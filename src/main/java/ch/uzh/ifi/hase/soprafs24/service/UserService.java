@@ -20,7 +20,7 @@ import java.util.UUID;
  * This class is the "worker" and responsible for all functionality related to
  * the user.
  * (e.g., it creates, modifies, deletes, finds). The result will be passed back
- * to the caller.
+ * to the caller
  */
 @Service
 @Transactional
