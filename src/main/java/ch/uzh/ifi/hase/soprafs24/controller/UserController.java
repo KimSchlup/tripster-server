@@ -46,7 +46,7 @@ public class UserController {
   @GetMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserGetDTO getUserbyId(@PathVariable Long userId) {
+  public UserGetDTO getUserbyId(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
     //add Id authentication here
     
 
