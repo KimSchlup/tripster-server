@@ -58,6 +58,11 @@ public class UserService {
               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
   }
 
+  public User getUserByToken(String token) {
+    System.out.println(token);
+    return this.userRepository.findByToken(token);
+}
+
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name

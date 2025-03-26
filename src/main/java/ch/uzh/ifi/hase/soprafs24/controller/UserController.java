@@ -7,9 +7,11 @@ import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -48,8 +50,12 @@ public class UserController {
   @ResponseBody
   public UserGetDTO getUserbyId(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
     //add Id authentication here
-    
+    User authenticatedUser = userService.getUserByToken(token);
 
+      if (!Objects.equals(authenticatedUser.getId(), userId)) {
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
+      }
+    
     // fetch user in the internal representation
     User user = userService.getUserById(userId);
 
@@ -67,6 +73,6 @@ public class UserController {
     // create user
     User createdUser = userService.createUser(userInput);
     // convert internal representation of user back to API
-    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+    return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(createdUser);
   }
 }
