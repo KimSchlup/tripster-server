@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * User Controller
  * This class is responsible for handling all REST request that are related to
@@ -41,6 +42,20 @@ public class UserController {
     }
     return userGetDTOs;
   }
+
+  @GetMapping("/users/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDTO getUserbyId(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
+    //add Id authentication here
+    
+
+    // fetch user in the internal representation
+    User user = userService.getUserById(userId);
+
+    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+  }
+  
 
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
