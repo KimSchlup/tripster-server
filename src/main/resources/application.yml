@@ -1,12 +1,11 @@
 server:
   port: 8080
-  error:
-    include-message: always
 
 spring:
   profiles:
     active: dev
-
+---
+spring:
   config:
     activate:
       on-profile: dev
@@ -19,7 +18,7 @@ spring:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     username: sa
-    password: ""
+    password:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
 ---
@@ -28,9 +27,9 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:postgresql://<PROD_DB_HOST>:5432/<DB_NAME>
+    url: jdbc:postgresql://${PROD_DB_HOST}:${PROD_DB_PORT:5432}/${DB_NAME}
     driver-class-name: org.postgresql.Driver
-    username: <PROD_DB_USERNAME>
-    password: <PROD_DB_PASSWORD>
+    username: postgres
+    password: ${PROD_DB_PASSWORD}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
