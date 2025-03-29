@@ -1,6 +1,6 @@
-# 🗺️ MapMates PostgreSQL + PostGIS Setup on Google Cloud Free Tier
+# 🗺️ MapMates PostgreSQL + PostGIS Setup on Google Compute Engine VM
 
-This guide walks you through setting up a PostgreSQL + PostGIS database using Docker on a [free-tier Google Cloud VM](https://cloud.google.com/free/docs/free-cloud-features#compute).
+This guide walks you through setting up a PostgreSQL + PostGIS database using Docker on a [free-tier Google Cloud Compute Engine VM](https://cloud.google.com/free/docs/free-cloud-features#compute).
 
 ---
 
