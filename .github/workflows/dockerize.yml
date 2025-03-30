@@ -16,9 +16,44 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # auto-generated
       DOCKER_BUILDKIT: 1
 
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: mapmates123
+          POSTGRES_DB: mapmates_dev
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       # checkout repository code
       - uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Wait for Postgres
+        run: |
+          echo "Waiting for Postgres to be ready..."
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            sleep 1
+          done
+
+      - name: Set environment variables
+        run: |
+          echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/mapmates_dev" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_USERNAME=postgres" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_PASSWORD=mapmates123" >> $GITHUB_ENV
+          echo "SPRING_PROFILES_ACTIVE=dev" >> $GITHUB_ENV
 
       # docker QEMU preparation
       - name: Set up QEMU
