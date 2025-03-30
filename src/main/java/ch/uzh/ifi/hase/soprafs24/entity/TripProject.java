@@ -5,9 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * Internal User Representation
- * This class composes the internal representation of the user and defines how
- * the user is stored in the database.
  * Every variable will be mapped into a database field with the @Column
  * annotation
  * - nullable = false -> this cannot be left empty
@@ -30,6 +27,7 @@ public class TripProject implements Serializable {
   private TripProjectSettings tripProjectSettings;
   @Column(nullable = false)
   private ArrayList<TripProjectMember> tripProjectMembers;
+  
 
   public void setTripName(String tripName){
     this.tripName = tripName;

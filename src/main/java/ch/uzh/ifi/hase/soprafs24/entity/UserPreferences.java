@@ -4,9 +4,6 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 /**
- * Internal User Representation
- * This class composes the internal representation of the user and defines how
- * the user is stored in the database.
  * Every variable will be mapped into a database field with the @Column
  * annotation
  * - nullable = false -> this cannot be left empty
@@ -14,8 +11,8 @@ import java.io.Serializable;
  * the primary key
  */
 @Entity
-@Table(name = "userPreference")
-public class UserPreference implements Serializable {
+@Table(name = "userPreferences")
+public class UserPreferences implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
