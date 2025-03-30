@@ -55,6 +55,10 @@ jobs:
           echo "SPRING_DATASOURCE_PASSWORD=mapmates123" >> $GITHUB_ENV
           echo "SPRING_PROFILES_ACTIVE=dev" >> $GITHUB_ENV
 
+      # Run tests here so we can test against a real postgres database
+      - name: Run Tests Before Docker Build
+        run: ./gradlew clean test --no-daemon
+
       # docker QEMU preparation
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

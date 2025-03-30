@@ -9,8 +9,9 @@ RUN chmod +x ./gradlew
 # Copy build script and source code
 COPY build.gradle settings.gradle /app/
 COPY src /app/src
-# Build the server
-RUN ./gradlew clean build --no-daemon
+# Build the server, no test as this will be handled by github actions
+# against a Postgres Instance supplied by github service
+RUN ./gradlew clean build -x test --no-daemon
 # make image smaller by using multi stage build
 FROM openjdk:17-slim
 # Set the env to "prod"
