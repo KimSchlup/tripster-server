@@ -3,7 +3,9 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Point;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Every variable will be mapped into a database field with the @Column
@@ -23,6 +25,7 @@ public class PointOfInterest implements Serializable {
   @Column(nullable = false)
   private String name;
   @Column(nullable = false)
-  private JTS.Point coordinate;
+  @JdbcTypeCode(SqlTypes.GEOMETRY)
+  private Point coordinate;
 
 }
