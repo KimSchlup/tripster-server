@@ -1,11 +1,13 @@
 name: Dockerize
 
-on: 
+on:
   push:
-    branches: 
+    branches:
       - main
+      - develop
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,46 +15,85 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # auto-generated
       DOCKER_BUILDKIT: 1
-      
-    steps:
-    # checkout repository code
-    - uses: actions/checkout@v4
-      
-    # docker QEMU preparation
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-      
-    # docker Buildx preparation
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    # docker login
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.dockerhub_username }}
-        password: ${{ secrets.dockerhub_password }}
-        
-    # docker build & push amd64
-    - name: Build and push for x64_86 processor architecture
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: ${{secrets.dockerhub_username}}/${{secrets.dockerhub_repo_name}}:intel
-        platforms: linux/amd64
-        cache-from: type=registry,ref=${{secrets.dockerhub_username}}/${{secrets.dockerhub_repo_name}}:cache
-        cache-to: type=inline,mode=max
 
-    # docker build & push arm64
-    - name: Build and push for arm64 (Apple M-series) processor architecture
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: ${{secrets.dockerhub_username}}/${{secrets.dockerhub_repo_name}}:apple
-        platforms: linux/arm64/v8
-        cache-from: type=registry,ref=${{secrets.dockerhub_username}}/${{secrets.dockerhub_repo_name}}:cache
-        cache-to: type=inline,mode=max
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: mapmates123
+          POSTGRES_DB: mapmates_dev
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      # checkout repository code
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Wait for Postgres
+        run: |
+          echo "Waiting for Postgres to be ready..."
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            sleep 1
+          done
+
+      - name: Set environment variables
+        run: |
+          echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/mapmates_dev" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_USERNAME=postgres" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_PASSWORD=mapmates123" >> $GITHUB_ENV
+          echo "SPRING_PROFILES_ACTIVE=dev" >> $GITHUB_ENV
+
+      # Run tests here so we can test against a real postgres database
+      - name: Run Tests Before Docker Build
+        run: ./gradlew clean test --no-daemon
+
+      # docker QEMU preparation
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # docker Buildx preparation
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # docker login
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.dockerhub_username }}
+          password: ${{ secrets.dockerhub_password }}
+
+      # docker build & push amd64
+      - name: Build and push for x64_86 processor architecture
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{secrets.dockerhub_username}}/${{secrets.dockerhub_repo_name}}:intel
+          platforms: linux/amd64
+          cache-from: type=registry,ref=${{secrets.dockerhub_username}}/${{secrets.dockerhub_repo_name}}:cache
+          cache-to: type=inline,mode=max
+
+      # docker build & push arm64
+      - name: Build and push for arm64 (Apple M-series) processor architecture
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{secrets.dockerhub_username}}/${{secrets.dockerhub_repo_name}}:apple
+          platforms: linux/arm64/v8
+          cache-from: type=registry,ref=${{secrets.dockerhub_username}}/${{secrets.dockerhub_repo_name}}:cache
+          cache-to: type=inline,mode=max
