@@ -9,6 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Service containers to run with `container-job`
     services:
       postgres:
         image: postgis/postgis:15-3.3
