@@ -1,4 +1,4 @@
-FROM gradle:7.6-jdk17 as build
+FROM gradle:7.6-jdk17 AS build
 # Set container working directory to /app
 WORKDIR /app
 # Copy Gradle configuration files
@@ -11,11 +11,10 @@ COPY build.gradle settings.gradle /app/
 COPY src /app/src
 # Build the server
 RUN ./gradlew clean build --no-daemon
-
 # make image smaller by using multi stage build
 FROM openjdk:17-slim
-# Set the env to "production"
-ENV SPRING_PROFILES_ACTIVE=production
+# Set the env to "prod"
+ENV SPRING_PROFILES_ACTIVE=prod
 # get non-root user
 USER 3301
 # Set container working directory to /app
