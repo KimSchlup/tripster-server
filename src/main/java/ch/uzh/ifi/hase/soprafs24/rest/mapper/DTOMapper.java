@@ -22,18 +22,48 @@ public interface DTOMapper {
 
   DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
-  @Mapping(source = "name", target = "name")
-  @Mapping(source = "username", target = "username")
+  @Mapping(source="firstName", target="firstName")
+  @Mapping(source="lastName", target="lastName")
+  @Mapping(source="phoneNumber", target="phoneNumber")
+  @Mapping(source="mail", target="mail")
+  @Mapping(source="username", target="username")
+  @Mapping(source="token", target="token")
+  @Mapping(source="status", target="status")
+  @Mapping(source="profilePictureUrl", target="profilePictureUrl")
+  @Mapping(source="receiveNotifications", target="receiveNotifications")
+  @Mapping(source="userPreferences", target="userPreferences")
+  @Mapping(source="userEmergencyContacts", target="userEmergencyContacts")
+  @Mapping(source="userEmergencyInformations", target="userEmergencyInformations")
+  @Mapping(target="userEmergencyInformation", ignore = true)
+  @Mapping(target="creationDate", ignore=true)
+  @Mapping(target="id", ignore=true)
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "name", target = "name")
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "status", target = "status")
-  UserGetDTO convertEntityToUserGetDTO(User user);
+
 
   @Mapping(source = "username", target = "username")
   @Mapping(source = "id", target = "id")
   @Mapping(source = "token", target = "token")
-  UserGetDTO convertEntityToUserGetCredentials(User user);  
+  UserGetDTO convertEntityToUserGetCredentials(User user);
+
+  
+
+  @Mapping(source="userId", target="userId")
+  @Mapping(source="firstName", target="firstName")
+  @Mapping(source="lastName", target="lastName")
+  @Mapping(source="phoneNumber", target="phoneNumber")
+  @Mapping(source="mail", target="mail")
+  @Mapping(source="username", target="username")
+  @Mapping(source="token", target="token")
+  @Mapping(source="status", target="status")
+  @Mapping(source="creationDate", target="creationDate")
+  @Mapping(source="profilePictureUrl", target="profilePictureUrl")
+  @Mapping(source="receiveNotifications", target="receiveNotifications")
+  @Mapping(source="userPreferences", target="userPreferences")
+  @Mapping(source="userEmergencyContacts", target="userEmergencyContacts")
+  @Mapping(source="userEmergencyInformations", target="userEmergencyInformations")
+  UserGetDTO convertEntityToUserGetDTO(User user);
+
+
+
 }

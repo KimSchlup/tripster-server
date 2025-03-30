@@ -46,7 +46,7 @@ public class User implements Serializable {
   private LocalDate creationDate;
   @Column(nullable = true)
   private String profilePictureUrl;
-  @Column(nullable = false)
+  @Column
   private Boolean receiveNotifications;
   @Column
   private UserPreferences userPreferences;
@@ -123,10 +123,10 @@ public class User implements Serializable {
     this.profilePictureUrl = profilePictureUrl;
   }
   public Boolean getReceiveNotifications(){
-    return receiveNotifications;
+    return this.receiveNotifications;
   }
-  public void setReceiveNorifications(Boolean receiveNotifications){
-    this.receiveNotifications = receiveNotifications;
+  public void setReceiveNotifications(Boolean receiveNotification){
+    this.receiveNotifications = receiveNotification;
   }
   public UserPreferences getUserPreferences(){
     return userPreferences;
@@ -135,10 +135,10 @@ public class User implements Serializable {
     this.userPreferences = userPreferences;
   }
 
-  public ArrayList<UserEmergencyContact> getUserEmergencyContact(){
-    return userEmergencyContacts;
+  public ArrayList<UserEmergencyContact> getUserEmergencyContacts(){
+    return this.userEmergencyContacts;
   }
-  public void setUserEmergencyContact(UserEmergencyContact userEmergencyContact){
+  public void setUserEmergencyContacts(UserEmergencyContact userEmergencyContact){
     if(this.userEmergencyContacts == null){
       this.userEmergencyContacts = new ArrayList<UserEmergencyContact>();
     }
@@ -146,7 +146,7 @@ public class User implements Serializable {
   }
 
   public ArrayList<UserEmergencyInformation> getUserEmergencyInformations(){
-    return userEmergencyInformations;
+    return this.userEmergencyInformations;
   }
   public void setUserEmergencyInformation(UserEmergencyInformation userEmergencyInformation){
     if(this.userEmergencyInformations == null){

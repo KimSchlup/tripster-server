@@ -27,6 +27,8 @@ public class TripProject implements Serializable {
   private TripProjectSettings tripProjectSettings;
   @Column(nullable = false)
   private ArrayList<TripProjectMember> tripProjectMembers;
+  @Column
+  private User owner;
   
 
   public void setTripName(String tripName){
@@ -52,6 +54,12 @@ public class TripProject implements Serializable {
   }
   public ArrayList<TripProjectMember> getTripProjectMembers(){
     return this.tripProjectMembers;
+  }
+  public void setOwner(User user){
+    this.owner = user;
+  }
+  public User getOwner(){
+    return this.owner;
   }
 
 }

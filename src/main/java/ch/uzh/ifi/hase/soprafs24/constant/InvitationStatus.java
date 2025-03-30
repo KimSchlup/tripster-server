@@ -1,5 +1,5 @@
 package ch.uzh.ifi.hase.soprafs24.constant;
 
-public enum InvitationStatus {
+public enum AcceptanceStatus {
     PENDING, ACCEPTED, DECLINED;
 }

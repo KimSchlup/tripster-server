@@ -2,7 +2,8 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
+
+import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
 
 /**
  * Every variable will be mapped into a database field with the @Column
@@ -23,7 +24,7 @@ public class TripProjectMember implements Serializable {
   // @GeneratedValue
   private Long userId;
   @Column
-  private InvitationStatus status;
+  private AcceptanceStatus status;
 
   public Long getTripId() {
     return tripId;
