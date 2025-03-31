@@ -33,7 +33,7 @@ services:
     volumes:
       - .:/app # Mounts your local code into the container
       - ~/.gradle:/home/gradle/.gradle # Speeds up Gradle builds by reusing dependencies
-    command: ./gradlew bootRun # Starts the app with live-reloading
+    command: ./gradlew bootRun --no-daemon # Starts the app with live-reloading
 
 volumes:
   postgres_data:

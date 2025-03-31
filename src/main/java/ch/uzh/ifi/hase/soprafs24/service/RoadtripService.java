@@ -56,5 +56,12 @@ public class RoadtripService {
         return newRoadtrip;
     }
 
+    public void deleteRoadtrip(Long roadtripId) {
+        if (!roadtripRepository.existsById(roadtripId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found");
+        }
+        roadtripRepository.deleteById(roadtripId);
+    }
+
 
 }
