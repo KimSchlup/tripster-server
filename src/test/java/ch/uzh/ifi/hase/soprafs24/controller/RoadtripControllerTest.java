@@ -70,12 +70,25 @@ public class RoadtripControllerTest {
         .andExpect(jsonPath("$.description", is(roadtrip.getDescription())));
   }
 
-    public String asJsonString(final Object object) {
-        try {
-          return new ObjectMapper().writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              String.format("The request body could not be created.%s", e.toString()));
-        }
+  @Test
+  public void deleteRoadtrip_validId_roadtripDeleted() throws Exception {
+      // given
+      Long roadtripId = 52L;
+
+      // when/then -> perform delete request and expect 204 No Content
+      mockMvc.perform(
+          org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+              .delete("/roadtrips/{roadtripId}", roadtripId)
+    )
+    .andExpect(status().isNoContent());
+  }
+
+  public String asJsonString(final Object object) {
+      try {
+        return new ObjectMapper().writeValueAsString(object);
+      } catch (JsonProcessingException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            String.format("The request body could not be created.%s", e.toString()));
       }
+    }
 }
