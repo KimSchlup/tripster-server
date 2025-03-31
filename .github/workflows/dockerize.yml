@@ -48,6 +48,10 @@ jobs:
             sleep 1
           done
 
+      - name: Enable PostGIS extension
+        run: |
+          PGPASSWORD=mapmates123 psql -h localhost -U postgres -d mapmates_dev -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
       - name: Set environment variables
         run: |
           echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/mapmates_dev" >> $GITHUB_ENV
