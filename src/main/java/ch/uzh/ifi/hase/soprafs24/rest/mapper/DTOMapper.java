@@ -1,6 +1,9 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import org.mapstruct.*;
@@ -36,4 +39,15 @@ public interface DTOMapper {
   @Mapping(source = "id", target = "id")
   @Mapping(source = "token", target = "token")
   UserGetDTO convertEntityToUserGetCredentials(User user);  
+
+  // Roadtrip mappings
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "description", target = "description")
+  Roadtrip convertRoadtripPostDTOtoEntity(RoadtripPostDTO roadtripPostDTO);
+
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "description", target = "description")
+  RoadtripGetDTO convertEntityToRoadtripGetDTO(Roadtrip roadtrip);
+
 }

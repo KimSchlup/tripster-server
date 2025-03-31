@@ -108,7 +108,7 @@ public class UserControllerTest {
    * @param object
    * @return string
    */
-  private String asJsonString(final Object object) {
+  public String asJsonString(final Object object) {
     try {
       return new ObjectMapper().writeValueAsString(object);
     } catch (JsonProcessingException e) {
