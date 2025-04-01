@@ -106,6 +106,54 @@ public class UserControllerTest {
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
   }
 
+  @Test
+  public void createUser_Username_taken() throws Exception {
+    // // create first user
+    // User user = new User();
+    // user.setUsername("testUsername");
+
+
+    // User user_2 = new User();
+    // user_2.setUsername("testUsername");
+
+    // UserPostDTO userPostDTO = new UserPostDTO();
+    // userPostDTO.setUsername("testUsername");
+
+    // UserPostDTO userPostDTO_2 = new UserPostDTO();
+    // userPostDTO.setUsername("testUsername");
+
+    // given(userService.createUser(Mockito.any())).willReturn(user);
+    // given(userService.createUser(Mockito.any())).willReturn(user_2);
+
+    // // when/then -> do the request + validate the result
+    // MockHttpServletRequestBuilder postRequest_1 = post("/users")
+    //     .contentType(MediaType.APPLICATION_JSON)
+    //     .content(asJsonString(userPostDTO));
+
+    // MockHttpServletRequestBuilder postRequest_2 = post("/users")
+    //     .contentType(MediaType.APPLICATION_JSON)
+    //     .content(asJsonString(userPostDTO_2));
+
+    // // then
+    // mockMvc.perform(postRequest_2)
+    //     .andExpect(status().isConflict());
+
+    UserPostDTO userPostDTO_conflict = new UserPostDTO();
+    userPostDTO_conflict.setUsername("username");
+    userPostDTO_conflict.setPassword("password_conflict");
+
+    given(userService.createUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
+    // mock auth token
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    
+    MockHttpServletRequestBuilder postRequest_conflict = post("/users")
+    .contentType(MediaType.APPLICATION_JSON)
+    .content(asJsonString(userPostDTO_conflict));
+
+    mockMvc.perform(postRequest_conflict).andExpect(status().isConflict());
+
+  }
+
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed
