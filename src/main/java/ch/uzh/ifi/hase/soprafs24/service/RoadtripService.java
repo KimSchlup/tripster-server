@@ -26,8 +26,6 @@ import java.util.UUID;
  * 
  */
 
-
-
 @Service
 @Transactional
 public class RoadtripService {
@@ -62,6 +60,5 @@ public class RoadtripService {
         }
         roadtripRepository.deleteById(roadtripId);
     }
-
 
 }

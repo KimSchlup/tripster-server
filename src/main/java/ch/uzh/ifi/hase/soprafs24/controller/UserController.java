@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 /**
  * User Controller
  * This class is responsible for handling all REST request that are related to
@@ -49,19 +48,18 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public UserGetDTO getUserbyId(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
-    //add Id authentication here
+    // add Id authentication here
     User authenticatedUser = userService.getUserByToken(token);
 
-      if (!Objects.equals(authenticatedUser.getId(), userId)) {
-          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
-      }
-    
+    if (!Objects.equals(authenticatedUser.getId(), userId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
+    }
+
     // fetch user in the internal representation
     User user = userService.getUserById(userId);
 
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }
-  
 
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
