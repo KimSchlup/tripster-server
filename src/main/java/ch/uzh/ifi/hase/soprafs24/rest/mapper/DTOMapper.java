@@ -1,8 +1,15 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyInformation;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserEmergencyContactDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserEmergencyInformationDTO;
+
+import java.util.ArrayList;
+
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -22,13 +29,15 @@ public interface DTOMapper {
 
   DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
+  ArrayList<UserEmergencyContact> mapEmergencyContactDTOsToEntities(ArrayList<UserEmergencyContactDTO> dtos);
+  ArrayList<UserEmergencyInformation> mapEmergencyInformationDTOsToEntities(ArrayList<UserEmergencyInformationDTO> dtos);
+
   @Mapping(source="firstName", target="firstName")
   @Mapping(source="lastName", target="lastName")
   @Mapping(source="phoneNumber", target="phoneNumber")
   @Mapping(source="mail", target="mail")
   @Mapping(source="username", target="username")
   @Mapping(source="token", target="token")
-  @Mapping(source="status", target="status")
   @Mapping(source="profilePictureUrl", target="profilePictureUrl")
   @Mapping(source="receiveNotifications", target="receiveNotifications")
   @Mapping(source="userPreferences", target="userPreferences")
@@ -37,7 +46,10 @@ public interface DTOMapper {
   @Mapping(target="userEmergencyInformation", ignore = true)
   @Mapping(target="creationDate", ignore=true)
   @Mapping(target="id", ignore=true)
+  @Mapping(target="status", ignore = true)
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
+
+  
 
 
 

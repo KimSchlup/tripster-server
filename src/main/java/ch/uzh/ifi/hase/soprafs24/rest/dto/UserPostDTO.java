@@ -2,7 +2,6 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
 import java.util.ArrayList;
 
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
 import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyInformation;
 import ch.uzh.ifi.hase.soprafs24.entity.UserPreferences;
@@ -16,7 +15,6 @@ public class UserPostDTO {
   private String username;
   private String password;
   private String token;
-  private UserStatus status;
   private String profilePictureUrl;
   private Boolean receiveNotifications;
   private UserPreferences userPreferences;
@@ -64,12 +62,6 @@ public class UserPostDTO {
   }
   public void setToken(String token) {
     this.token = token;
-  }
-  public UserStatus getStatus() {
-    return status;
-  }
-  public void setStatus(UserStatus status) {
-    this.status = status;
   }
   public String getProfilePictureUrl(){
     return profilePictureUrl;
