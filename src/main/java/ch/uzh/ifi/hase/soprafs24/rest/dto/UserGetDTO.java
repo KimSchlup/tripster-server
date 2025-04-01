@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
-import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyInformation;
 import ch.uzh.ifi.hase.soprafs24.entity.UserPreferences;
 
 public class UserGetDTO {
@@ -22,8 +20,8 @@ public class UserGetDTO {
   private String profilePictureUrl;
   private Boolean receiveNotifications;
   private UserPreferences userPreferences;
-  private ArrayList<UserEmergencyContact> userEmergencyContacts;
-  private ArrayList<UserEmergencyInformation> userEmergencyInformations;
+  private ArrayList<UserEmergencyContactDTO> userEmergencyContacts;
+  private ArrayList<UserEmergencyInformationDTO> userEmergencyInformations;
 
   public Long getId() {
     return userId;
@@ -98,22 +96,22 @@ public class UserGetDTO {
     this.userPreferences = userPreferences;
   }
 
-  public ArrayList<UserEmergencyContact> getUserEmergencyContact(){
+  public ArrayList<UserEmergencyContactDTO> getUserEmergencyContacts(){
     return userEmergencyContacts;
   }
-  public void setUserEmergencyContact(UserEmergencyContact userEmergencyContact){
+  public void setUserEmergencyContacts(UserEmergencyContactDTO userEmergencyContact){
     if(this.userEmergencyContacts == null){
-      this.userEmergencyContacts = new ArrayList<UserEmergencyContact>();
+      this.userEmergencyContacts = new ArrayList<UserEmergencyContactDTO>();
     }
     this.userEmergencyContacts.add(userEmergencyContact);
   }
 
-  public ArrayList<UserEmergencyInformation> getUserEmergencyInformations(){
+  public ArrayList<UserEmergencyInformationDTO> getUserEmergencyInformations(){
     return userEmergencyInformations;
   }
-  public void setUserEmergencyInformation(UserEmergencyInformation userEmergencyInformation){
+  public void setUserEmergencyInformations(UserEmergencyInformationDTO userEmergencyInformation){
     if(this.userEmergencyInformations == null){
-      this.userEmergencyInformations = new ArrayList<UserEmergencyInformation>();
+      this.userEmergencyInformations = new ArrayList<UserEmergencyInformationDTO>();
     }
     this.userEmergencyInformations.add(userEmergencyInformation);
   }

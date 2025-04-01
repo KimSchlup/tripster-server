@@ -29,9 +29,34 @@ public interface DTOMapper {
 
   DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
-  ArrayList<UserEmergencyContact> mapEmergencyContactDTOsToEntities(ArrayList<UserEmergencyContactDTO> dtos);
-  ArrayList<UserEmergencyInformation> mapEmergencyInformationDTOsToEntities(ArrayList<UserEmergencyInformationDTO> dtos);
 
+  // Individual mappers
+
+  @IterableMapping(qualifiedByName = "convertEmergencyContactDTOsToEntities")
+  ArrayList<UserEmergencyContact> convertEmergencyContactDTOsToEntities(ArrayList<UserEmergencyContactDTO> emergencyContactDTOs);
+
+  @IterableMapping(qualifiedByName = "convertEntitiesToEmergencyContactDTO")
+  ArrayList<UserEmergencyContactDTO> convertEntitiesToEmergencyContactDTO(ArrayList<UserEmergencyContact> emergencyContacts);
+
+  @IterableMapping(qualifiedByName = "convertEmergencyInformationDTOsToEntities")
+  ArrayList<UserEmergencyInformation> convertEmergencyInformationDTOsToEntities(ArrayList<UserEmergencyInformationDTO> emergencyInformationDTOs);
+  
+  @IterableMapping(qualifiedByName = "convertEntitiesToEmergencyInformationDTOs")
+  ArrayList<UserEmergencyInformationDTO> convertEntitiesToEmergencyInformationDTOs(ArrayList<UserEmergencyInformation> emergencyInformations);
+  
+  @Named("convertUserEmergencyContactToDTO")
+  UserEmergencyContactDTO convertUserEmergencyContactToDTO(UserEmergencyContact userEmergencyContact);
+
+  @Named("convertDTOToUserEmergencyContact")
+  UserEmergencyContact convertDTOToUserEmergencyContact(UserEmergencyContactDTO userEmergencyContactDTO);
+
+  @Named("convertUserEmergencyInformationToDTO")
+  UserEmergencyInformationDTO convertUserEmergencyInformationToDTO(UserEmergencyInformation userEmergencyInformation);
+
+  @Named("convertDTOToUserEmergencyInformation")
+  UserEmergencyInformation convertDTOToUserEmergencyInformation(UserEmergencyInformationDTO userEmergencyInformationDTO);
+
+  // User to PostDTO mapper
   @Mapping(source="firstName", target="firstName")
   @Mapping(source="lastName", target="lastName")
   @Mapping(source="phoneNumber", target="phoneNumber")
@@ -43,38 +68,59 @@ public interface DTOMapper {
   @Mapping(source="userPreferences", target="userPreferences")
   @Mapping(source="userEmergencyContacts", target="userEmergencyContacts")
   @Mapping(source="userEmergencyInformations", target="userEmergencyInformations")
-  @Mapping(target="userEmergencyInformation", ignore = true)
   @Mapping(target="creationDate", ignore=true)
   @Mapping(target="id", ignore=true)
   @Mapping(target="status", ignore = true)
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
+  // userEmergencyContact mapper
+  @Mapping(source="userId",target="userId")
+  @Mapping(source="firstName",target="firstName")
+  @Mapping(source="lastName",target="lastName")
+  @Mapping(source="phoneNumber",target="phoneNumber")
+  UserEmergencyContact convertUserEmergencyContactToDTO(UserEmergencyContactDTO userEmergencyContactDTO);
+
+  @Mapping(source="userId",target="userId")
+  @Mapping(source="firstName",target="firstName")
+  @Mapping(source="lastName",target="lastName")
+  @Mapping(source="phoneNumber",target="phoneNumber")
+  UserEmergencyContactDTO convertDTOTOUserEmergencyContact(UserEmergencyContact userEmergencyContact);
+
+
+  // userEmergencyInformation mapper
+  @Mapping(source="userId",target="userId")
+  @Mapping(source="type",target="type")
+  @Mapping(source="comment",target="comment")
+  UserEmergencyInformation convertUserEmergencyInformationToDTO(UserEmergencyInformationDTO userEmergencyInformationDTO);
+
+  @Mapping(source="userId",target="userId")
+  @Mapping(source="type",target="type")
+  @Mapping(source="comment",target="comment")
+  UserEmergencyInformationDTO convertDTOTOUserEmergencyInformation(UserEmergencyInformation userEmergencyInformation);
+
+
+  // @Mapping(source = "username", target = "username")
+  // @Mapping(source = "id", target = "id")
+  // @Mapping(source = "token", target = "token")
+  // UserGetDTO convertEntityToUserGetCredentials(User user);
+
   
 
-
-
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "token", target = "token")
-  UserGetDTO convertEntityToUserGetCredentials(User user);
-
-  
-
-  @Mapping(source="userId", target="userId")
-  @Mapping(source="firstName", target="firstName")
-  @Mapping(source="lastName", target="lastName")
-  @Mapping(source="phoneNumber", target="phoneNumber")
-  @Mapping(source="mail", target="mail")
-  @Mapping(source="username", target="username")
-  @Mapping(source="token", target="token")
-  @Mapping(source="status", target="status")
-  @Mapping(source="creationDate", target="creationDate")
-  @Mapping(source="profilePictureUrl", target="profilePictureUrl")
-  @Mapping(source="receiveNotifications", target="receiveNotifications")
-  @Mapping(source="userPreferences", target="userPreferences")
-  @Mapping(source="userEmergencyContacts", target="userEmergencyContacts")
-  @Mapping(source="userEmergencyInformations", target="userEmergencyInformations")
-  UserGetDTO convertEntityToUserGetDTO(User user);
+  // @Mapping(source="userId", target="userId")
+  // @Mapping(source="firstName", target="firstName")
+  // @Mapping(source="lastName", target="lastName")
+  // @Mapping(source="phoneNumber", target="phoneNumber")
+  // @Mapping(source="mail", target="mail")
+  // @Mapping(source="username", target="username")
+  // @Mapping(source="token", target="token")
+  // @Mapping(source="status", target="status")
+  // @Mapping(source="creationDate", target="creationDate")
+  // @Mapping(source="profilePictureUrl", target="profilePictureUrl")
+  // @Mapping(source="receiveNotifications", target="receiveNotifications")
+  // @Mapping(source="userPreferences", target="userPreferences")
+  // @Mapping(source="userEmergencyContacts", target="userEmergencyContacts")
+  // @Mapping(source="userEmergencyInformations", target="userEmergencyInformations")
+  // UserGetDTO convertEntityToUserGetDTO(User user);
 
 
 

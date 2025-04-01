@@ -2,8 +2,6 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
 import java.util.ArrayList;
 
-import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
-import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyInformation;
 import ch.uzh.ifi.hase.soprafs24.entity.UserPreferences;
 
 public class UserPostDTO {
@@ -18,8 +16,8 @@ public class UserPostDTO {
   private String profilePictureUrl;
   private Boolean receiveNotifications;
   private UserPreferences userPreferences;
-  private ArrayList<UserEmergencyContact> userEmergencyContacts;
-  private ArrayList<UserEmergencyInformation> userEmergencyInformations;
+  private ArrayList<UserEmergencyContactDTO> userEmergencyContacts;
+  private ArrayList<UserEmergencyInformationDTO> userEmergencyInformations;
 
   public String getFirstName(){
     return firstName;
@@ -82,22 +80,22 @@ public class UserPostDTO {
     this.userPreferences = userPreferences;
   }
 
-  public ArrayList<UserEmergencyContact> getUserEmergencyContacts(){
-    return this.userEmergencyContacts;
+  public ArrayList<UserEmergencyContactDTO> getUserEmergencyContacts(){
+    return userEmergencyContacts;
   }
-  public void setUserEmergencyContacts(UserEmergencyContact userEmergencyContact){
+  public void setUserEmergencyContacts(UserEmergencyContactDTO userEmergencyContact){
     if(this.userEmergencyContacts == null){
-      this.userEmergencyContacts = new ArrayList<UserEmergencyContact>();
+      this.userEmergencyContacts = new ArrayList<UserEmergencyContactDTO>();
     }
     this.userEmergencyContacts.add(userEmergencyContact);
   }
 
-  public ArrayList<UserEmergencyInformation> getUserEmergencyInformations(){
-    return this.userEmergencyInformations;
+  public ArrayList<UserEmergencyInformationDTO> getUserEmergencyInformations(){
+    return userEmergencyInformations;
   }
-  public void setUserEmergencyInformation(UserEmergencyInformation userEmergencyInformation){
+  public void setUserEmergencyInformations(UserEmergencyInformationDTO userEmergencyInformation){
     if(this.userEmergencyInformations == null){
-      this.userEmergencyInformations = new ArrayList<UserEmergencyInformation>();
+      this.userEmergencyInformations = new ArrayList<UserEmergencyInformationDTO>();
     }
     this.userEmergencyInformations.add(userEmergencyInformation);
   }

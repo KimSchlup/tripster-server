@@ -148,7 +148,7 @@ public class User implements Serializable {
   public ArrayList<UserEmergencyInformation> getUserEmergencyInformations(){
     return this.userEmergencyInformations;
   }
-  public void setUserEmergencyInformation(UserEmergencyInformation userEmergencyInformation){
+  public void setUserEmergencyInformations(UserEmergencyInformation userEmergencyInformation){
     if(this.userEmergencyInformations == null){
       this.userEmergencyInformations = new ArrayList<UserEmergencyInformation>();
     }

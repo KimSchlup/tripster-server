@@ -1,6 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
-public class UserEmergencyContactPostDTO {
+public class UserEmergencyContactDTO {
     
   private Long userId;
   private String firstName;
