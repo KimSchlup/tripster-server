@@ -31,9 +31,32 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - .:/app # Mounts your local code into the container
-      - ~/.gradle:/home/gradle/.gradle # Speeds up Gradle builds by reusing dependencies
-    command: ./gradlew bootRun --no-daemon # Starts the app with live-reloading
+      - .:/app
+      - ~/.gradle:/home/gradle/.gradle
+    command: ./gradlew bootRun --no-daemon
+    profiles:
+      - dev
+
+  test-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: springboot_test_server
+    restart: "no" # Stop container after test run
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mapmates_dev
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: mapmates123
+      SPRING_PROFILES_ACTIVE: test
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - ~/.gradle:/home/gradle/.gradle
+      - ./test-reports:/app/build/reports/tests/test # Mount reports to local
+    command: ./gradlew test --no-daemon
+    profiles:
+      - test
 
 volumes:
   postgres_data:
