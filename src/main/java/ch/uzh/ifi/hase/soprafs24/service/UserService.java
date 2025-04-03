@@ -40,20 +40,20 @@ public class UserService {
     return this.userRepository.findAll();
   }
 
-  public User loginUser(User user) {
-    User userByUsername = userRepository.findByUsername(user.getUsername());
-    if (userByUsername == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-    }
-    if (!userByUsername.getPassword().equals(user.getPassword())) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Password incorrect");
-    }
-    userByUsername.setStatus(UserStatus.ONLINE);
-    userByUsername.setToken(UUID.randomUUID().toString());
-    userRepository.save(userByUsername);
-    userRepository.flush();
-    return userByUsername;
-  }
+  // public User loginUser(User user) {
+  //   User userByUsername = userRepository.findByUsername(user.getUsername());
+  //   if (userByUsername == null) {
+  //     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+  //   }
+  //   if (!userByUsername.getPassword().equals(user.getPassword())) {
+  //     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Password incorrect");
+  //   }
+  //   userByUsername.setStatus(UserStatus.ONLINE);
+  //   userByUsername.setToken(UUID.randomUUID().toString());
+  //   userRepository.save(userByUsername);
+  //   userRepository.flush();
+  //   return userByUsername;
+  // }
 
   public void logoutUser(User user) {
     User userByUsername = userRepository.findByUsername(user.getUsername());

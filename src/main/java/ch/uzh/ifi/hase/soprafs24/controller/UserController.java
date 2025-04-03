@@ -76,17 +76,17 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(createdUser);
   }
 
-  @PostMapping("auth/login")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public UserGetDTO loginUser(@RequestBody UserPostDTO userPostDTO) {
-      // convert API user to internal representation
-      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-      // login user
-      User loggedInUser = userService.loginUser(userInput);
-      // convert internal representation of user back to API
-      return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(loggedInUser);
-  }
+  // @PostMapping("auth/login")
+  // @ResponseStatus(HttpStatus.OK)
+  // @ResponseBody
+  // public UserGetDTO loginUser(@RequestBody UserPostDTO userPostDTO) {
+  //     // convert API user to internal representation
+  //     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+  //     // login user
+  //     User loggedInUser = userService.loginUser(userInput);
+  //     // convert internal representation of user back to API
+  //     return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(loggedInUser);
+  // }
   
   @PostMapping("/logout")
   @ResponseStatus(HttpStatus.OK)
