@@ -27,6 +27,8 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -153,6 +155,61 @@ public class UserControllerTest {
     mockMvc.perform(postRequest_conflict).andExpect(status().isConflict());
 
   }
+
+  @Test
+  public void getUserById_UserExists() throws Exception {
+      //given
+      User user = new User();
+      user.setName("Firstname Lastname");
+      user.setUsername("firstname@lastname");
+      user.setStatus(UserStatus.ONLINE);
+      user.setId(999L);
+
+
+      given(userService.getUserById(999L)).willReturn(user);
+      given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+      given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+              .willReturn(user); // Simuliert authentifizierten User
+
+      // when
+      MockHttpServletRequestBuilder getRequest = get("/users/999")
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("Authorization", "some_token"); // Simulierte Authentifizierung
+
+      // then
+      mockMvc.perform(getRequest).andExpect(status().isOk())
+              .andExpect(jsonPath("$.id", is(user.getId().intValue()))) // id als einzelnes Feld überprüfen
+              .andExpect(jsonPath("$.name", is(user.getName())))
+              .andExpect(jsonPath("$.username", is(user.getUsername())))
+              .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
+  }
+
+  @Test
+  public void updateUser_validInput_success() throws Exception {
+// given
+      UserPostDTO userPostDTO = new UserPostDTO();
+
+      // and
+      User user = new User();
+      user.setName("Firstname Lastname");
+      user.setId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
+
+      given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+      given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+              .willReturn(user); // Simuliert authentifizierten User
+      given(userService.updateUser(Mockito.anyLong(), Mockito.any(User.class))).willReturn(new User());
+
+      // when
+      MockHttpServletRequestBuilder putRequest = put("/users/999")
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("Authorization", "some_token") // Simulierte Authentifizierung
+              .content(asJsonString(userPostDTO));
+
+      // then
+      mockMvc.perform(putRequest)
+              .andExpect(status().isNoContent()); // Erwartet 204 NO CONTENT
+  }
+
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input

@@ -92,6 +92,22 @@ public class UserService {
     return this.userRepository.findByToken(token);
   }
 
+public User updateUser(Long userId, User updatedUser) {
+  User user = this.userRepository.findById(userId)
+              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+    if (updatedUser.getName() != null) {
+        user.setName(updatedUser.getName());
+    }
+    if (updatedUser.getUsername() != null) {
+        user.setUsername(updatedUser.getUsername());
+    }
+    
+  this.userRepository.save(user);
+    userRepository.flush();
+  return user;
+}
+
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name
