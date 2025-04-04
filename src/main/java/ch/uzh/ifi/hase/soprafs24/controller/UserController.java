@@ -1,6 +1,10 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyInformation;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserEmergencyContactDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserEmergencyInformationDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
@@ -52,7 +56,7 @@ public class UserController {
     //add Id authentication here
     User authenticatedUser = userService.getUserByToken(token);
 
-      if (!Objects.equals(authenticatedUser.getId(), userId)) {
+      if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
           throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
       }
     
@@ -75,4 +79,50 @@ public class UserController {
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(createdUser);
   }
+
+  // @GetMapping("/users/{userId}")
+  // @ResponseStatus(HttpStatus.OK)
+  // @ResponseBody
+  // public ArrayList<UserEmergencyContactDTO> getAllUserEmergencyContacts(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
+  //   //add Id authentication here
+  //   User authenticatedUser = userService.getUserByToken(token);
+
+  //     if (!Objects.equals(authenticatedUser.getId(), userId)) {
+  //         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this users emergency contact.");
+  //     }
+    
+  //   // fetch user in the internal representation
+  //   User user = userService.getUserById(userId);
+  //   ArrayList<UserEmergencyContact> emergencyContacts = user.getUserEmergencyContacts();
+  //   ArrayList<UserEmergencyContactDTO> dtoContacts = new ArrayList<UserEmergencyContactDTO>();
+
+  //   for(UserEmergencyContact contact : emergencyContacts){
+  //     dtoContacts.add(DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(contact));
+  //   }
+  //   return dtoContacts;
+  // }
+
+  // @GetMapping("/users/{userId}")
+  // @ResponseStatus(HttpStatus.OK)
+  // @ResponseBody
+  // public ArrayList<UserEmergencyInformationDTO> getAllUserEmergencyInformations(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
+  //   //add Id authentication here
+  //   User authenticatedUser = userService.getUserByToken(token);
+
+  //     if (!Objects.equals(authenticatedUser.getId(), userId)) {
+  //         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this users emergency information.");
+  //     }
+    
+  //   // fetch user in the internal representation
+  //   User user = userService.getUserById(userId);
+  //   ArrayList<UserEmergencyInformation> emergencyInformation = user.getUserEmergencyInformations();
+  //   ArrayList<UserEmergencyInformationDTO> dtoInformations = new ArrayList<UserEmergencyInformationDTO>();
+
+  //   for(UserEmergencyInformation contact : emergencyInformation){
+  //     dtoInformations.add(DTOMapper.INSTANCE.convertUserEmergencyInformationToDTO(contact));
+  //   }
+  //   return dtoInformations;
+  // }
+
+
 }

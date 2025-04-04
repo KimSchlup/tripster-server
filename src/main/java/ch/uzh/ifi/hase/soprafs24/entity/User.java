@@ -44,22 +44,22 @@ public class User implements Serializable {
   private UserStatus status;
   @Column(nullable = false)
   private LocalDate creationDate;
-  @Column(nullable = true)
-  private String profilePictureUrl;
+  // @Column(nullable = true)
+  // private String profilePictureUrl;
   @Column
   private Boolean receiveNotifications;
   @Column
   private UserPreferences userPreferences;
-  @Column
-  private ArrayList<UserEmergencyContact> userEmergencyContacts;
-  @Column
-  private ArrayList<UserEmergencyInformation> userEmergencyInformations;
+  // @Column
+  // private ArrayList<UserEmergencyContact> userEmergencyContacts;
+  // @Column
+  // private ArrayList<UserEmergencyInformation> userEmergencyInformations;
 
 
-  public Long getId() {
+  public Long getUserId() {
     return userId;
   }
-  public void setId(Long userId) {
+  public void setUserId(Long userId) {
     this.userId = userId;
   }
   public String getFirstName(){
@@ -116,12 +116,12 @@ public class User implements Serializable {
   public void setCreationDate(LocalDate creationDate){
     this.creationDate = creationDate;
   }
-  public String getProfilePictureUrl(){
-    return profilePictureUrl;
-  }
-  public void setProfilePictureUrl(String profilePictureUrl){
-    this.profilePictureUrl = profilePictureUrl;
-  }
+  // public String getProfilePictureUrl(){
+  //   return profilePictureUrl;
+  // }
+  // public void setProfilePictureUrl(String profilePictureUrl){
+  //   this.profilePictureUrl = profilePictureUrl;
+  // }
   public Boolean getReceiveNotifications(){
     return this.receiveNotifications;
   }
@@ -135,24 +135,24 @@ public class User implements Serializable {
     this.userPreferences = userPreferences;
   }
 
-  public ArrayList<UserEmergencyContact> getUserEmergencyContacts(){
-    return this.userEmergencyContacts;
-  }
-  public void setUserEmergencyContacts(UserEmergencyContact userEmergencyContact){
-    if(this.userEmergencyContacts == null){
-      this.userEmergencyContacts = new ArrayList<UserEmergencyContact>();
-    }
-    this.userEmergencyContacts.add(userEmergencyContact);
-  }
+  // public ArrayList<UserEmergencyContact> getUserEmergencyContacts(){
+  //   return this.userEmergencyContacts;
+  // }
+  // public void setUserEmergencyContacts(UserEmergencyContact userEmergencyContact){
+  //   if(this.userEmergencyContacts == null){
+  //     this.userEmergencyContacts = new ArrayList<UserEmergencyContact>();
+  //   }
+  //   this.userEmergencyContacts.add(userEmergencyContact);
+  // }
 
-  public ArrayList<UserEmergencyInformation> getUserEmergencyInformations(){
-    return this.userEmergencyInformations;
-  }
-  public void setUserEmergencyInformations(UserEmergencyInformation userEmergencyInformation){
-    if(this.userEmergencyInformations == null){
-      this.userEmergencyInformations = new ArrayList<UserEmergencyInformation>();
-    }
-    this.userEmergencyInformations.add(userEmergencyInformation);
-  }
+  // public ArrayList<UserEmergencyInformation> getUserEmergencyInformations(){
+  //   return this.userEmergencyInformations;
+  // }
+  // public void setUserEmergencyInformations(UserEmergencyInformation userEmergencyInformation){
+  //   if(this.userEmergencyInformations == null){
+  //     this.userEmergencyInformations = new ArrayList<UserEmergencyInformation>();
+  //   }
+  //   this.userEmergencyInformations.add(userEmergencyInformation);
+  // }
 
 }

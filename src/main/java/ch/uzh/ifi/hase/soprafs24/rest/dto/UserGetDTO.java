@@ -17,16 +17,16 @@ public class UserGetDTO {
   private String token;
   private UserStatus status;
   private LocalDate creationDate;
-  private String profilePictureUrl;
+  // private String profilePictureUrl;
   private Boolean receiveNotifications;
   private UserPreferences userPreferences;
-  private ArrayList<UserEmergencyContactDTO> userEmergencyContacts;
-  private ArrayList<UserEmergencyInformationDTO> userEmergencyInformations;
+  // private ArrayList<UserEmergencyContactDTO> userEmergencyContacts;
+  // private ArrayList<UserEmergencyInformationDTO> userEmergencyInformations;
 
-  public Long getId() {
+  public Long getUserId() {
     return userId;
   }
-  public void setId(Long userId) {
+  public void setUserId(Long userId) {
     this.userId = userId;
   }
   public String getFirstName(){
@@ -77,16 +77,16 @@ public class UserGetDTO {
   public void setCreationDate(LocalDate creationDate){
     this.creationDate = creationDate;
   }
-  public String getProfilePictureUrl(){
-    return profilePictureUrl;
-  }
-  public void setProfilePictureUrl(String profilePictureUrl){
-    this.profilePictureUrl = profilePictureUrl;
-  }
+  // public String getProfilePictureUrl(){
+  //   return profilePictureUrl;
+  // }
+  // public void setProfilePictureUrl(String profilePictureUrl){
+  //   this.profilePictureUrl = profilePictureUrl;
+  // }
   public Boolean getReceiveNotifications(){
     return receiveNotifications;
   }
-  public void setReceiveNorifications(Boolean receiveNotifications){
+  public void setreceiveNotifications(Boolean receiveNotifications){
     this.receiveNotifications = receiveNotifications;
   }
   public UserPreferences getUserPreferences(){
@@ -96,23 +96,23 @@ public class UserGetDTO {
     this.userPreferences = userPreferences;
   }
 
-  public ArrayList<UserEmergencyContactDTO> getUserEmergencyContacts(){
-    return userEmergencyContacts;
-  }
-  public void setUserEmergencyContacts(UserEmergencyContactDTO userEmergencyContact){
-    if(this.userEmergencyContacts == null){
-      this.userEmergencyContacts = new ArrayList<UserEmergencyContactDTO>();
-    }
-    this.userEmergencyContacts.add(userEmergencyContact);
-  }
+  // public ArrayList<UserEmergencyContactDTO> getUserEmergencyContacts(){
+  //   return userEmergencyContacts;
+  // }
+  // public void setUserEmergencyContacts(UserEmergencyContactDTO userEmergencyContact){
+  //   if(this.userEmergencyContacts == null){
+  //     this.userEmergencyContacts = new ArrayList<UserEmergencyContactDTO>();
+  //   }
+  //   this.userEmergencyContacts.add(userEmergencyContact);
+  // }
 
-  public ArrayList<UserEmergencyInformationDTO> getUserEmergencyInformations(){
-    return userEmergencyInformations;
-  }
-  public void setUserEmergencyInformations(UserEmergencyInformationDTO userEmergencyInformation){
-    if(this.userEmergencyInformations == null){
-      this.userEmergencyInformations = new ArrayList<UserEmergencyInformationDTO>();
-    }
-    this.userEmergencyInformations.add(userEmergencyInformation);
-  }
+  // public ArrayList<UserEmergencyInformationDTO> getUserEmergencyInformations(){
+  //   return userEmergencyInformations;
+  // }
+  // public void setUserEmergencyInformations(UserEmergencyInformationDTO userEmergencyInformation){
+  //   if(this.userEmergencyInformations == null){
+  //     this.userEmergencyInformations = new ArrayList<UserEmergencyInformationDTO>();
+  //   }
+  //   this.userEmergencyInformations.add(userEmergencyInformation);
+  // }
 }
