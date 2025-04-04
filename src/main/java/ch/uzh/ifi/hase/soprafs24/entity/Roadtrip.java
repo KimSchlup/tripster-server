@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -12,37 +13,48 @@ import java.util.ArrayList;
  * the primary key
  */
 @Entity
-@Table(name = "tripProject")
-public class TripProject implements Serializable {
+@Table(name = "roadtrip")
+public class Roadtrip implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   @Id
-  private Long tripId;
+  @GeneratedValue
+  private Long id;
   @Column(nullable = false)
-  private String tripName;
+  private String name;
   @Column
-  private String tripDescription;
+  private String description;
+  /*
   @Column
   private TripProjectSettings tripProjectSettings;
   @Column(nullable = false)
   private ArrayList<TripProjectMember> tripProjectMembers;
+  */
   @Column
   private User owner;
-  
 
-  public void setTripName(String tripName){
-    this.tripName = tripName;
+  public Long getId() {
+    return id;
   }
-  public String getTripName(){
-    return this.tripName;
+
+  public void setId(Long id) {
+    this.id = id;
   }
-  public void setTripDescription(String tripDescription){
-    this.tripDescription = tripDescription;
+
+  public void setName(String name){
+    this.name = name;
   }
-  public String getTripDescription(){
-    return this.tripDescription;
+  public String getName(){
+    return this.name;
   }
+  public void setDescription(String description){
+    this.description = description;
+  }
+  public String getDescription(){
+    return this.description;
+  }
+  /*
   public void setTripProjectSetting(TripProjectSettings tripProjectSettings){
     this.tripProjectSettings = tripProjectSettings;
   }
@@ -55,6 +67,7 @@ public class TripProject implements Serializable {
   public ArrayList<TripProjectMember> getTripProjectMembers(){
     return this.tripProjectMembers;
   }
+  */
   public void setOwner(User user){
     this.owner = user;
   }

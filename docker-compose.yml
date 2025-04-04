@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: mapmates_postgres_dev
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mapmates123
+      POSTGRES_DB: mapmates_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: springboot_server
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mapmates_dev
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: mapmates123
+      SPRING_PROFILES_ACTIVE: dev
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app # Mounts your local code into the container
+      - ~/.gradle:/home/gradle/.gradle # Speeds up Gradle builds by reusing dependencies
+    command: ./gradlew bootRun --no-daemon # Starts the app with live-reloading
+
+volumes:
+  postgres_data:

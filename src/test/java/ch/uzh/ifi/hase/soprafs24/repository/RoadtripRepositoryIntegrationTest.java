@@ -1,7 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.repository;
 
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -13,34 +12,31 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class UserRepositoryIntegrationTest {
+public class RoadtripRepositoryIntegrationTest {
 
   @Autowired
   private TestEntityManager entityManager;
 
   @Autowired
-  private UserRepository userRepository;
+  private RoadtripRepository roadtripRepository;
 
   @Test
   public void findByName_success() {
     // given
-    User user = new User();
-    user.setName("Firstname Lastname");
-    user.setUsername("firstname@lastname");
-    user.setStatus(UserStatus.OFFLINE);
-    user.setToken("1");
+    Roadtrip roadtrip = new Roadtrip();
+    roadtrip.setName("Test Name");
+    roadtrip.setDescription("Test Description");
 
-    entityManager.persist(user);
+    entityManager.persist(roadtrip);
     entityManager.flush();
 
     // when
-    User found = userRepository.findByName(user.getName());
+    Roadtrip found = roadtripRepository.findById(roadtrip.getId()).orElse(null);
 
     // then
     assertNotNull(found.getId());
-    assertEquals(found.getName(), user.getName());
-    assertEquals(found.getUsername(), user.getUsername());
-    assertEquals(found.getToken(), user.getToken());
-    assertEquals(found.getStatus(), user.getStatus());
+    assertEquals(found.getName(), roadtrip.getName());
+    assertEquals(found.getDescription(), roadtrip.getDescription());
+
   }
 }

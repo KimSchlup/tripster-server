@@ -7,8 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
+import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
 @RestController
 @SpringBootApplication
 public class Application {
@@ -33,4 +34,15 @@ public class Application {
       }
     };
   }
+
+      @Bean
+    public WebMvcConfigurer webMvcConfigurer(AuthenticationInterceptor authenticationInterceptor) {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addInterceptors(InterceptorRegistry registry) {
+                registry.addInterceptor(authenticationInterceptor)
+                        .excludePathPatterns("/");
+            }
+        };
+    }
 }
