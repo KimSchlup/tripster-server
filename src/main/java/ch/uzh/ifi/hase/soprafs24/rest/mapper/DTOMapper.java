@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
 import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyInformation;
+
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
