@@ -50,14 +50,12 @@ public interface DTOMapper {
   @Mapping(source="mail", target="mail")
   @Mapping(source="username", target="username")
   @Mapping(source="token", target="token")
-  // @Mapping(source="profilePictureUrl", target="profilePictureUrl")
   @Mapping(source="receiveNotifications", target="receiveNotifications")
   @Mapping(source="userPreferences", target="userPreferences")
   @Mapping(source="status",target="status")
   @Mapping(target="creationDate", ignore=true)
   @Mapping(target="userId", ignore=true)
-  @Mapping(target="profilePictureUrl", ignore=true)
-    // @Mapping(source="userEmergencyContacts", target="userEmergencyContacts")
+  // @Mapping(source="userEmergencyContacts", target="userEmergencyContacts")
   // @Mapping(source="userEmergencyInformations", target="userEmergencyInformations")
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
@@ -103,7 +101,6 @@ public interface DTOMapper {
   @Mapping(source="token", target="token")
   @Mapping(source="status", target="status")
   @Mapping(source="creationDate", target="creationDate")
-  // @Mapping(source="profilePictureUrl", target="profilePictureUrl")
   @Mapping(source="receiveNotifications", target="receiveNotifications")
   @Mapping(source="userPreferences", target="userPreferences")
   // @Mapping(source="userEmergencyContacts", target="userEmergencyContacts")
