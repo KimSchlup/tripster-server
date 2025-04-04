@@ -42,6 +42,7 @@ public class User implements Serializable {
   private String token;
   @Column(nullable = false)
   private UserStatus status;
+<<<<<<< HEAD
   @Column(nullable = false)
   private LocalDate creationDate;
   // @Column(nullable = true)
@@ -54,13 +55,46 @@ public class User implements Serializable {
   // private ArrayList<UserEmergencyContact> userEmergencyContacts;
   // @Column
   // private ArrayList<UserEmergencyInformation> userEmergencyInformations;
+||||||| parent of fea1801 (added all necessary classes except POI classes (all including the JTS objects))
+=======
+  @Column(nullable = false)
+  private LocalDate creationDate;
+  @Column(nullable = true)
+  private String profilePictureUrl;
+  @Column(nullable = false)
+  private Boolean receiveNotifications;
+  @Column
+  private UserPreferences userPreferences;
+  @Column
+  private ArrayList<UserEmergencyContact> userEmergencyContacts;
+  @Column
+  private ArrayList<UserEmergencyInformation> userEmergencyInformations;
 
+>>>>>>> fea1801 (added all necessary classes except POI classes (all including the JTS objects))
+
+<<<<<<< HEAD
 
   public Long getUserId() {
     return userId;
+||||||| parent of fea1801 (added all necessary classes except POI classes (all including the JTS objects))
+  public Long getId() {
+    return id;
+=======
+  public Long getId() {
+    return userId;
+>>>>>>> fea1801 (added all necessary classes except POI classes (all including the JTS objects))
   }
+<<<<<<< HEAD
   public void setUserId(Long userId) {
     this.userId = userId;
+||||||| parent of fea1801 (added all necessary classes except POI classes (all including the JTS objects))
+
+  public void setId(Long id) {
+    this.id = id;
+=======
+  public void setId(Long userId) {
+    this.userId = userId;
+>>>>>>> fea1801 (added all necessary classes except POI classes (all including the JTS objects))
   }
   public String getFirstName(){
     return firstName;
@@ -110,6 +144,7 @@ public class User implements Serializable {
   public void setStatus(UserStatus status) {
     this.status = status;
   }
+<<<<<<< HEAD
   public LocalDate getCreationDate(){
     return creationDate;
   }
@@ -156,3 +191,53 @@ public class User implements Serializable {
   // }
 
 }
+||||||| parent of fea1801 (added all necessary classes except POI classes (all including the JTS objects))
+}
+=======
+  public LocalDate getCreationDate(){
+    return creationDate;
+  }
+  public void setCreationDate(LocalDate creationDate){
+    this.creationDate = creationDate;
+  }
+  public String getProfilePictureUrl(){
+    return profilePictureUrl;
+  }
+  public void setProfilePictureUrl(String profilePictureUrl){
+    this.profilePictureUrl = profilePictureUrl;
+  }
+  public Boolean getReceiveNotifications(){
+    return receiveNotifications;
+  }
+  public void setReceiveNorifications(Boolean receiveNotifications){
+    this.receiveNotifications = receiveNotifications;
+  }
+  public UserPreferences getUserPreferences(){
+    return userPreferences;
+  }
+  public void setUserPreferences(UserPreferences userPreferences){
+    this.userPreferences = userPreferences;
+  }
+
+  public ArrayList<UserEmergencyContact> getUserEmergencyContact(){
+    return userEmergencyContacts;
+  }
+  public void setUserEmergencyContact(UserEmergencyContact userEmergencyContact){
+    if(this.userEmergencyContacts == null){
+      this.userEmergencyContacts = new ArrayList<UserEmergencyContact>();
+    }
+    this.userEmergencyContacts.add(userEmergencyContact);
+  }
+
+  public ArrayList<UserEmergencyInformation> getUserEmergencyInformations(){
+    return userEmergencyInformations;
+  }
+  public void setUserEmergencyInformation(UserEmergencyInformation userEmergencyInformation){
+    if(this.userEmergencyInformations == null){
+      this.userEmergencyInformations = new ArrayList<UserEmergencyInformation>();
+    }
+    this.userEmergencyInformations.add(userEmergencyInformation);
+  }
+
+}
+>>>>>>> fea1801 (added all necessary classes except POI classes (all including the JTS objects))
