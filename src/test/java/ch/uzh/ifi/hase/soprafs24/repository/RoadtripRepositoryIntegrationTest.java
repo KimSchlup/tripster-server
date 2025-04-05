@@ -1,42 +1,47 @@
-// package ch.uzh.ifi.hase.soprafs24.repository;
+package ch.uzh.ifi.hase.soprafs24.repository;
 
-// import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-// import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-// import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-// @DataJpaTest
-// @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-// public class RoadtripRepositoryIntegrationTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-//   @Autowired
-//   private TestEntityManager entityManager;
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+public class RoadtripRepositoryIntegrationTest {
 
-//   @Autowired
-//   private RoadtripRepository roadtripRepository;
+  @Autowired
+  private TestEntityManager entityManager;
 
-//   @Test
-//   public void findByName_success() {
-//     // given
-//     Roadtrip roadtrip = new Roadtrip();
-//     roadtrip.setName("Test Name");
-//     roadtrip.setDescription("Test Description");
+  @Autowired
+  private RoadtripRepository roadtripRepository;
 
-//     entityManager.persist(roadtrip);
-//     entityManager.flush();
+    @MockBean
+  private AuthenticationInterceptor authenticationInterceptor;
 
-//     // when
-//     Roadtrip found = roadtripRepository.findById(roadtrip.getId()).orElse(null);
+  @Test
+  public void findByName_success() {
+    // given
+    Roadtrip roadtrip = new Roadtrip();
+    roadtrip.setName("Test Name");
+    roadtrip.setDescription("Test Description");
 
-//     // then
-//     assertNotNull(found.getId());
-//     assertEquals(found.getName(), roadtrip.getName());
-//     assertEquals(found.getDescription(), roadtrip.getDescription());
+    entityManager.persist(roadtrip);
+    entityManager.flush();
 
-//   }
-// }
+    // when
+    Roadtrip found = roadtripRepository.findById(roadtrip.getId()).orElse(null);
+
+    // then
+    assertNotNull(found.getId());
+    assertEquals(found.getName(), roadtrip.getName());
+    assertEquals(found.getDescription(), roadtrip.getDescription());
+  }
+}

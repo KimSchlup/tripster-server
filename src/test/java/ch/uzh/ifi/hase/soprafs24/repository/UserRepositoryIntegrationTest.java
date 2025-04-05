@@ -1,46 +1,57 @@
-// package ch.uzh.ifi.hase.soprafs24.repository;
+package ch.uzh.ifi.hase.soprafs24.repository;
 
-// import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-// import ch.uzh.ifi.hase.soprafs24.entity.User;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-// import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-// import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.User;
+import org.junit.jupiter.api.Test;
+import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-// @DataJpaTest
-// @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-// public class UserRepositoryIntegrationTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-//   @Autowired
-//   private TestEntityManager entityManager;
+import java.time.LocalDate;
 
-//   @Autowired
-//   private UserRepository userRepository;
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+public class UserRepositoryIntegrationTest {
 
-//   @Test
-//   public void findByName_success() {
-//     // given
-//     User user = new User();
-//     user.setName("Firstname Lastname");
-//     user.setUsername("firstname@lastname");
-//     user.setStatus(UserStatus.OFFLINE);
-//     user.setToken("1");
+    @Autowired
+    private TestEntityManager entityManager;
 
-//     entityManager.persist(user);
-//     entityManager.flush();
+    @Autowired
+    private UserRepository userRepository;
 
-//     // when
-//     User found = userRepository.findByName(user.getName());
+    @MockBean
+    private AuthenticationInterceptor authenticationInterceptor;
 
-//     // then
-//     assertNotNull(found.getId());
-//     assertEquals(found.getName(), user.getName());
-//     assertEquals(found.getUsername(), user.getUsername());
-//     assertEquals(found.getToken(), user.getToken());
-//     assertEquals(found.getStatus(), user.getStatus());
-//   }
-// }
+    @Test
+    public void findByFirstName_success() {
+        // given
+        User user = new User();
+        user.setFirstName("Firstname");
+        user.setLastName("lastname");
+        user.setUsername("firstname@lastname");
+        user.setPassword("password");
+        user.setStatus(UserStatus.OFFLINE);
+        user.setToken("1");
+        user.setCreationDate(LocalDate.now());
+
+        entityManager.persist(user);
+        entityManager.flush();
+
+        // when
+        User found = userRepository.findByFirstName(user.getFirstName());
+
+        // then
+        assertNotNull(found.getUserId());
+        assertEquals(found.getFirstName(), user.getFirstName());
+        assertEquals(found.getUsername(), user.getUsername());
+        assertEquals(found.getToken(), user.getToken());
+        assertEquals(found.getStatus(), user.getStatus());
+    }
+}
