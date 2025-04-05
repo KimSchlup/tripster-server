@@ -13,6 +13,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.PoiPriority;
 import ch.uzh.ifi.hase.soprafs24.constant.PoiStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.TravelMode;
 
+import org.locationtech.jts.geom.LineString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -31,17 +32,23 @@ public class Route implements Serializable {
 
   @Id
   private Long startPoiId;
+
   @Id
   private Long endPoiId;
+
   @Column(nullable = false)
   @JdbcTypeCode(SqlTypes.GEOMETRY)
-  private Linestring geometry;
+  private LineString geometry;
+
   @Column
   private Float distance;
+
   @Column
   private Float travelTime;
+
   @Column
   private TravelMode travelMode;
+
   @Column
   private AcceptanceStatus status;
 
@@ -57,10 +64,10 @@ public class Route implements Serializable {
   public Long getEndPoiId(){
     return this.endPoiId;
   }
-  public void setGeometry(Linestring geometry){
+  public void setGeometry(LineString geometry){
     this.geometry = geometry;
   }
-  public Linestring getGeometry(){
+  public LineString getGeometry(){
     return this.geometry;
   }
   public void setDistance(Float distance){

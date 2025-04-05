@@ -22,7 +22,7 @@ import org.hibernate.type.SqlTypes;
  * the primary key
  */
 @Entity
-@Table(name = "pointOfInterest")
+@Table(name = "point_of_interest")
 public class PointOfInterest implements Serializable {
 
   private static final long serialVersionUID = 1L;
