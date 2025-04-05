@@ -1,4 +1,4 @@
-FROM gradle:7.6-jdk17 as build
+FROM gradle:7.6-jdk17 AS build
 # Set container working directory to /app
 WORKDIR /app
 # Copy Gradle configuration files
@@ -9,19 +9,19 @@ RUN chmod +x ./gradlew
 # Copy build script and source code
 COPY build.gradle settings.gradle /app/
 COPY src /app/src
-# Build the server
-RUN ./gradlew clean build --no-daemon
-
+# Build the server, no test as this will be handled by github actions
+# against a Postgres Instance supplied by github service
+RUN ./gradlew clean build -x test --no-daemon
 # make image smaller by using multi stage build
 FROM openjdk:17-slim
-# Set the env to "production"
-ENV SPRING_PROFILES_ACTIVE=production
+# Set the env to "prod"
+ENV SPRING_PROFILES_ACTIVE=prod
 # get non-root user
 USER 3301
 # Set container working directory to /app
 WORKDIR /app
 # copy built artifact from build stage
-COPY --from=build /app/build/libs/*.jar /app/soprafs24.jar
+COPY --from=build /app/build/libs/*.jar /app/soprafs25.jar
 # Expose the port on which the server will be running (based on application.properties)
 EXPOSE 8080
 # start server
