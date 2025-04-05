@@ -21,16 +21,19 @@ public class Roadtrip implements Serializable {
   @Id
   @GeneratedValue
   private Long id;
+
   @Column(nullable = false)
   private String name;
+
   @Column
   private String description;
   /*
-  @Column
-  private TripProjectSettings tripProjectSettings;
-  @Column(nullable = false)
-  private ArrayList<TripProjectMember> tripProjectMembers;
-  */
+   * @Column
+   * private TripProjectSettings tripProjectSettings;
+   * 
+   * @Column(nullable = false)
+   * private ArrayList<TripProjectMember> tripProjectMembers;
+   */
   @Column
   private User owner;
 
@@ -42,36 +45,41 @@ public class Roadtrip implements Serializable {
     this.id = id;
   }
 
-  public void setName(String name){
+  public void setName(String name) {
     this.name = name;
   }
-  public String getName(){
+
+  public String getName() {
     return this.name;
   }
-  public void setDescription(String description){
+
+  public void setDescription(String description) {
     this.description = description;
   }
-  public String getDescription(){
+
+  public String getDescription() {
     return this.description;
   }
+
   /*
-  public void setTripProjectSetting(TripProjectSettings tripProjectSettings){
-    this.tripProjectSettings = tripProjectSettings;
-  }
-  public TripProjectSettings getTripProjectSettings(){
-    return this.tripProjectSettings;
-  }
-  public void setTripProjectMembers(TripProjectMember tripProjectMember){
-    this.tripProjectMembers.add(tripProjectMember);
-  }
-  public ArrayList<TripProjectMember> getTripProjectMembers(){
-    return this.tripProjectMembers;
-  }
-  */
-  public void setOwner(User user){
+   * public void setTripProjectSetting(TripProjectSettings tripProjectSettings){
+   * this.tripProjectSettings = tripProjectSettings;
+   * }
+   * public TripProjectSettings getTripProjectSettings(){
+   * return this.tripProjectSettings;
+   * }
+   * public void setTripProjectMembers(TripProjectMember tripProjectMember){
+   * this.tripProjectMembers.add(tripProjectMember);
+   * }
+   * public ArrayList<TripProjectMember> getTripProjectMembers(){
+   * return this.tripProjectMembers;
+   * }
+   */
+  public void setOwner(User user) {
     this.owner = user;
   }
-  public User getOwner(){
+
+  public User getOwner() {
     return this.owner;
   }
 

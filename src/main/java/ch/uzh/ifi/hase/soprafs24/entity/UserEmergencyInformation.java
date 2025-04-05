@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
-
 import jakarta.persistence.*;
 import java.io.Serializable;
 
@@ -18,31 +17,40 @@ public class UserEmergencyInformation implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
-  // @GeneratedValue
-  private Long userId;
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
+
   @Column
   private String type;
+  
   @Column
   private String comment;
 
-  public Long getUserId() {
-    return userId;
-  }
-  public void setUserId(Long userId) {
-    this.userId = userId;
+  public User getUser() {
+    return user;
   }
 
-  public String getType(){
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  public String getType() {
     return type;
   }
-  public void setType(String type){
+
+  public void setType(String type) {
     this.type = type;
   }
 
-  public String getComment(){
+  public String getComment() {
     return comment;
   }
-  public void setComment(String comment){
+
+  public void setComment(String comment) {
     this.comment = comment;
   }
 }

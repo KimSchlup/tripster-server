@@ -17,29 +17,39 @@ public class UserPreferences implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
-  // @GeneratedValue
-  private Long userId;
+  @GeneratedValue
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
+
   @Column
   private String distanceMetric;
   @Column
   private String temperatureMetric;
 
-  public Long getId() {
-    return userId;
+  public User getUser() {
+    return user;
   }
-  public void setId(Long userId) {
-    this.userId = userId;
+
+  public void setUser(User user) {
+    this.user = user;
   }
-  public String getDistanceMetric(){
+
+  public String getDistanceMetric() {
     return distanceMetric;
   }
-  public void setDistanceMetric(String distanceMetric){
+
+  public void setDistanceMetric(String distanceMetric) {
     this.distanceMetric = distanceMetric;
   }
-  public String getTemperatureMetric(){
+
+  public String getTemperatureMetric() {
     return temperatureMetric;
   }
-  public void setTemperatureMetric(String temperatureMetric){
+
+  public void setTemperatureMetric(String temperatureMetric) {
     this.temperatureMetric = temperatureMetric;
   }
 }

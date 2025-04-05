@@ -1,11 +1,14 @@
 package ch.uzh.ifi.hase.soprafs24.repository;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,6 +22,9 @@ public class RoadtripRepositoryIntegrationTest {
 
   @Autowired
   private RoadtripRepository roadtripRepository;
+
+    @MockBean
+  private AuthenticationInterceptor authenticationInterceptor;
 
   @Test
   public void findByName_success() {

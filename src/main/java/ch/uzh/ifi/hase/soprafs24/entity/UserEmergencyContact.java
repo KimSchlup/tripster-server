@@ -17,37 +17,51 @@ public class UserEmergencyContact implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
-  // @GeneratedValue
-  private Long userId;
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
+
   @Column
   private String firstName;
+
   @Column
   private String lastName;
+
   @Column
   private String phoneNumber;
 
-  public Long getUserId() {
-    return userId;
+  public User getUser() {
+    return user;
   }
-  public void setUserId(Long userId) {
-    this.userId = userId;
+
+  public void setUser(User user) {
+    this.user = user;
   }
-  public String getFirstName(){
+
+  public String getFirstName() {
     return firstName;
   }
-  public void setFirstName(String firstName){
+
+  public void setFirstName(String firstName) {
     this.firstName = firstName;
   }
-  public String getLastName(){
+
+  public String getLastName() {
     return lastName;
   }
-  public void setLastName(String lastName){
+
+  public void setLastName(String lastName) {
     this.lastName = lastName;
   }
-  public String getPhoneNumber(){
+
+  public String getPhoneNumber() {
     return phoneNumber;
   }
-  public void setPhoneNumber(String phoneNumber){
+
+  public void setPhoneNumber(String phoneNumber) {
     this.phoneNumber = phoneNumber;
   }
 

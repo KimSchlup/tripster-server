@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
-import java.util.ArrayList;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.UserPreferences;
@@ -18,92 +17,92 @@ public class UserPostDTO {
   private Boolean receiveNotifications;
   private UserPreferences userPreferences;
   private UserStatus status;
-  // private ArrayList<UserEmergencyContactDTO> userEmergencyContacts;
-  // private ArrayList<UserEmergencyInformationDTO> userEmergencyInformations;
 
-  public String getFirstName(){
+
+  public String getFirstName() {
     return firstName;
   }
-  public void setFirstName(String firstName){
+
+  public void setFirstName(String firstName) {
     this.firstName = firstName;
   }
-  public String getLastName(){
+
+  public String getLastName() {
     return lastName;
   }
-  public void setLastName(String lastName){
+
+  public void setLastName(String lastName) {
     this.lastName = lastName;
   }
-  public String getPhoneNumber(){
+
+  public String getPhoneNumber() {
     return phoneNumber;
   }
-  public void setPhoneNumber(String phoneNumber){
+
+  public void setPhoneNumber(String phoneNumber) {
     this.phoneNumber = phoneNumber;
   }
-  public String getMail(){
+
+  public String getMail() {
     return mail;
   }
-  public void setMail(String mail){
+
+  public void setMail(String mail) {
     this.mail = mail;
   }
+
   public String getUsername() {
     return username;
   }
+
   public void setUsername(String username) {
     this.username = username;
   }
-  public String getPassword(){
+
+  public String getPassword() {
     return password;
   }
-  public void setPassword(String password){
+
+  public void setPassword(String password) {
     this.password = password;
   }
+
   public String getToken() {
     return token;
   }
+
   public void setToken(String token) {
     this.token = token;
   }
+
   // public String getProfilePictureUrl(){
-  //   return profilePictureUrl;
+  // return profilePictureUrl;
   // }
   // public void setProfilePictureUrl(String profilePictureUrl){
-  //   this.profilePictureUrl = profilePictureUrl;
+  // this.profilePictureUrl = profilePictureUrl;
   // }
-  public Boolean getReceiveNotifications(){
+  public Boolean getReceiveNotifications() {
     return this.receiveNotifications;
   }
-  public void setReceiveNotifications(Boolean receiveNotification){
+
+  public void setReceiveNotifications(Boolean receiveNotification) {
     this.receiveNotifications = receiveNotification;
   }
-  public UserPreferences getUserPreferences(){
+
+  public UserPreferences getUserPreferences() {
     return userPreferences;
   }
-  public void setUserPreferences(UserPreferences userPreferences){
+
+  public void setUserPreferences(UserPreferences userPreferences) {
     this.userPreferences = userPreferences;
   }
+
   public UserStatus getStatus() {
     return status;
   }
+
   public void setStatus(UserStatus status) {
     this.status = status;
   }
-  // public ArrayList<UserEmergencyContactDTO> getUserEmergencyContacts(){
-  //   return userEmergencyContacts;
-  // }
-  // public void setUserEmergencyContacts(UserEmergencyContactDTO userEmergencyContact){
-  //   if(this.userEmergencyContacts == null){
-  //     this.userEmergencyContacts = new ArrayList<UserEmergencyContactDTO>();
-  //   }
-  //   this.userEmergencyContacts.add(userEmergencyContact);
-  // }
 
-  // public ArrayList<UserEmergencyInformationDTO> getUserEmergencyInformations(){
-  //   return userEmergencyInformations;
-  // }
-  // public void setUserEmergencyInformations(UserEmergencyInformationDTO userEmergencyInformation){
-  //   if(this.userEmergencyInformations == null){
-  //     this.userEmergencyInformations = new ArrayList<UserEmergencyInformationDTO>();
-  //   }
-  //   this.userEmergencyInformations.add(userEmergencyInformation);
-  // }
 }

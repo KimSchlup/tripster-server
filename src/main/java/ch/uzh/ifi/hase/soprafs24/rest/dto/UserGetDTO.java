@@ -95,24 +95,4 @@ public class UserGetDTO {
   public void setUserPreferences(UserPreferences userPreferences){
     this.userPreferences = userPreferences;
   }
-
-  // public ArrayList<UserEmergencyContactDTO> getUserEmergencyContacts(){
-  //   return userEmergencyContacts;
-  // }
-  // public void setUserEmergencyContacts(UserEmergencyContactDTO userEmergencyContact){
-  //   if(this.userEmergencyContacts == null){
-  //     this.userEmergencyContacts = new ArrayList<UserEmergencyContactDTO>();
-  //   }
-  //   this.userEmergencyContacts.add(userEmergencyContact);
-  // }
-
-  // public ArrayList<UserEmergencyInformationDTO> getUserEmergencyInformations(){
-  //   return userEmergencyInformations;
-  // }
-  // public void setUserEmergencyInformations(UserEmergencyInformationDTO userEmergencyInformation){
-  //   if(this.userEmergencyInformations == null){
-  //     this.userEmergencyInformations = new ArrayList<UserEmergencyInformationDTO>();
-  //   }
-  //   this.userEmergencyInformations.add(userEmergencyInformation);
-  // }
 }

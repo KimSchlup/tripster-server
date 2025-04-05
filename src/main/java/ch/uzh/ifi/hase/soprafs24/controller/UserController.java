@@ -1,10 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
-import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyInformation;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserEmergencyContactDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserEmergencyInformationDTO;
+
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
@@ -99,7 +96,7 @@ public class UserController {
     userService.logoutUser(authenticatedUser);
     return;
   }
-
+  /*
   @GetMapping("/users/{userId}/emergency-contacts")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
@@ -146,4 +143,5 @@ public class UserController {
     }
     return dtoInformations;
   }
+    */
 }
