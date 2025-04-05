@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 /**
  * User Controller
  * This class is responsible for handling all REST request that are related to
@@ -53,19 +52,18 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public UserGetDTO getUserbyId(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
-    //add Id authentication here
+    // add Id authentication here
     User authenticatedUser = userService.getUserByToken(token);
 
-      if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
-          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
-      }
-    
+    if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
+    }
+
     // fetch user in the internal representation
     User user = userService.getUserById(userId);
 
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }
-  
 
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
@@ -80,49 +78,72 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(createdUser);
   }
 
-  // @GetMapping("/users/{userId}")
-  // @ResponseStatus(HttpStatus.OK)
-  // @ResponseBody
-  // public ArrayList<UserEmergencyContactDTO> getAllUserEmergencyContacts(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
-  //   //add Id authentication here
-  //   User authenticatedUser = userService.getUserByToken(token);
+  @PostMapping("auth/login")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDTO loginUser(@RequestBody UserPostDTO userPostDTO) {
+    // convert API user to internal representation
+    User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+    // login user
+    User loggedInUser = userService.loginUser(userInput);
+    // convert internal representation of user back to API
+    return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(loggedInUser);
+  }
 
-  //     if (!Objects.equals(authenticatedUser.getId(), userId)) {
-  //         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this users emergency contact.");
-  //     }
-    
-  //   // fetch user in the internal representation
-  //   User user = userService.getUserById(userId);
-  //   ArrayList<UserEmergencyContact> emergencyContacts = user.getUserEmergencyContacts();
-  //   ArrayList<UserEmergencyContactDTO> dtoContacts = new ArrayList<UserEmergencyContactDTO>();
+  @PostMapping("/logout")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public void logoutUser(@RequestHeader("Authorization") String token) {
+    User authenticatedUser = userService.getUserByToken(token);
 
-  //   for(UserEmergencyContact contact : emergencyContacts){
-  //     dtoContacts.add(DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(contact));
-  //   }
-  //   return dtoContacts;
-  // }
+    userService.logoutUser(authenticatedUser);
+    return;
+  }
 
-  // @GetMapping("/users/{userId}")
-  // @ResponseStatus(HttpStatus.OK)
-  // @ResponseBody
-  // public ArrayList<UserEmergencyInformationDTO> getAllUserEmergencyInformations(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
-  //   //add Id authentication here
-  //   User authenticatedUser = userService.getUserByToken(token);
+  @GetMapping("/users/{userId}/emergency-contacts")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<UserEmergencyContactDTO> getAllUserEmergencyContacts(@PathVariable Long userId,
+      @RequestHeader("Authorization") String token) {
+    // add Id authentication here
+    User authenticatedUser = userService.getUserByToken(token);
 
-  //     if (!Objects.equals(authenticatedUser.getId(), userId)) {
-  //         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this users emergency information.");
-  //     }
-    
-  //   // fetch user in the internal representation
-  //   User user = userService.getUserById(userId);
-  //   ArrayList<UserEmergencyInformation> emergencyInformation = user.getUserEmergencyInformations();
-  //   ArrayList<UserEmergencyInformationDTO> dtoInformations = new ArrayList<UserEmergencyInformationDTO>();
+    if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "You are not allowed to access this users emergency contact.");
+    }
+    // fetch user in the internal representation
+    User user = userService.getUserById(userId);
+    List<UserEmergencyContact> emergencyContacts = user.getUserEmergencyContacts();
+    List<UserEmergencyContactDTO> dtoContacts = new ArrayList<UserEmergencyContactDTO>();
 
-  //   for(UserEmergencyInformation contact : emergencyInformation){
-  //     dtoInformations.add(DTOMapper.INSTANCE.convertUserEmergencyInformationToDTO(contact));
-  //   }
-  //   return dtoInformations;
-  // }
+    for (UserEmergencyContact contact : emergencyContacts) {
+      dtoContacts.add(DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(contact));
+    }
+    return dtoContacts;
+  }
 
+  @GetMapping("/users/{userId}/emergency-information")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<UserEmergencyInformationDTO> getAllUserEmergencyInformations(@PathVariable Long userId,
+      @RequestHeader("Authorization") String token) {
+    // add Id authentication here
+    User authenticatedUser = userService.getUserByToken(token);
 
+    if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "You are not allowed to access this users emergency information.");
+    }
+    // fetch user in the internal representation
+    User user = userService.getUserById(userId);
+
+    List<UserEmergencyInformation> emergencyInformation = user.getUserEmergencyInformations();
+    List<UserEmergencyInformationDTO> dtoInformations = new ArrayList<UserEmergencyInformationDTO>();
+
+    for (UserEmergencyInformation contact : emergencyInformation) {
+      dtoInformations.add(DTOMapper.INSTANCE.convertUserEmergencyInformationToDTO(contact));
+    }
+    return dtoInformations;
+  }
 }

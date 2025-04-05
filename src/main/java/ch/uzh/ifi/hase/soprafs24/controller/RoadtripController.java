@@ -1,5 +1,8 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,9 +11,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
@@ -33,18 +36,32 @@ public class RoadtripController {
         this.roadtripService = roadtripService;
     }
 
-
     @PostMapping("/roadtrips")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public RoadtripGetDTO createRoadtrip(@RequestBody RoadtripPostDTO roadtripPostDTO) {
-    // convert API user to internal representation
-    Roadtrip roadtripInput = DTOMapper.INSTANCE.convertRoadtripPostDTOtoEntity(roadtripPostDTO);
+        // convert API user to internal representation
+        Roadtrip roadtripInput = DTOMapper.INSTANCE.convertRoadtripPostDTOtoEntity(roadtripPostDTO);
 
-    // create roadtrip
-    Roadtrip createdRoadtrip = roadtripService.createRoadtrip(roadtripInput);
-    // convert internal representation of user back to API
-    return DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(createdRoadtrip);
+        // create roadtrip
+        Roadtrip createdRoadtrip = roadtripService.createRoadtrip(roadtripInput);
+        // convert internal representation of user back to API
+        return DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(createdRoadtrip);
+    }
+
+    @GetMapping("/roadtrips")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseBody
+    public List<RoadtripGetDTO> getRoadtrips() {
+
+        List<Roadtrip> roadtrips = roadtripService.getRoadtrips();
+        List<RoadtripGetDTO> roadtripGetDTOs = new ArrayList<>();
+
+        for (Roadtrip roadtrip : roadtrips) {
+            roadtripGetDTOs.add(DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(roadtrip));
+        }
+
+        return roadtripGetDTOs;
     }
 
     @DeleteMapping("/roadtrips/{roadtripId}")
@@ -53,7 +70,3 @@ public class RoadtripController {
         roadtripService.deleteRoadtrip(roadtripId);
     }
 }
-
-
-
-

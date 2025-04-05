@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
+import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
 import ch.uzh.ifi.hase.soprafs24.service.RoadtripService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +44,9 @@ public class RoadtripControllerTest {
   @MockBean
   private RoadtripService roadtripService;
 
+  @MockBean
+  private AuthenticationInterceptor authenticationInterceptor;
+
   @Test
   public void createRoadtrip_validInput_roadtripCreated() throws Exception {
     // given
@@ -56,6 +60,7 @@ public class RoadtripControllerTest {
     roadtripPostDTO.setDescription("Test Description");
 
     given(roadtripService.createRoadtrip(Mockito.any())).willReturn(roadtrip);
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
 
     // when/then -> do the request + validate the result
     MockHttpServletRequestBuilder postRequest = post("/roadtrips")
@@ -74,6 +79,8 @@ public class RoadtripControllerTest {
   public void deleteRoadtrip_validId_roadtripDeleted() throws Exception {
       // given
       Long roadtripId = 52L;
+
+      given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
 
       // when/then -> perform delete request and expect 204 No Content
       mockMvc.perform(
