@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,9 @@ public class UserControllerTest {
   @MockBean
   private UserService userService;
 
+  @MockBean
+  private AuthenticationInterceptor authenticationInterceptor;
+
   @Test
   public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
     // given
@@ -58,6 +62,7 @@ public class UserControllerTest {
     // this mocks the UserService -> we define above what the userService should
     // return when getUsers() is called
     given(userService.getUsers()).willReturn(allUsers);
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
 
     // when
     MockHttpServletRequestBuilder getRequest = get("/users").contentType(MediaType.APPLICATION_JSON);
@@ -85,6 +90,7 @@ public class UserControllerTest {
     userPostDTO.setUsername("testUsername");
 
     given(userService.createUser(Mockito.any())).willReturn(user);
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
 
     // when/then -> do the request + validate the result
     MockHttpServletRequestBuilder postRequest = post("/users")
