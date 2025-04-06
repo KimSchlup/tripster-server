@@ -41,7 +41,7 @@ public class Application {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
                 registry.addInterceptor(authenticationInterceptor)
-                        .excludePathPatterns("/");
+                        .excludePathPatterns("/","/error");
             }
         };
     }

@@ -34,7 +34,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
 
         // Exclude login endpoint from authentication check
-        if (requestURI.equals("/login")){
+        if (requestURI.equals("/auth/login")){
         return true;
         }
 
