@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
+
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
 import ch.uzh.ifi.hase.soprafs24.service.RoadtripService;
@@ -30,7 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * RoadtripControllerTest
- * This is a WebMvcTest which allows to test the RoadtripController i.e. GET/POST
+ * This is a WebMvcTest which allows to test the RoadtripController i.e.
+ * GET/POST
  * request without actually sending them over the network.
  * This tests if the RoadtripController works.
  */
@@ -50,9 +53,14 @@ public class RoadtripControllerTest {
   @Test
   public void createRoadtrip_validInput_roadtripCreated() throws Exception {
     // given
+    User testUser = new User();
+    testUser.setUserId(100L);
+    testUser.setUsername("testuser");
+
     Roadtrip roadtrip = new Roadtrip();
     roadtrip.setId(1L);
     roadtrip.setName("Test User");
+    roadtrip.setOwner(testUser);
     roadtrip.setDescription("Test Description");
 
     RoadtripPostDTO roadtripPostDTO = new RoadtripPostDTO();
@@ -77,25 +85,24 @@ public class RoadtripControllerTest {
 
   @Test
   public void deleteRoadtrip_validId_roadtripDeleted() throws Exception {
-      // given
-      Long roadtripId = 52L;
+    // given
+    Long roadtripId = 52L;
 
-      given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
 
-      // when/then -> perform delete request and expect 204 No Content
-      mockMvc.perform(
-          org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-              .delete("/roadtrips/{roadtripId}", roadtripId)
-    )
-    .andExpect(status().isNoContent());
+    // when/then -> perform delete request and expect 204 No Content
+    mockMvc.perform(
+        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+            .delete("/roadtrips/{roadtripId}", roadtripId))
+        .andExpect(status().isNoContent());
   }
 
   public String asJsonString(final Object object) {
-      try {
-        return new ObjectMapper().writeValueAsString(object);
-      } catch (JsonProcessingException e) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            String.format("The request body could not be created.%s", e.toString()));
-      }
+    try {
+      return new ObjectMapper().writeValueAsString(object);
+    } catch (JsonProcessingException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format("The request body could not be created.%s", e.toString()));
     }
+  }
 }
