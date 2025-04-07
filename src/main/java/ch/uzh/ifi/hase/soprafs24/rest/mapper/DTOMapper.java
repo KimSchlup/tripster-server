@@ -1,14 +1,15 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 
-
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
-
 
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -71,4 +72,16 @@ public interface DTOMapper {
   @Mapping(source = "description", target = "description")
   RoadtripGetDTO convertEntityToRoadtripGetDTO(Roadtrip roadtrip);
 
+  // Roadtrip mappings
+  // If we do the lookup directly in the service we can use ignore = true
+  @Mapping(target = "user", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "invitationStatus", ignore = true)
+  RoadtripMember convertRoadtripMemberPostDTOtoEntity(RoadtripMemberPostDTO roadtripMemberPostDTO);
+
+  @Mapping(source = "id.userId", target = "userId")
+  @Mapping(source = "id.roadtripId", target = "roadtripId")
+  @Mapping(source = "invitationStatus", target = "invitationStatus")
+  RoadtripMemberGetDTO convertEntityToRoadtripMemberGetDTO(RoadtripMember roadtripMember);
 }
