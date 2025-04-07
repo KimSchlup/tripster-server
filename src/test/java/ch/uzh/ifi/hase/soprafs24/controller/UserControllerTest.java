@@ -140,7 +140,7 @@ public class UserControllerTest {
 
     UserPostDTO userPostDTO_conflict = new UserPostDTO();
     userPostDTO_conflict.setUsername("username");
-    userPostDTO_conflict.setPassword("password_conflict");
+    userPostDTO_conflict.setPassword("password");
 
     given(userService.createUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
     // mock auth token
