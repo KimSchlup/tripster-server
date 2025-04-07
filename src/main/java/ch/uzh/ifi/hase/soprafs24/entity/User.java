@@ -73,6 +73,9 @@ public class User implements Serializable {
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private UserPreferences userPreferences;
 
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<RoadtripMember> roadtripMemberships = new ArrayList<>();
+
   public Long getUserId() {
     return userId;
   }
