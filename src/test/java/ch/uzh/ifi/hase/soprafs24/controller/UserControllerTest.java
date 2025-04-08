@@ -160,10 +160,10 @@ public class UserControllerTest {
   public void getUserById_UserExists() throws Exception {
       //given
       User user = new User();
-      user.setName("Firstname Lastname");
+      user.setFirstName("Firstname");
       user.setUsername("firstname@lastname");
       user.setStatus(UserStatus.ONLINE);
-      user.setId(999L);
+      user.setUserId(999L);
 
 
       given(userService.getUserById(999L)).willReturn(user);
@@ -178,8 +178,8 @@ public class UserControllerTest {
 
       // then
       mockMvc.perform(getRequest).andExpect(status().isOk())
-              .andExpect(jsonPath("$.id", is(user.getId().intValue()))) // id als einzelnes Feld überprüfen
-              .andExpect(jsonPath("$.name", is(user.getName())))
+              .andExpect(jsonPath("$.id", is(user.getUserId().intValue()))) // id als einzelnes Feld überprüfen
+              .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
               .andExpect(jsonPath("$.username", is(user.getUsername())))
               .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
   }
@@ -191,8 +191,8 @@ public class UserControllerTest {
 
       // and
       User user = new User();
-      user.setName("Firstname Lastname");
-      user.setId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
+      user.setFirstName("Firstname Lastname");
+      user.setUserId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
 
       given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
       given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))

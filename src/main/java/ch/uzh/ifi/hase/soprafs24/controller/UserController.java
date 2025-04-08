@@ -69,7 +69,7 @@ public class UserController {
 
     User authenticatedUser = userService.getUserByToken(token);
 
-      if (!Objects.equals(authenticatedUser.getId(), userId)) {
+      if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
           throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
       }
 

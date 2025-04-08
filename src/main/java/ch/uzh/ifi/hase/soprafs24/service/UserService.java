@@ -96,9 +96,6 @@ public User updateUser(Long userId, User updatedUser) {
   User user = this.userRepository.findById(userId)
               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-    if (updatedUser.getName() != null) {
-        user.setName(updatedUser.getName());
-    }
     if (updatedUser.getUsername() != null) {
         user.setUsername(updatedUser.getUsername());
     }
