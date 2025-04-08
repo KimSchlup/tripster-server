@@ -10,8 +10,28 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      # Use named volume in dev for persistence
       - postgres_data:/var/lib/postgresql/data
+      # Only mount init-scripts in dev
       - ./init-scripts:/docker-entrypoint-initdb.d
+    profiles:
+      - dev
+
+  db-test:
+    image: postgis/postgis:15-3.3
+    container_name: mapmates_postgres_test
+    restart: "no"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mapmates123
+      POSTGRES_DB: mapmates_dev
+    ports:
+      - "5433:5432" # separate port if needed
+    # Use anonymous volume (wipes after container stops)
+    volumes:
+      - /var/lib/postgresql/data
+    profiles:
+      - test
 
   app:
     build:
@@ -40,18 +60,18 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: springboot_test_server
-    restart: "no" # Stop container after test run
+    restart: "no"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mapmates_dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-test:5432/mapmates_dev
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: mapmates123
       SPRING_PROFILES_ACTIVE: test
     depends_on:
-      - db
+      - db-test
     volumes:
       - .:/app
       - ~/.gradle:/home/gradle/.gradle
-      - ./test-reports:/app/build/reports/tests/test # Mount reports to local
+      - ./test-reports:/app/build/reports/tests/test
     command: ./gradlew test --no-daemon
     profiles:
       - test
