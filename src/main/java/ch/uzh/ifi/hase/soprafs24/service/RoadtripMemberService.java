@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -51,38 +52,81 @@ public class RoadtripMemberService {
         this.roadtripRepository = roadtripRepository;
     }
 
-    public RoadtripMember createRoadtripMember(Long roadtripId, RoadtripMember newRoadtripMember) {
-
-        // verify user exists
-        Long userId = newRoadtripMember.getId().getUserId();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    
-
+    public RoadtripMember createRoadtripMember(Long roadtripId, User invitingUser, Long userId) {
         // verify roadtrip exists
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
-        // Set user and roadtrip
-        newRoadtripMember.setUser(user);
-        newRoadtripMember.setRoadtrip(roadtrip);
+        // verify invitingUser is owner of roadtrip
+        boolean isOwner = Objects.equals(roadtrip.getOwner(), invitingUser);
+        if (!isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not allowed to invite");
+        }
 
-        // Set composite key
+        // verify user exists
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // verify userId provided is not the owner itself
+        if (Objects.equals(invitingUser, user)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner cannot invite itself");
+        }
+
+        // verify user is not already member of roadtrip
+        List<RoadtripMember> roadtripMembers = roadtripMemberRepository.findByRoadtrip(roadtrip);
+        boolean isAlreadyMember = roadtripMembers.stream()
+                .anyMatch(member -> Objects.equals(member.getUser(), user));
+
+        if (isAlreadyMember) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "User is already a member or was invited to the roadtrip");
+        }
+
+        // Create composite key
         RoadtripMemberPK pk = new RoadtripMemberPK();
         pk.setUserId(userId);
         pk.setRoadtripId(roadtripId);
-        newRoadtripMember.setId(pk);
 
-        // Set default status
+        // Set user and roadtrip
+        RoadtripMember newRoadtripMember = new RoadtripMember();
+        newRoadtripMember.setId(pk);
+        newRoadtripMember.setUser(user);
+        newRoadtripMember.setRoadtrip(roadtrip);
         newRoadtripMember.setInvitationStatus(InvitationStatus.PENDING);
 
-         // saves the given entity but data is only persisted in the database once
+        // saves the given entity but data is only persisted in the database once
         // flush() is called
         newRoadtripMember = roadtripMemberRepository.save(newRoadtripMember);
         roadtripMemberRepository.flush();
 
-        log.debug("Created Information for Roadtrip: {}", newRoadtripMember);
         return newRoadtripMember;
+    }
+
+    public void deleteRoadtripMember(Long roadtripId, User deletingUser, long userId) {
+        // verify roadtrip exists
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        // verify deletingUser is owner of roadtrip
+        boolean isOwner = Objects.equals(roadtrip.getOwner(), deletingUser);
+        if (!isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not allowed to delete");
+        }
+        // verify user exists
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // verify user is member of roadtrip
+        RoadtripMemberPK roadtripMemberPK = new RoadtripMemberPK();
+        roadtripMemberPK.setUserId(userId);
+        roadtripMemberPK.setRoadtripId(roadtripId);
+        RoadtripMember roadtripMember = roadtripMemberRepository.findById(roadtripMemberPK)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip member not found"));
+
+        // delete roadtrip member
+        roadtripMemberRepository.delete(roadtripMember);
+        roadtripMemberRepository.flush();
+
     }
 
 }
