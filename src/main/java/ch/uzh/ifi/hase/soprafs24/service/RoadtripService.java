@@ -1,21 +1,27 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
+import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import org.slf4j.Logger;
 
 import org.springframework.stereotype.Service;
 import org.slf4j.LoggerFactory;
 
+import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Roadtrip Service
@@ -30,23 +36,59 @@ import java.util.UUID;
 @Transactional
 public class RoadtripService {
 
+    private final RoadtripRepository roadtripRepository;
+    private final UserRepository userRepository;
+    private final RoadtripMemberRepository roadtripMemberRepository;
+
     private final Logger log = LoggerFactory.getLogger(RoadtripService.class);
 
-    private final RoadtripRepository roadtripRepository;
-
-    @Autowired
-    public RoadtripService(@Qualifier("roadtripRepository") RoadtripRepository roadtripRepository) {
+    public RoadtripService(@Qualifier("roadtripRepository") RoadtripRepository roadtripRepository,
+            UserRepository userRepository, RoadtripMemberRepository roadtripMemberRepository) {
         this.roadtripRepository = roadtripRepository;
+        this.userRepository = userRepository;
+        this.roadtripMemberRepository = roadtripMemberRepository;
     }
 
-    public List<Roadtrip> getRoadtrips() {
-        return this.roadtripRepository.findAll();
+    public List<Roadtrip> getRoadtrips(User user) {
+
+        // Get roadtrips where user is owner
+        List<Roadtrip> ownedTrips = roadtripRepository.findByOwner(user);
+
+        // Get roadtrips where invitation was accepted or is still pending
+        List<InvitationStatus> validStatuses = List.of(InvitationStatus.PENDING, InvitationStatus.ACCEPTED);
+        List<Roadtrip> memberTrips = roadtripMemberRepository.findRoadtripsByUserAndStatusIn(user, validStatuses);
+
+        // Combine and remove duplicates
+        Set<Roadtrip> allTrips = new HashSet<>(ownedTrips);
+        allTrips.addAll(memberTrips);
+
+        return new ArrayList<>(allTrips);
     }
 
-    public Roadtrip createRoadtrip(Roadtrip newRoadtrip) {
+    public Roadtrip getRoadtripById(Long roadtripId, User user) {
+
+        // Check if roadtrip exists
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        // Check if user is owner or member
+        boolean isOwner = Objects.equals(roadtrip.getOwner(), user);
+        RoadtripMember roadtripMember = roadtripMemberRepository.findByUserAndRoadtrip(user, roadtrip);
+        boolean isMember = roadtripMember != null && roadtripMember.getInvitationStatus() == InvitationStatus.ACCEPTED;
+
+        if (!isOwner && !isMember) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not a member of this roadtrip");
+        }
+
+        return roadtrip;
+
+    }
+
+    public Roadtrip createRoadtrip(Roadtrip newRoadtrip, String token) {
 
         // saves the given entity but data is only persisted in the database once
         // flush() is called
+        newRoadtrip.setOwner(userRepository.findByToken(token));
         newRoadtrip = roadtripRepository.save(newRoadtrip);
         roadtripRepository.flush();
 
@@ -54,10 +96,19 @@ public class RoadtripService {
         return newRoadtrip;
     }
 
-    public void deleteRoadtrip(Long roadtripId) {
-        if (!roadtripRepository.existsById(roadtripId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found");
+    public void deleteRoadtrip(Long roadtripId, Long requestingUserId) {
+
+        Roadtrip roadtripToBeDeleted = roadtripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        Long roadtripOwnerId = roadtripToBeDeleted.getOwner().getUserId();
+        boolean requestingUserIsOwner = Objects.equals(roadtripOwnerId, requestingUserId);
+
+        if (!requestingUserIsOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only the roadtrip owner can delete this roadtrip.");
         }
+
         roadtripRepository.deleteById(roadtripId);
     }
 
