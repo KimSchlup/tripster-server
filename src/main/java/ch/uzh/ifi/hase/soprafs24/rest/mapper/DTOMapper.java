@@ -92,6 +92,7 @@ public interface DTOMapper {
   @Mapping(source = "description", target = "description")
   RoadtripGetDTO convertEntityToRoadtripGetDTO(Roadtrip roadtrip);
 
+<<<<<<< HEAD
   // Roadtrip mappings
   // If we do the lookup directly in the service we can use ignore = true
   @Mapping(target = "user", ignore = true)
@@ -172,4 +173,14 @@ public interface DTOMapper {
   PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
 
 >>>>>>> b50f40e (added post, put and delete to POI's. Not yet including votes and comments)
+||||||| parent of a35fb73 (first iteration of POI's, no tests yet and only POST and GET implemented)
+=======
+  @Mapping(target = "poiId", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  PointOfInterest convertPointOfInterestPostDTOToEntity(PointOfInterestPostDTO pointOfInterestPostDTO);
+  
+  PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
+
+>>>>>>> a35fb73 (first iteration of POI's, no tests yet and only POST and GET implemented)
 }
