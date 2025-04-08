@@ -92,3 +92,4 @@ public class PointOfInterestService {
         pointOfInterestRepository.deleteById(poiId);
     }
 }
+

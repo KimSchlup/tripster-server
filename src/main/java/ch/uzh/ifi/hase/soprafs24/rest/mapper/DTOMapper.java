@@ -154,4 +154,11 @@ public interface DTOMapper {
   }
   PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
 
+  @Mapping(target = "poiId", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  PointOfInterest convertPointOfInterestPostDTOToEntity(PointOfInterestPostDTO pointOfInterestPostDTO);
+  
+  PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
+
 }
