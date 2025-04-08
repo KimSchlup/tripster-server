@@ -1,0 +1,133 @@
+package ch.uzh.ifi.hase.soprafs24.entity;
+
+import jakarta.persistence.*;
+
+import java.io.Serializable;
+
+import org.locationtech.jts.geom.Point;
+
+import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
+import ch.uzh.ifi.hase.soprafs24.constant.PoiCategory;
+import ch.uzh.ifi.hase.soprafs24.constant.PoiPriority;
+
+@Entity
+@Table(name = "point_of_interest")
+public class PointOfInterest implements Serializable{
+
+    private static final long serialVersionUID = 1L;
+    
+    @Id
+    @GeneratedValue
+    private Long poiId;
+
+    @ManyToOne
+    @JoinColumn(name = "roadtrip_id")
+    private Roadtrip roadtrip;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private Point coordinate;
+
+    @Column
+    private String description;
+
+    @Column
+    private PoiCategory category;
+    
+    @Column
+    private PoiPriority priority;
+
+    @Column(nullable = false)
+    private Long creatorId;
+
+    @Column(nullable = false)
+    private AcceptanceStatus status;
+
+    @Column(nullable = false)
+    private Integer eligibleVoteCount;
+
+    
+    // Getters and Setters
+    public Long getPoiId() {
+        return poiId;
+    }
+
+    public void setPoiId(Long poiId) {
+        this.poiId = poiId;
+    }
+
+    public Roadtrip getRoadtrip() {
+        return roadtrip;
+    }
+
+    public void setRoadtrip(Roadtrip roadtrip) {
+        this.roadtrip = roadtrip;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Point getCoordinate() {
+        return coordinate;
+    }
+
+    public void setCoordinate(Point coordinate) {
+        this.coordinate = coordinate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public PoiCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(PoiCategory category) {
+        this.category = category;
+    }
+
+    public Long getCreatorId() {
+        return creatorId;
+    }
+
+    public void setUser(Long creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public AcceptanceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AcceptanceStatus status) {
+        this.status = status;
+    }
+
+    public Integer getEligibleVoteCount() {
+        return eligibleVoteCount;
+    }
+
+    public void setEligibleVoteCount(Integer eligibleVoteCount) {
+        this.eligibleVoteCount = eligibleVoteCount;
+    }
+
+    public PoiPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(PoiPriority priority) {
+        this.priority = priority;
+    }
+
+}

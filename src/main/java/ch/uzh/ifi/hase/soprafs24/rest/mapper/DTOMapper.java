@@ -1,9 +1,10 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-
-
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
@@ -70,5 +71,12 @@ public interface DTOMapper {
   @Mapping(source = "name", target = "name")
   @Mapping(source = "description", target = "description")
   RoadtripGetDTO convertEntityToRoadtripGetDTO(Roadtrip roadtrip);
+
+  @Mapping(target = "poiId", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  PointOfInterest convertPointOfInterestPostDTOToEntity(PointOfInterestPostDTO pointOfInterestPostDTO);
+  
+  PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
 
 }
