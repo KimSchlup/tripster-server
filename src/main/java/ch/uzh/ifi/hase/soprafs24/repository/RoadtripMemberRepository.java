@@ -7,6 +7,8 @@ import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,4 +27,8 @@ public interface RoadtripMemberRepository extends JpaRepository<RoadtripMember, 
 
     // Find membership of a specific user in a specific trip
     RoadtripMember findByUserAndRoadtrip(User user, Roadtrip roadtrip);
+
+    @Query("SELECT rm.roadtrip FROM RoadtripMember rm WHERE rm.user = :user AND rm.invitationStatus IN :statuses")
+    List<Roadtrip> findRoadtripsByUserAndStatusIn(@Param("user") User user, @Param("statuses") List<InvitationStatus> statuses);
+
 }
