@@ -77,7 +77,7 @@ public class UserController {
       User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
       // update user
 
-      User updatedUser = userService.updateUser(userId, userInput);
+      userService.updateUser(userId, userInput);
       // convert internal representation of user back to API
       return;
   }
