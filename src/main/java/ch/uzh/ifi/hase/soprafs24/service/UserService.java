@@ -99,6 +99,21 @@ public User updateUser(Long userId, User updatedUser) {
     if (updatedUser.getUsername() != null) {
         user.setUsername(updatedUser.getUsername());
     }
+    if (updatedUser.getFirstName() != null) {
+      user.setFirstName(updatedUser.getFirstName());
+    }
+    if (updatedUser.getLastName() != null) {
+        user.setLastName(updatedUser.getLastName());
+    }
+    if (updatedUser.getPhoneNumber() != null) {
+        user.setPhoneNumber(updatedUser.getPhoneNumber());
+    }
+    if (updatedUser.getMail() != null) {
+        user.setMail(updatedUser.getMail());
+    }
+    if (updatedUser.getPassword() != null) {
+        user.setPassword(updatedUser.getPassword());
+    }
     
   this.userRepository.save(user);
     userRepository.flush();
