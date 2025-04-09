@@ -178,7 +178,7 @@ public class UserControllerTest {
 
       // then
       mockMvc.perform(getRequest).andExpect(status().isOk())
-              .andExpect(jsonPath("$.id", is(user.getUserId().intValue()))) // id als einzelnes Feld überprüfen
+              .andExpect(jsonPath("$.userId", is(user.getUserId().intValue()))) // id als einzelnes Feld überprüfen
               .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
               .andExpect(jsonPath("$.username", is(user.getUsername())))
               .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
