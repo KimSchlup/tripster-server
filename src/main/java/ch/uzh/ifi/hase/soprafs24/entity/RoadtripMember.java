@@ -32,11 +32,11 @@ public class RoadtripMember implements Serializable {
     @Column(nullable = false)
     private InvitationStatus invitationStatus;
 
-    public RoadtripMemberPK getId() {
+    public RoadtripMemberPK getRoadtripMemberId() {
         return roadtripMemberId;
     }
 
-    public void setId(RoadtripMemberPK roadtripMemberId) {
+    public void setRoadtripMemberId(RoadtripMemberPK roadtripMemberId) {
         this.roadtripMemberId = roadtripMemberId;
     }
 

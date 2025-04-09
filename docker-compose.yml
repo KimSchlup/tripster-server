@@ -1,4 +1,7 @@
+version: "3.8"
+
 services:
+  # Setup database for development
   db:
     image: postgis/postgis:15-3.3
     container_name: mapmates_postgres_dev
@@ -17,6 +20,7 @@ services:
     profiles:
       - dev
 
+  # Setup separate database for testing
   db-test:
     image: postgis/postgis:15-3.3
     container_name: mapmates_postgres_test
@@ -26,9 +30,9 @@ services:
       POSTGRES_PASSWORD: mapmates123
       POSTGRES_DB: mapmates_dev
     ports:
-      - "5433:5432" # separate port if needed
+      - "5433:5432"
     # Use anonymous volume (wipes after container stops)
-    volumes:
+    tmpfs:
       - /var/lib/postgresql/data
     profiles:
       - test
@@ -51,7 +55,7 @@ services:
     volumes:
       - .:/app
       - ~/.gradle:/home/gradle/.gradle
-    command: ./gradlew bootRun --no-daemon
+    command: ./gradlew bootRun --continuous --no-daemon
     profiles:
       - dev
 

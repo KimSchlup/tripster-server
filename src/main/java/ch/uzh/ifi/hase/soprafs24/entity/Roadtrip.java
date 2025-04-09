@@ -21,7 +21,7 @@ public class Roadtrip implements Serializable {
 
   @Id
   @GeneratedValue
-  private Long id;
+  private Long roadtripId;
 
   @Column(nullable = false)
   private String name;
@@ -36,12 +36,12 @@ public class Roadtrip implements Serializable {
   @OneToMany(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<RoadtripMember> roadtripMembers = new ArrayList<>();
 
-  public Long getId() {
-    return id;
+  public Long getRoadtripId() {
+    return roadtripId;
   }
 
-  public void setId(Long id) {
-    this.id = id;
+  public void setRoadtripId(Long roadtripId) {
+    this.roadtripId = roadtripId;
   }
 
   public void setName(String name) {
