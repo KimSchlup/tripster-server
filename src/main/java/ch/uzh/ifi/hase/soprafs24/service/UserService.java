@@ -105,6 +105,15 @@ public User updateUser(Long userId, User updatedUser) {
   return user;
 }
 
+public void deleteUser(Long userId) {
+  User user = this.userRepository.findById(userId)
+              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+  this.userRepository.delete(user);
+  userRepository.flush();
+  return;
+}
+
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name

@@ -117,6 +117,21 @@ public class UserController {
     userService.logoutUser(authenticatedUser);
     return;
   }
+
+  @DeleteMapping("users/{userId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseBody
+  public void deleteUser(@PathVariable Long userId, @RequestHeader("Authorization") String token){
+
+    User authenticatedUser = userService.getUserByToken(token);
+
+    if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
+    }
+
+    userService.deleteUser(userId);
+    return;
+  }
   /*
   @GetMapping("/users/{userId}/emergency-contacts")
   @ResponseStatus(HttpStatus.OK)
