@@ -2,11 +2,14 @@ server:
   port: 8080
 
 spring:
+  config:
+    import: optional:sm://prod-db-url,optional:sm://prod-db-username,optional:sm://prod-db-password
+
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${SPRING_DATASOURCE_URL:#{prod-db-url}}
     driver-class-name: org.postgresql.Driver
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    username: ${SPRING_DATASOURCE_USERNAME:#{prod-db-username}}
+    password: ${SPRING_DATASOURCE_PASSWORD:#{prod-db-password}}
 
   jpa:
     hibernate:
