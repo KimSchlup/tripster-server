@@ -29,15 +29,15 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * RoadtripControllerTest
  * This is a WebMvcTest which allows to test the RoadtripController i.e.
- * GET/POST
- * request without actually sending them over the network.
- * This tests if the RoadtripController works.
+ * GET/POST/DELETE request without actually sending them over the network.
+ * This only tests if the RoadtripController itself works.
  */
 @WebMvcTest(RoadtripController.class)
 @ActiveProfiles("dev")
@@ -90,6 +90,100 @@ public class RoadtripControllerTest {
         .andExpect(jsonPath("$.roadtripId", is(roadtrip.getRoadtripId().intValue())))
         .andExpect(jsonPath("$.name", is(roadtrip.getName())))
         .andExpect(jsonPath("$.description", is(roadtrip.getDescription())));
+  }
+
+  @Test
+  public void givenRoadtrips_whenGetRoadtrips_thenReturnJsonArray() throws Exception {
+    // given
+    String token = "test-token";
+
+    User testUser = new User();
+    testUser.setUserId(100L);
+    testUser.setUsername("testuser");
+    testUser.setToken("1");
+
+    Roadtrip roadtrip = new Roadtrip();
+    roadtrip.setRoadtripId(1L);
+    roadtrip.setOwner(testUser);
+    roadtrip.setName("Test User");
+    roadtrip.setDescription("Test Description");
+
+    List<Roadtrip> allRoadtrips = Collections.singletonList(roadtrip);
+    given(roadtripService.getRoadtrips(Mockito.any())).willReturn(allRoadtrips);
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+
+    // when
+    MockHttpServletRequestBuilder getRequest = get("/roadtrips")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", token);
+
+    // then
+    mockMvc.perform(getRequest)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].roadtripId", is(roadtrip.getRoadtripId().intValue())))
+        .andExpect(jsonPath("$[0].name", is(roadtrip.getName())))
+        .andExpect(jsonPath("$[0].description", is(roadtrip.getDescription())));
+  }
+
+  @Test
+  public void getRoadtripById_RoadtripExists() throws Exception {
+    // given
+    User testUser = new User();
+    testUser.setUserId(123L);
+    testUser.setUsername("testUser");
+    testUser.setToken("testToken");
+
+    Roadtrip roadtrip = new Roadtrip();
+    roadtrip.setRoadtripId(321L);
+    roadtrip.setOwner(testUser);
+    roadtrip.setName("testName");
+    roadtrip.setDescription("testDescription");
+
+    given(roadtripService.getRoadtripById(Mockito.any(), Mockito.any())).willReturn(roadtrip);
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+
+    // when
+    MockHttpServletRequestBuilder getRequest = get("/roadtrips/{roadtripId}", roadtrip.getRoadtripId())
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token");
+
+    // then
+    mockMvc.perform(getRequest)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.roadtripId", is(roadtrip.getRoadtripId().intValue())))
+        .andExpect(jsonPath("$.name", is(roadtrip.getName())))
+        .andExpect(jsonPath("$.description", is(roadtrip.getDescription())));
+  }
+
+  @Test
+  public void updateRoadtrip_validInput_success() throws Exception {
+    // given
+    RoadtripPostDTO roadtripPostDTO = new RoadtripPostDTO();
+    // and
+    User testUser = new User();
+    testUser.setUserId(123L);
+    testUser.setUsername("testUser");
+    testUser.setToken("testToken");
+
+    Roadtrip roadtrip = new Roadtrip();
+    roadtrip.setRoadtripId(321L);
+    roadtrip.setOwner(testUser);
+    roadtrip.setName("testName");
+    roadtrip.setDescription("testDescription");
+
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(roadtripService.updateRoadtripById(Mockito.anyLong(), Mockito.any())).willReturn(new Roadtrip());
+
+    // when
+    MockHttpServletRequestBuilder putRequest = put("/roadtrips/{roadtripId}", roadtrip.getRoadtripId())
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token") // Simulierte Authentifizierung
+        .content(asJsonString(roadtripPostDTO));
+
+    // then
+    mockMvc.perform(putRequest)
+        .andExpect(status().isNoContent()); // Erwartet 204 NO CONTENT
   }
 
   @Test

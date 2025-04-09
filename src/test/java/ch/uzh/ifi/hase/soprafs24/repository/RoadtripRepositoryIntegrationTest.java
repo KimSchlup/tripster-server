@@ -44,7 +44,6 @@ public class RoadtripRepositoryIntegrationTest {
 
     entityManager.persistAndFlush(testUser); // Combines persist + flush
 
-
     Roadtrip roadtrip = new Roadtrip();
     roadtrip.setOwner(testUser);
     roadtrip.setName("testname");
