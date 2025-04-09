@@ -99,10 +99,34 @@ public User updateUser(Long userId, User updatedUser) {
     if (updatedUser.getUsername() != null) {
         user.setUsername(updatedUser.getUsername());
     }
+    if (updatedUser.getFirstName() != null) {
+      user.setFirstName(updatedUser.getFirstName());
+    }
+    if (updatedUser.getLastName() != null) {
+        user.setLastName(updatedUser.getLastName());
+    }
+    if (updatedUser.getPhoneNumber() != null) {
+        user.setPhoneNumber(updatedUser.getPhoneNumber());
+    }
+    if (updatedUser.getMail() != null) {
+        user.setMail(updatedUser.getMail());
+    }
+    if (updatedUser.getPassword() != null) {
+        user.setPassword(updatedUser.getPassword());
+    }
     
   this.userRepository.save(user);
     userRepository.flush();
   return user;
+}
+
+public void deleteUser(Long userId) {
+  User user = this.userRepository.findById(userId)
+              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+  this.userRepository.delete(user);
+  userRepository.flush();
+  return;
 }
 
   /**
