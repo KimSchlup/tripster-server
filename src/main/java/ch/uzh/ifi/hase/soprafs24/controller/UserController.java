@@ -108,7 +108,7 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(loggedInUser);
   }
 
-  @PostMapping("/logout")
+  @PostMapping("auth/logout")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public void logoutUser(@RequestHeader("Authorization") String token) {
