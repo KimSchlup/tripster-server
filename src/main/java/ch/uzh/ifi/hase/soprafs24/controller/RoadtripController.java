@@ -2,17 +2,17 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -60,7 +60,7 @@ public class RoadtripController {
     }
 
     @GetMapping("/roadtrips")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<RoadtripGetDTO> getRoadtrips(@RequestHeader("Authorization") String token) {
 
@@ -80,9 +80,26 @@ public class RoadtripController {
     }
 
     @GetMapping("/roadtrips/{roadtripId}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public RoadtripGetDTO getRoadtripById(@PathVariable Long roadtripId, @RequestHeader("Authorization") String token) {
+
+        // Get user from token
+        User user = userService.getUserByToken(token);
+
+        // Fetch roadtrips user is owner of or member of
+        Roadtrip roadtrip = roadtripService.getRoadtripById(roadtripId, user);
+
+        // convert internal representation of rodatrip back to API
+        RoadtripGetDTO roadtripGetDTO = DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(roadtrip);
+
+        return roadtripGetDTO;
+    }
+
+    @PutMapping("/roadtrips/{roadtripId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public RoadtripGetDTO updateRoadtrip(@PathVariable Long roadtripId, @RequestHeader("Authorization") String token) {
 
         // Get user from token
         User user = userService.getUserByToken(token);

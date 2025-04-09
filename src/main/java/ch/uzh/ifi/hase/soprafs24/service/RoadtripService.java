@@ -112,4 +112,14 @@ public class RoadtripService {
         roadtripRepository.deleteById(roadtripId);
     }
 
+    public Roadtrip updateRoadtripById(Long roadtripId, Roadtrip roadtripUpdate) {
+
+        Roadtrip roadtripToBeUpdated = roadtripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        roadtripToBeUpdated.setName(roadtripUpdate.getName());
+        roadtripToBeUpdated.setDescription(roadtripUpdate.getDescription());
+
+        return roadtripRepository.save(roadtripToBeUpdated);
+    }
 }
