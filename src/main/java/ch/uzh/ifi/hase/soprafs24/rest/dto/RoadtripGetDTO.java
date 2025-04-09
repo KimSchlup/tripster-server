@@ -2,16 +2,16 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
 public class RoadtripGetDTO {
 
-  private Long id;
+  private Long roadtripId;
   private String name;
   private String description;
 
-  public Long getId() {
-    return id;
+  public Long getRoadtripId() {
+    return roadtripId;
   }
 
-  public void setId(Long id) {
-    this.id = id;
+  public void setRoadtripId(Long roadtripId) {
+    this.roadtripId = roadtripId;
   }
 
   public String getName() {

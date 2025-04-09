@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository("roadtripRepository")
 public interface RoadtripRepository extends JpaRepository<Roadtrip, Long> {
-  Optional<Roadtrip> findById(Long id);
+  Optional<Roadtrip> findById(Long roadtripId);
 
   List<Roadtrip> findByOwner(User owner);
 

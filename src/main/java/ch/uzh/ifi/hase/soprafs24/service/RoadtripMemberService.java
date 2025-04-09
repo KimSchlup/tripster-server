@@ -89,7 +89,7 @@ public class RoadtripMemberService {
 
         // Set user and roadtrip
         RoadtripMember newRoadtripMember = new RoadtripMember();
-        newRoadtripMember.setId(pk);
+        newRoadtripMember.setRoadtripMemberId(pk);
         newRoadtripMember.setUser(user);
         newRoadtripMember.setRoadtrip(roadtrip);
         newRoadtripMember.setInvitationStatus(InvitationStatus.PENDING);

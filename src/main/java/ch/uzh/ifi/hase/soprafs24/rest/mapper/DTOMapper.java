@@ -67,7 +67,7 @@ public interface DTOMapper {
   @Mapping(source = "description", target = "description")
   Roadtrip convertRoadtripPostDTOtoEntity(RoadtripPostDTO roadtripPostDTO);
 
-  @Mapping(source = "id", target = "id")
+  @Mapping(source = "roadtripId", target = "roadtripId")
   @Mapping(source = "name", target = "name")
   @Mapping(source = "description", target = "description")
   RoadtripGetDTO convertEntityToRoadtripGetDTO(Roadtrip roadtrip);
@@ -76,12 +76,12 @@ public interface DTOMapper {
   // If we do the lookup directly in the service we can use ignore = true
   @Mapping(target = "user", ignore = true)
   @Mapping(target = "roadtrip", ignore = true)
-  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "roadtripMemberId", ignore = true)
   @Mapping(target = "invitationStatus", ignore = true)
   RoadtripMember convertRoadtripMemberPostDTOtoEntity(RoadtripMemberPostDTO roadtripMemberPostDTO);
 
-  @Mapping(source = "id.userId", target = "userId")
-  @Mapping(source = "id.roadtripId", target = "roadtripId")
+  @Mapping(source = "roadtripMemberId.userId", target = "userId")
+  @Mapping(source = "roadtripMemberId.roadtripId", target = "roadtripId")
   @Mapping(source = "invitationStatus", target = "invitationStatus")
   RoadtripMemberGetDTO convertEntityToRoadtripMemberGetDTO(RoadtripMember roadtripMember);
 }

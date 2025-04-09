@@ -54,10 +54,10 @@ public class RoadtripRepositoryIntegrationTest {
     entityManager.flush();
 
     // when
-    Roadtrip found = roadtripRepository.findById(roadtrip.getId()).orElse(null);
+    Roadtrip found = roadtripRepository.findById(roadtrip.getRoadtripId()).orElse(null);
 
     // then
-    assertNotNull(found.getId());
+    assertNotNull(found.getRoadtripId());
     assertEquals(found.getName(), roadtrip.getName());
     assertEquals(found.getDescription(), roadtrip.getDescription());
   }

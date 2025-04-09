@@ -66,7 +66,7 @@ public class RoadtripControllerTest {
     testUser.setToken("1");
 
     Roadtrip roadtrip = new Roadtrip();
-    roadtrip.setId(1L);
+    roadtrip.setRoadtripId(1L);
     roadtrip.setName("Test User");
     roadtrip.setOwner(testUser);
     roadtrip.setDescription("Test Description");
@@ -87,7 +87,7 @@ public class RoadtripControllerTest {
     // then
     mockMvc.perform(postRequest)
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id", is(roadtrip.getId().intValue())))
+        .andExpect(jsonPath("$.roadtripId", is(roadtrip.getRoadtripId().intValue())))
         .andExpect(jsonPath("$.name", is(roadtrip.getName())))
         .andExpect(jsonPath("$.description", is(roadtrip.getDescription())));
   }
