@@ -70,7 +70,7 @@ public class UserService {
 
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setStatus(UserStatus.ONLINE);
     newUser.setCreationDate(LocalDate.now());
     checkIfUserExists(newUser);
     // saves the given entity but data is only persisted in the database once
@@ -91,6 +91,19 @@ public class UserService {
     System.out.println(token);
     return this.userRepository.findByToken(token);
   }
+
+public User updateUser(Long userId, User updatedUser) {
+  User user = this.userRepository.findById(userId)
+              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+    if (updatedUser.getUsername() != null) {
+        user.setUsername(updatedUser.getUsername());
+    }
+    
+  this.userRepository.save(user);
+    userRepository.flush();
+  return user;
+}
 
   /**
    * This is a helper method that will check the uniqueness criteria of the

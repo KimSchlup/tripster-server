@@ -62,6 +62,27 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }
 
+  @PutMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseBody
+  public void updateUser(@PathVariable Long userId, @RequestBody UserPostDTO userPostDTO, @RequestHeader("Authorization") String token) {
+
+    User authenticatedUser = userService.getUserByToken(token);
+
+      if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
+      }
+
+      // convert API user to internal representation
+      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+      // update user
+
+      User updatedUser = userService.updateUser(userId, userInput);
+      // convert internal representation of user back to API
+      return;
+  }
+  
+
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
@@ -87,7 +108,7 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetCredentials(loggedInUser);
   }
 
-  @PostMapping("/logout")
+  @PostMapping("auth/logout")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public void logoutUser(@RequestHeader("Authorization") String token) {
