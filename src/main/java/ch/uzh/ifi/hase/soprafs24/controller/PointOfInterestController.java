@@ -88,16 +88,19 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.PointOfInterestService;
 
@@ -134,6 +137,27 @@ public class PointOfInterestController {
         }
 
         return pointOfInterestGetDTOs;
+    }
+
+    @PutMapping("/roadtrips/{roadtripId}/pois/{poiId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void updatePointOfInterest(@RequestBody PointOfInterestPutDTO pointOfInterestPutDTO, @PathVariable Long roadtripId, @PathVariable Long poiId){
+        
+        PointOfInterest newPointOfInterest = DTOMapper.INSTANCE.convertPointOfInterestPutDTOToEntity(pointOfInterestPutDTO);
+        PointOfInterest oldPointOfInterest = pointOfInterestService.getPointOfInterestByID(roadtripId, poiId);
+        
+        pointOfInterestService.updatePointOfInterest(oldPointOfInterest, newPointOfInterest);
+        
+    }
+
+    @DeleteMapping("/roadtrips/{roadtripId}/pois/{poiId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void deletePointOfInterest(@PathVariable Long roadtripId, @PathVariable Long poiId){
+        
+        pointOfInterestService.deletePointOfInterest(poiId);
+        
     }
 
 }

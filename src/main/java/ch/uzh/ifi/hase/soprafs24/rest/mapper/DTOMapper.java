@@ -9,7 +9,6 @@ import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPutDTO;
-
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPostDTO;
@@ -163,6 +162,7 @@ public interface DTOMapper {
   PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   @Mapping(target = "poiId", ignore = true)
   @Mapping(target = "roadtrip", ignore = true)
@@ -183,4 +183,9 @@ public interface DTOMapper {
   PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
 
 >>>>>>> a35fb73 (first iteration of POI's, no tests yet and only POST and GET implemented)
+||||||| parent of 95ea4dc (added post, put and delete to POI's. Not yet including votes and comments)
+=======
+  PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
+
+>>>>>>> 95ea4dc (added post, put and delete to POI's. Not yet including votes and comments)
 }
