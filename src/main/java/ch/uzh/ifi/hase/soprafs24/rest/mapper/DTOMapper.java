@@ -161,4 +161,5 @@ public interface DTOMapper {
   
   PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
 
+
 }
