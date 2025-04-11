@@ -161,9 +161,15 @@ public interface DTOMapper {
   
   PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
 
+<<<<<<< HEAD
 
   @Mapping(target = "poiId", ignore = true)
   @Mapping(target = "roadtrip", ignore = true)
   @Mapping(target = "user", ignore = true)
   PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
+||||||| parent of b50f40e (added post, put and delete to POI's. Not yet including votes and comments)
+=======
+  PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
+
+>>>>>>> b50f40e (added post, put and delete to POI's. Not yet including votes and comments)
 }
