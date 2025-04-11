@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPostDTO;
@@ -151,4 +152,6 @@ public interface DTOMapper {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid GeoJSON format");
     }
   }
+  PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
+
 }
