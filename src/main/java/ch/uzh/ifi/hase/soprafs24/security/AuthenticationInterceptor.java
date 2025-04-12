@@ -3,7 +3,6 @@ package ch.uzh.ifi.hase.soprafs24.security;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -18,7 +17,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     private final UserRepository userRepository;
 
-    @Autowired
     public AuthenticationInterceptor(UserRepository userRepository) {
         this.userRepository = userRepository;
     }

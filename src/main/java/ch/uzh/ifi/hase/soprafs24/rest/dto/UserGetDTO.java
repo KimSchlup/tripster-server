@@ -1,7 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.UserPreferences;

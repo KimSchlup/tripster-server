@@ -2,17 +2,30 @@ package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
 
 /**
  * DTOMapper
@@ -65,8 +78,8 @@ public interface DTOMapper {
   // Roadtrip mappings
   @Mapping(source = "name", target = "name")
   @Mapping(source = "description", target = "description")
-  @Mapping(target = "owner", ignore=true)
-  @Mapping(target = "roadtripId", ignore=true)
+  @Mapping(target = "owner", ignore = true)
+  @Mapping(target = "roadtripId", ignore = true)
   Roadtrip convertRoadtripPostDTOtoEntity(RoadtripPostDTO roadtripPostDTO);
 
   @Mapping(source = "roadtripId", target = "roadtripId")
@@ -86,4 +99,54 @@ public interface DTOMapper {
   @Mapping(source = "roadtripMemberId.roadtripId", target = "roadtripId")
   @Mapping(source = "invitationStatus", target = "invitationStatus")
   RoadtripMemberGetDTO convertEntityToRoadtripMemberGetDTO(RoadtripMember roadtripMember);
+
+  // RoadtripSettings mappings
+  @Mapping(source = "roadtripSettingsId", target = "roadtripSettingsId")
+  @Mapping(source = "roadtrip.roadtripId", target = "roadtripId") // Map roadtripId from Roadtrip entity
+  @Mapping(source = "basemapType", target = "basemapType")
+  @Mapping(source = "decisionProcess", target = "decisionProcess")
+  @Mapping(source = "boundingBox", target = "boundingBox", qualifiedByName = "polygonToGeoJsonNode")
+  @Mapping(source = "startDate", target = "startDate")
+  @Mapping(source = "endDate", target = "endDate")
+  RoadtripSettingsGetDTO convertEntityToRoadtripSettingsGetDTO(RoadtripSettings roadtripSettings);
+
+  @Mapping(target = "roadtripSettingsId", ignore = true)
+  @Mapping(target = "roadtrip.roadtripId", ignore = true)
+  @Mapping(source = "basemapType", target = "basemapType")
+  @Mapping(source = "decisionProcess", target = "decisionProcess")
+  @Mapping(source = "boundingBox", target = "boundingBox", qualifiedByName = "mapGeoJsonToPolygon")
+  @Mapping(source = "startDate", target = "startDate")
+  @Mapping(source = "endDate", target = "endDate")
+  RoadtripSettings convertRoadtripSettingsPutDTOtoEntity(RoadtripSettingsPutDTO roadtripSettingsPutDTO);
+
+  public static final ObjectMapper objectMapper = new ObjectMapper();
+
+  @Named("polygonToGeoJsonNode")
+  public static JsonNode polygonToGeoJsonNode(Polygon polygon) {
+    try {
+      GeoJsonWriter writer = new GeoJsonWriter();
+      String geoJson = writer.write(polygon);
+      return new ObjectMapper().readTree(geoJson);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to convert Polygon to GeoJSON", e);
+    }
+  }
+
+  @Named("mapGeoJsonToPolygon")
+  public static Polygon mapGeoJsonToPolygon(JsonNode geoJsonNode) {
+    try {
+      // GeojsonReader expects a String
+      String geoJson = objectMapper.writeValueAsString(geoJsonNode);
+      GeoJsonReader reader = new GeoJsonReader();
+      Geometry geometry = reader.read(geoJson);
+
+      if (!(geometry instanceof Polygon)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided geometry is not a Polygon");
+      }
+
+      return (Polygon) geometry;
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid GeoJSON format");
+    }
+  }
 }
