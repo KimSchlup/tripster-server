@@ -39,14 +39,17 @@ public class RoadtripService {
     private final RoadtripRepository roadtripRepository;
     private final UserRepository userRepository;
     private final RoadtripMemberRepository roadtripMemberRepository;
+    private final RoadtripSettingsService roadtripSettingsService;
 
     private final Logger log = LoggerFactory.getLogger(RoadtripService.class);
 
     public RoadtripService(@Qualifier("roadtripRepository") RoadtripRepository roadtripRepository,
-            UserRepository userRepository, RoadtripMemberRepository roadtripMemberRepository) {
+            UserRepository userRepository, RoadtripMemberRepository roadtripMemberRepository,
+            RoadtripSettingsService roadtripSettingsService) {
         this.roadtripRepository = roadtripRepository;
         this.userRepository = userRepository;
         this.roadtripMemberRepository = roadtripMemberRepository;
+        this.roadtripSettingsService = roadtripSettingsService;
     }
 
     public List<Roadtrip> getRoadtrips(User user) {
@@ -90,6 +93,8 @@ public class RoadtripService {
         // flush() is called
         newRoadtrip.setOwner(userRepository.findByToken(token));
         newRoadtrip = roadtripRepository.save(newRoadtrip);
+        roadtripSettingsService.createRoadtripSettings(newRoadtrip);
+
         roadtripRepository.flush();
 
         log.debug("Created Information for Roadtrip: {}", newRoadtrip);
