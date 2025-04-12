@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,8 +30,7 @@ public class UserService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
-
-  @Autowired
+  
   public UserService(@Qualifier("userRepository") UserRepository userRepository) {
     this.userRepository = userRepository;
   }
@@ -92,7 +90,7 @@ public class UserService {
     return this.userRepository.findByToken(token);
   }
 
-public User updateUser(Long userId, User updatedUser) {
+public void updateUser(Long userId, User updatedUser) {
   User user = this.userRepository.findById(userId)
               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -117,7 +115,7 @@ public User updateUser(Long userId, User updatedUser) {
     
   this.userRepository.save(user);
     userRepository.flush();
-  return user;
+
 }
 
 public void deleteUser(Long userId) {
