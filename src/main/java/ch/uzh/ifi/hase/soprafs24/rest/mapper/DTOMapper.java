@@ -102,6 +102,7 @@ public interface DTOMapper {
   @Mapping(source = "roadtripMemberId.roadtripId", target = "roadtripId")
   @Mapping(source = "invitationStatus", target = "invitationStatus")
   RoadtripMemberGetDTO convertEntityToRoadtripMemberGetDTO(RoadtripMember roadtripMember);
+<<<<<<< HEAD
 
   // RoadtripSettings mappings
   @Mapping(source = "roadtripSettingsId", target = "roadtripSettingsId")
@@ -154,6 +155,10 @@ public interface DTOMapper {
   }
   PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
 
+||||||| parent of 41998a8 (minor change to DTO Mapper)
+=======
+  
+>>>>>>> 41998a8 (minor change to DTO Mapper)
   @Mapping(target = "poiId", ignore = true)
   @Mapping(target = "roadtrip", ignore = true)
   @Mapping(target = "user", ignore = true)
@@ -161,5 +166,14 @@ public interface DTOMapper {
   
   PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
 
+<<<<<<< HEAD
+||||||| parent of 41998a8 (minor change to DTO Mapper)
+  PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
+=======
+  @Mapping(target = "poiId", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
+>>>>>>> 41998a8 (minor change to DTO Mapper)
 
 }
