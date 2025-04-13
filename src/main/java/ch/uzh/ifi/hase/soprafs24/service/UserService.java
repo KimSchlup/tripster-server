@@ -70,6 +70,7 @@ public class UserService {
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.ONLINE);
+    newUser.setReceiveNotifications(true);
     newUser.setCreationDate(LocalDate.now());
     checkIfUserExists(newUser);
     // saves the given entity but data is only persisted in the database once
@@ -116,6 +117,12 @@ public void updateUser(Long userId, User updatedUser) {
   if (updatedUser.getPassword() != null) {
       user.setPassword(updatedUser.getPassword());
   }
+  if (updatedUser.getReceiveNotifications() != null) {
+      user.setReceiveNotifications(updatedUser.getReceiveNotifications());
+  }
+  if (updatedUser.getUserPreferences() != null) {
+    user.setUserPreferences(updatedUser.getUserPreferences());
+  }
 
   this.userRepository.save(user);
   userRepository.flush();
@@ -151,7 +158,7 @@ public void deleteUser(Long userId) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
     } 
     //check to ensure the username is not empty
-    if (userToBeCreated.getUsername() == null || userToBeCreated.getUsername().trim().isEmpty()) {
+    if (userToBeCreated.getUsername() != null && userToBeCreated.getUsername().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be empty");
     }
   }
