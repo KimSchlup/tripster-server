@@ -94,29 +94,31 @@ public class UserService {
 public void updateUser(Long userId, User updatedUser) {
   User user = this.userRepository.findById(userId)
               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+  
+  //check that username is valid input            
+  checkIfUserExists(updatedUser);
 
-    if (updatedUser.getUsername() != null) {
-        user.setUsername(updatedUser.getUsername());
-    }
-    if (updatedUser.getFirstName() != null) {
-      user.setFirstName(updatedUser.getFirstName());
-    }
-    if (updatedUser.getLastName() != null) {
-        user.setLastName(updatedUser.getLastName());
-    }
-    if (updatedUser.getPhoneNumber() != null) {
-        user.setPhoneNumber(updatedUser.getPhoneNumber());
-    }
-    if (updatedUser.getMail() != null) {
-        user.setMail(updatedUser.getMail());
-    }
-    if (updatedUser.getPassword() != null) {
-        user.setPassword(updatedUser.getPassword());
-    }
-    
+  if (updatedUser.getUsername() != null) {
+      user.setUsername(updatedUser.getUsername());
+  }
+  if (updatedUser.getFirstName() != null) {
+    user.setFirstName(updatedUser.getFirstName());
+  }
+  if (updatedUser.getLastName() != null) {
+      user.setLastName(updatedUser.getLastName());
+  }
+  if (updatedUser.getPhoneNumber() != null) {
+      user.setPhoneNumber(updatedUser.getPhoneNumber());
+  }
+  if (updatedUser.getMail() != null) {
+      user.setMail(updatedUser.getMail());
+  }
+  if (updatedUser.getPassword() != null) {
+      user.setPassword(updatedUser.getPassword());
+  }
+
   this.userRepository.save(user);
-    userRepository.flush();
-
+  userRepository.flush();
 }
 
 public void deleteUser(Long userId) {
@@ -148,5 +150,9 @@ public void deleteUser(Long userId) {
     if (userByUsername != null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
     } 
+    //check to ensure the username is not empty
+    if (userToBeCreated.getUsername() == null || userToBeCreated.getUsername().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be empty");
+    }
   }
 }
