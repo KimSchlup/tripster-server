@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -122,9 +123,13 @@ public void deleteUser(Long userId) {
   User user = this.userRepository.findById(userId)
               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-  this.userRepository.delete(user);
-  userRepository.flush();
-  return;
+  try {
+    this.userRepository.delete(user);
+    this.userRepository.flush();
+    } catch (DataIntegrityViolationException e) {
+    // Handle the foreign key constraint violation
+    throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete user. Please delete your roadtrips first.");
+  }
 }
 
   /**
