@@ -1,10 +1,12 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPostDTO;
