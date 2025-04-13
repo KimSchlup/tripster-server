@@ -39,6 +39,9 @@ public class Roadtrip implements Serializable {
   @OneToOne(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
   private RoadtripSettings roadtripSettings;  // Add this line
 
+  @OneToOne(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Checklist checklist;
+  
   public Long getRoadtripId() {
     return roadtripId;
   }
@@ -85,4 +88,12 @@ public class Roadtrip implements Serializable {
     return this.owner;
   }
 
+  public Checklist getChecklist() {
+    return checklist;
+  }
+
+  public void setChecklist(Checklist checklist) {
+      this.checklist = checklist;
+  }
+  
 }
