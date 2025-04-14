@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +25,7 @@ import ch.uzh.ifi.hase.soprafs24.service.PointOfInterestService;
 
 @RestController
 public class PointOfInterestController {
-    
+
     private final PointOfInterestService pointOfInterestService;
 
     PointOfInterestController(PointOfInterestService pointOfInterestService){
@@ -34,11 +35,9 @@ public class PointOfInterestController {
     @PostMapping("/roadtrips/{roadtripId}/pois")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public PointOfInterestGetDTO createPointOfInterest(@RequestBody PointOfInterestPostDTO pointOfInterestPostDTO, @PathVariable Long roadtripId) {
-        
+    public PointOfInterestGetDTO createPointOfInterest(@RequestHeader("Authorization") String token, @RequestBody PointOfInterestPostDTO pointOfInterestPostDTO, @PathVariable Long roadtripId) {
         PointOfInterest pointOfInterestInput = DTOMapper.INSTANCE.convertPointOfInterestPostDTOToEntity(pointOfInterestPostDTO);
-        PointOfInterest createdPointOfInterest = pointOfInterestService.createPointOfInterest(pointOfInterestInput, roadtripId);
-        System.out.println(createdPointOfInterest.getRoadtrip());
+        PointOfInterest createdPointOfInterest = pointOfInterestService.createPointOfInterest(pointOfInterestInput, roadtripId, token);
         return DTOMapper.INSTANCE.convertEntityToPointOfInterestGetDTO(createdPointOfInterest);
     }
     
