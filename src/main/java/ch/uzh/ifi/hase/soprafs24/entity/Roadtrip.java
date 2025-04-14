@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Every variable will be mapped into a database field with the @Column
@@ -20,29 +21,30 @@ public class Roadtrip implements Serializable {
 
   @Id
   @GeneratedValue
-  private Long id;
+  private Long roadtripId;
 
   @Column(nullable = false)
   private String name;
 
   @Column
   private String description;
-  /*
-   * @Column
-   * private TripProjectSettings tripProjectSettings;
-   * 
-   * @Column(nullable = false)
-   * private ArrayList<TripProjectMember> tripProjectMembers;
-   */
-  @Column
+
+  @ManyToOne
+  @JoinColumn(name = "owner_id", nullable = false)
   private User owner;
 
-  public Long getId() {
-    return id;
+  @OneToMany(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<RoadtripMember> roadtripMembers = new ArrayList<>();
+
+  @OneToOne(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
+  private RoadtripSettings roadtripSettings;  // Add this line
+
+  public Long getRoadtripId() {
+    return roadtripId;
   }
 
-  public void setId(Long id) {
-    this.id = id;
+  public void setRoadtripId(Long roadtripId) {
+    this.roadtripId = roadtripId;
   }
 
   public void setName(String name) {

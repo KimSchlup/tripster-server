@@ -1,6 +1,7 @@
 # https://cloud.google.com/appengine/docs/the-appengine-environments#comparing_high-level_features
 # https://cloud.google.com/appengine/docs/standard
 
+# This file is used to configure the Google App Engine Standard environment for Java 17.
 runtime: java17
 instance_class: F2
 

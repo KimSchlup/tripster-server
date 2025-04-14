@@ -62,114 +62,122 @@ public class User implements Serializable {
   private Boolean receiveNotifications;
 
   // One-to-Many relationship with UserEmergencyContact
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<UserEmergencyContact> userEmergencyContacts = new ArrayList<>();
+  // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
+  // true)
+  // private List<UserEmergencyContact> userEmergencyContacts = new ArrayList<>();
 
   // One-to-Many relationship with UserEmergencyInformation
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<UserEmergencyInformation> userEmergencyInformations = new ArrayList<>();
+  // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
+  // true)
+  // private List<UserEmergencyInformation> userEmergencyInformations = new
+  // ArrayList<>();
 
   // Optional One-to-One relationship with UserPreferences
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private UserPreferences userPreferences;
 
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<RoadtripMember> roadtripMemberships = new ArrayList<>();
+
   public Long getUserId() {
     return userId;
   }
+
   public void setUserId(Long userId) {
     this.userId = userId;
   }
-  public String getFirstName(){
+
+  public String getFirstName() {
     return firstName;
   }
-  public void setFirstName(String firstName){
+
+  public void setFirstName(String firstName) {
     this.firstName = firstName;
   }
-  public String getLastName(){
+
+  public String getLastName() {
     return lastName;
   }
-  public void setLastName(String lastName){
+
+  public void setLastName(String lastName) {
     this.lastName = lastName;
   }
-  public String getPhoneNumber(){
+
+  public String getPhoneNumber() {
     return phoneNumber;
   }
-  public void setPhoneNumber(String phoneNumber){
+
+  public void setPhoneNumber(String phoneNumber) {
     this.phoneNumber = phoneNumber;
   }
-  public String getMail(){
+
+  public String getMail() {
     return mail;
   }
-  public void setMail(String mail){
+
+  public void setMail(String mail) {
     this.mail = mail;
   }
+
   public String getUsername() {
     return username;
   }
+
   public void setUsername(String username) {
     this.username = username;
   }
-  public String getPassword(){
+
+  public String getPassword() {
     return password;
   }
-  public void setPassword(String password){
+
+  public void setPassword(String password) {
     this.password = password;
   }
+
   public String getToken() {
     return token;
   }
+
   public void setToken(String token) {
     this.token = token;
   }
+
   public UserStatus getStatus() {
     return status;
   }
+
   public void setStatus(UserStatus status) {
     this.status = status;
   }
-  public LocalDate getCreationDate(){
+
+  public LocalDate getCreationDate() {
     return creationDate;
   }
-  public void setCreationDate(LocalDate creationDate){
+
+  public void setCreationDate(LocalDate creationDate) {
     this.creationDate = creationDate;
   }
+
   // public String getProfilePictureUrl(){
-  //   return profilePictureUrl;
+  // return profilePictureUrl;
   // }
   // public void setProfilePictureUrl(String profilePictureUrl){
-  //   this.profilePictureUrl = profilePictureUrl;
+  // this.profilePictureUrl = profilePictureUrl;
   // }
-  public Boolean getReceiveNotifications(){
+  public Boolean getReceiveNotifications() {
     return this.receiveNotifications;
   }
-  public void setReceiveNotifications(Boolean receiveNotification){
+
+  public void setReceiveNotifications(Boolean receiveNotification) {
     this.receiveNotifications = receiveNotification;
   }
-  public UserPreferences getUserPreferences(){
+
+  public UserPreferences getUserPreferences() {
     return userPreferences;
   }
-  public void setUserPreferences(UserPreferences userPreferences){
+
+  public void setUserPreferences(UserPreferences userPreferences) {
     this.userPreferences = userPreferences;
   }
-
-   public List<UserEmergencyContact> getUserEmergencyContacts(){
-     return this.userEmergencyContacts;
-   }
-   public void setUserEmergencyContacts(UserEmergencyContact userEmergencyContact){
-     if(this.userEmergencyContacts == null){
-       this.userEmergencyContacts = new ArrayList<UserEmergencyContact>();
-     }
-     this.userEmergencyContacts.add(userEmergencyContact);
-   }
-
-   public List<UserEmergencyInformation> getUserEmergencyInformations(){
-    return this.userEmergencyInformations;
-   }
-   public void setUserEmergencyInformations(UserEmergencyInformation userEmergencyInformation){
-     if(this.userEmergencyInformations == null){
-      this.userEmergencyInformations = new ArrayList<UserEmergencyInformation>();
-     }
-     this.userEmergencyInformations.add(userEmergencyInformation);
-  }
-
 }

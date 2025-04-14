@@ -25,8 +25,10 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -104,6 +106,106 @@ public class UserControllerTest {
         .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
         .andExpect(jsonPath("$.username", is(user.getUsername())))
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
+  }
+
+  @Test
+  public void createUser_Username_taken() throws Exception {
+    // // create first user
+    // User user = new User();
+    // user.setUsername("testUsername");
+
+    // User user_2 = new User();
+    // user_2.setUsername("testUsername");
+
+    // UserPostDTO userPostDTO = new UserPostDTO();
+    // userPostDTO.setUsername("testUsername");
+
+    // UserPostDTO userPostDTO_2 = new UserPostDTO();
+    // userPostDTO.setUsername("testUsername");
+
+    // given(userService.createUser(Mockito.any())).willReturn(user);
+    // given(userService.createUser(Mockito.any())).willReturn(user_2);
+
+    // // when/then -> do the request + validate the result
+    // MockHttpServletRequestBuilder postRequest_1 = post("/users")
+    // .contentType(MediaType.APPLICATION_JSON)
+    // .content(asJsonString(userPostDTO));
+
+    // MockHttpServletRequestBuilder postRequest_2 = post("/users")
+    // .contentType(MediaType.APPLICATION_JSON)
+    // .content(asJsonString(userPostDTO_2));
+
+    // // then
+    // mockMvc.perform(postRequest_2)
+    // .andExpect(status().isConflict());
+
+    UserPostDTO userPostDTO_conflict = new UserPostDTO();
+    userPostDTO_conflict.setUsername("username");
+    userPostDTO_conflict.setPassword("password");
+
+    given(userService.createUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
+    // mock auth token
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+
+    MockHttpServletRequestBuilder postRequest_conflict = post("/users")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(asJsonString(userPostDTO_conflict));
+
+    mockMvc.perform(postRequest_conflict).andExpect(status().isConflict());
+
+  }
+
+  @Test
+  public void getUserById_UserExists() throws Exception {
+    // given
+    User user = new User();
+    user.setFirstName("Firstname");
+    user.setUsername("firstname@lastname");
+    user.setStatus(UserStatus.ONLINE);
+    user.setUserId(999L);
+
+    given(userService.getUserById(999L)).willReturn(user);
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+
+    // when
+    MockHttpServletRequestBuilder getRequest = get("/users/999")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token"); // Simulierte Authentifizierung
+
+    // then
+    mockMvc.perform(getRequest).andExpect(status().isOk())
+        .andExpect(jsonPath("$.userId", is(user.getUserId().intValue()))) // id als einzelnes Feld überprüfen
+        .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
+        .andExpect(jsonPath("$.username", is(user.getUsername())))
+        .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
+  }
+
+  @Test
+  public void updateUser_validInput_success() throws Exception {
+    // given
+    UserPostDTO userPostDTO = new UserPostDTO();
+
+    // and
+    User user = new User();
+    user.setFirstName("Firstname Lastname");
+    user.setUserId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
+
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+    doNothing().when(userService).updateUser(Mockito.anyLong(), Mockito.any(User.class));
+
+    // when
+    MockHttpServletRequestBuilder putRequest = put("/users/999")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token") // Simulierte Authentifizierung
+        .content(asJsonString(userPostDTO));
+
+    // then
+    mockMvc.perform(putRequest)
+        .andExpect(status().isNoContent()); // Erwartet 204 NO CONTENT
   }
 
   /**
