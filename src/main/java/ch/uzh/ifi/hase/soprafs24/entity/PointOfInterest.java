@@ -42,11 +42,11 @@ public class PointOfInterest implements Serializable{
     @Column(nullable = false)
     private Long creatorId;
 
-    @Column(nullable = false)
-    private AcceptanceStatus status;
+    @Column
+    private AcceptanceStatus status = AcceptanceStatus.PENDING;
 
-    @Column(nullable = false)
-    private Integer eligibleVoteCount;
+    @Column
+    private Integer eligibleVoteCount = 1;
 
     
     // Getters and Setters

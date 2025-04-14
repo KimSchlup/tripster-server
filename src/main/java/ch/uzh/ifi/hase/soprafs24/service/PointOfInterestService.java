@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.PointOfInterestRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,15 +27,20 @@ import java.util.Optional;
 @Transactional
 public class PointOfInterestService {
 
+    private final UserRepository userRepository;
+
     private final RoadtripRepository roadtripRepository;
 
     private final Logger log = LoggerFactory.getLogger(PointOfInterestService.class);
     private final PointOfInterestRepository pointOfInterestRepository;
 
     @Autowired
-    public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, RoadtripRepository roadtripRepository){
+    public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, 
+                                                                                RoadtripRepository roadtripRepository,
+                                                                                UserRepository userRepository){
         this.pointOfInterestRepository = pointOfInterestRepository;
         this.roadtripRepository = roadtripRepository;
+        this.userRepository = userRepository;
     }
 
     public List<PointOfInterest> getPointOfInterests(){
@@ -47,9 +54,13 @@ public class PointOfInterestService {
         return pois;
     }
 
-    public PointOfInterest createPointOfInterest(PointOfInterest newPointOfInterest, Long roadtripId){
+    public PointOfInterest createPointOfInterest(PointOfInterest newPointOfInterest, Long roadtripId, String token){
         
+        // set creatorId = userId
+        User creator = userRepository.findByToken(token);
+        newPointOfInterest.setCreatorId(creator.getUserId());
         
+        // set POI roadtrip to the roadtrip the POI has been created in
         Optional<Roadtrip> roadtrip = roadtripRepository.findById(roadtripId);
         newPointOfInterest.setRoadtrip(roadtrip.get());
 
