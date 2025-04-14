@@ -5,7 +5,6 @@ spring:
   config:
     activate:
       on-profile: prod
-    import: sm://PROD_DB_URL,sm://PROD_DB_USERNAME,sm://PROD_DB_PASSWORD
 
   datasource:
     url: ${PROD_DB_URL}
