@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPostDTO;
@@ -57,6 +60,22 @@ public class RoadtripMemberController {
 
         // convert internal representation of user back to API
         return DTOMapper.INSTANCE.convertEntityToRoadtripMemberGetDTO(createdRoadtripMember);
+    }
+
+    @GetMapping("/roadtrips/{roadtripId}/members")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<RoadtripMemberGetDTO> getRoadtripMembers(@PathVariable Long roadtripId) {
+        // Get all members of the roadtrip
+        List<RoadtripMember> roadtripMembers = roadtripMemberService.getRoadtripMembers(roadtripId);
+
+        // Convert each member to DTO
+        List<RoadtripMemberGetDTO> roadtripMemberGetDTOs = new ArrayList<>();
+        for (RoadtripMember roadtripMember : roadtripMembers) {
+            roadtripMemberGetDTOs.add(DTOMapper.INSTANCE.convertEntityToRoadtripMemberGetDTO(roadtripMember));
+        }
+
+        return roadtripMemberGetDTOs;
     }
 
     @DeleteMapping("/roadtrips/{roadtripId}/members/{userId}")
