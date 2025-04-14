@@ -1,15 +1,36 @@
 server:
   port: 8080
-
+---
 spring:
   config:
+    activate:
+      on-profile: prod
     import: optional:sm://prod-db-url,optional:sm://prod-db-username,optional:sm://prod-db-password
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:#{prod-db-url}}
+    url: ${prod-db-url}
     driver-class-name: org.postgresql.Driver
-    username: ${SPRING_DATASOURCE_USERNAME:#{prod-db-username}}
-    password: ${SPRING_DATASOURCE_PASSWORD:#{prod-db-password}}
+    username: ${prod-db-username}
+    password: ${prod-db-password}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+---
+spring:
+  config:
+    activate:
+      on-profile: dev,test
+  cloud:
+    gcp:
+      secretmanager:
+        enabled: false
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
   jpa:
     hibernate:

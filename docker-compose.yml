@@ -44,10 +44,10 @@ services:
     container_name: springboot_server
     restart: always
     environment:
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mapmates_dev
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: mapmates123
-      SPRING_PROFILES_ACTIVE: dev
     depends_on:
       - db
     ports:
@@ -55,7 +55,7 @@ services:
     volumes:
       - .:/app
       - ~/.gradle:/home/gradle/.gradle
-    command: ./gradlew bootRun --continuous --no-daemon
+    command: sh -c "./gradlew --stop && ./gradlew bootRun --continuous --no-daemon"
     profiles:
       - dev
 
@@ -66,17 +66,19 @@ services:
     container_name: springboot_test_server
     restart: "no"
     environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-test:5432/mapmates_dev
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: mapmates123
-      SPRING_PROFILES_ACTIVE: test
     depends_on:
       - db-test
     volumes:
       - .:/app
       - ~/.gradle:/home/gradle/.gradle
       - ./test-reports:/app/build/reports/tests/test
-    command: ./gradlew test --no-daemon
+    command: sh -c "./gradlew --stop && ./gradlew test --no-daemon"
+
     profiles:
       - test
 
