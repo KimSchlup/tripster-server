@@ -80,7 +80,6 @@ dependencies {
     implementation 'com.google.cloud:spring-cloud-gcp-starter-secretmanager'
 }
 
-spring-cloud-starter-config
 bootJar {
     archiveFileName = "${archiveBaseName.get()}.${archiveExtension.get()}"
 }
