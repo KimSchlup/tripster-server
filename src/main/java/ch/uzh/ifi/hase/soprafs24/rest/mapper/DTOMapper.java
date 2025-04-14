@@ -1,10 +1,14 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPostDTO;
@@ -15,6 +19,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -149,4 +154,50 @@ public interface DTOMapper {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid GeoJSON format");
     }
   }
+
+  @Mapping(target = "poiId", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(source = "creatorId", target = "creatorId")
+  @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "mapGeoJsonToPoint")
+  PointOfInterest convertPointOfInterestPostDTOToEntity(PointOfInterestPostDTO pointOfInterestPostDTO);
+  
+  @Mapping(source = "creatorId", target = "creatorId")
+  @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "pointToGeoJsonNode")
+  PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
+
+  @Mapping(target = "poiId", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(source = "creatorId", target = "creatorId")
+  @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "pointToGeoJsonNode")
+  PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
+
+  @Named("mapGeoJsonToPoint")
+  public static Point mapGeoJsonToPoint(JsonNode geoJsonNode) {
+    try {
+      // GeojsonReader expects a String
+      String geoJson = objectMapper.writeValueAsString(geoJsonNode);
+      GeoJsonReader reader = new GeoJsonReader();
+      Geometry geometry = reader.read(geoJson);
+
+      if (!(geometry instanceof Point)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Provided geometry is not a Point");
+      }
+
+      return (Point) geometry;
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid GeoJSON format");
+    }
+  }
+
+  @Named("pointToGeoJsonNode")
+  public static JsonNode pointToGeoJsonNode(Point point) {
+    try {
+      GeoJsonWriter writer = new GeoJsonWriter();
+      String geoJson = writer.write(point);
+      return new ObjectMapper().readTree(geoJson);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to convert Point to GeoJSON", e);
+    }
+  }
+
 }
