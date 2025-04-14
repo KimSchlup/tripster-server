@@ -5,13 +5,13 @@ spring:
   config:
     activate:
       on-profile: prod
-    import: optional:sm://prod-db-url,optional:sm://prod-db-username,optional:sm://prod-db-password
+    import: sm://PROD_DB_URL,sm://PROD_DB_USERNAME,sm://PROD_DB_PASSWORD
 
   datasource:
-    url: ${prod-db-url}
+    url: ${PROD_DB_URL}
     driver-class-name: org.postgresql.Driver
-    username: ${prod-db-username}
-    password: ${prod-db-password}
+    username: ${PROD_DB_USERNAME}
+    password: ${PROD_DB_PASSWORD}
 
   jpa:
     hibernate:
