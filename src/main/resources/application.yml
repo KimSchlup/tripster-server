@@ -5,12 +5,16 @@ spring:
   config:
     activate:
       on-profile: prod
+  cloud:
+    gcp:
+      secretmanager:
+        enabled: true
 
   datasource:
-    url: ${PROD_DB_URL}
+    url: "${sm://PROD_DB_URL"
     driver-class-name: org.postgresql.Driver
-    username: ${PROD_DB_USERNAME}
-    password: ${PROD_DB_PASSWORD}
+    username: "${sm://PROD_DB_USERNAME}"
+    password: "${sm://PROD_DB_PASSWORD}"
 
   jpa:
     hibernate:
