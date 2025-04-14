@@ -1,6 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
-import org.locationtech.jts.geom.Point;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.PoiCategory;
@@ -10,7 +10,7 @@ public class PointOfInterestGetDTO {
     
     private Long poiId;
     private String name;
-    private Point coordinate;
+    private JsonNode coordinate;
     private String description;
     private PoiCategory category;
     private Long creatorId;
@@ -38,11 +38,11 @@ public class PointOfInterestGetDTO {
     }
 
     // Getter and Setter for coordinate
-    public Point getCoordinate() {
+    public JsonNode getCoordinate() {
         return coordinate;
     }
 
-    public void setCoordinate(Point coordinate) {
+    public void setCoordinate(JsonNode coordinate) {
         this.coordinate = coordinate;
     }
 

@@ -1,13 +1,16 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
-import org.geolatte.geom.Point;
+
 import org.slf4j.Logger;
 
 import org.springframework.stereotype.Service;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
+import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.repository.PointOfInterestRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,29 +18,42 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
 @Transactional
 public class PointOfInterestService {
 
+    private final RoadtripRepository roadtripRepository;
+
     private final Logger log = LoggerFactory.getLogger(PointOfInterestService.class);
     private final PointOfInterestRepository pointOfInterestRepository;
 
     @Autowired
-    public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository){
+    public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, RoadtripRepository roadtripRepository){
         this.pointOfInterestRepository = pointOfInterestRepository;
+        this.roadtripRepository = roadtripRepository;
     }
 
     public List<PointOfInterest> getPointOfInterests(){
         return this.pointOfInterestRepository.findAll();
     }
 
-    public List<PointOfInterest> getPointOfInterestsByRoadTrip(Long roadtrip_id){
-        return this.pointOfInterestRepository.findByRoadtripId(roadtrip_id);
+    public List<PointOfInterest> getPointOfInterestsByRoadTrip(Long roadtripId){
+        System.out.println("looking for Pois for roadtrip: " + roadtripId);
+        List<PointOfInterest> pois = this.pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
+        
+        return pois;
     }
 
-    public PointOfInterest createPointOfInterest(PointOfInterest newPointOfInterest){
+    public PointOfInterest createPointOfInterest(PointOfInterest newPointOfInterest, Long roadtripId){
+        
+        
+        Optional<Roadtrip> roadtrip = roadtripRepository.findById(roadtripId);
+        newPointOfInterest.setRoadtrip(roadtrip.get());
+
+
         newPointOfInterest = pointOfInterestRepository.save(newPointOfInterest);
         pointOfInterestRepository.flush();
         log.debug("Created PointOfInterest with content: {}", newPointOfInterest);

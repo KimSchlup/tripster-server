@@ -31,28 +31,28 @@ public class PointOfInterestController {
         this.pointOfInterestService = pointOfInterestService;
     }
 
-    @PostMapping("/roadtrips/{roadtrips_id}/pois")
+    @PostMapping("/roadtrips/{roadtripId}/pois")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public PointOfInterestGetDTO createPointOfInterest(@RequestBody PointOfInterestPostDTO pointOfInterestPostDTO) {
+    public PointOfInterestGetDTO createPointOfInterest(@RequestBody PointOfInterestPostDTO pointOfInterestPostDTO, @PathVariable Long roadtripId) {
         
         PointOfInterest pointOfInterestInput = DTOMapper.INSTANCE.convertPointOfInterestPostDTOToEntity(pointOfInterestPostDTO);
-        PointOfInterest createdPointOfInterest = pointOfInterestService.createPointOfInterest(pointOfInterestInput);
+        PointOfInterest createdPointOfInterest = pointOfInterestService.createPointOfInterest(pointOfInterestInput, roadtripId);
+        System.out.println(createdPointOfInterest.getRoadtrip());
         return DTOMapper.INSTANCE.convertEntityToPointOfInterestGetDTO(createdPointOfInterest);
     }
     
-    @GetMapping("/roadtrips/{roadtrips_id}/pois")
+    @GetMapping("/roadtrips/{roadtripId}/pois")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<PointOfInterestGetDTO> getPointOfInterests(@PathVariable Long roadtrip_id) {
-
-        List<PointOfInterest> pointOfInterests = pointOfInterestService.getPointOfInterestsByRoadTrip(roadtrip_id);
+    public List<PointOfInterestGetDTO> getPointOfInterests(@PathVariable Long roadtripId) {
+        List<PointOfInterest> pointOfInterests = pointOfInterestService.getPointOfInterestsByRoadTrip(roadtripId);
         List<PointOfInterestGetDTO> pointOfInterestGetDTOs = new ArrayList<>();
 
         for (PointOfInterest pointOfInterest : pointOfInterests) {
             pointOfInterestGetDTOs.add(DTOMapper.INSTANCE.convertEntityToPointOfInterestGetDTO(pointOfInterest));
         }
-
+        
         return pointOfInterestGetDTOs;
     }
 

@@ -19,7 +19,7 @@ public interface PointOfInterestRepository extends JpaRepository<PointOfInterest
     List<PointOfInterest> findByCreatorId(Long creatorId);
 
     // Find all Poi's of a trip
-    List<PointOfInterest> findByRoadtripId(Long roadtripId);
+    List<PointOfInterest> findByRoadtrip_RoadtripId(Long roadtripId);
 
     // Find all Poi's by their name
     List<PointOfInterest> findByName(String name);

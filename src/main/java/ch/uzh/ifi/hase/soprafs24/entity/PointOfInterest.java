@@ -102,7 +102,7 @@ public class PointOfInterest implements Serializable{
         return creatorId;
     }
 
-    public void setUser(Long creatorId) {
+    public void setCreatorId(Long creatorId) {
         this.creatorId = creatorId;
     }
 
