@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import org.slf4j.LoggerFactory;
 
+import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
+import ch.uzh.ifi.hase.soprafs24.constant.PoiPriority;
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
@@ -64,6 +66,19 @@ public class PointOfInterestService {
         Optional<Roadtrip> roadtrip = roadtripRepository.findById(roadtripId);
         newPointOfInterest.setRoadtrip(roadtrip.get());
 
+        // default value for eligibleVoteCount is set to 1 since there is at least one person anyway
+        if(newPointOfInterest.getEligibleVoteCount()==null){
+            newPointOfInterest.setEligibleVoteCount(1);
+        }
+        // default status is set to pending
+        if(newPointOfInterest.getStatus()== null){
+            newPointOfInterest.setStatus(AcceptanceStatus.PENDING);
+        }
+        // default prio set to low since it can't be that high if one forgets to set is...
+        if(newPointOfInterest.getPriority()==null){
+            newPointOfInterest.setPriority(PoiPriority.LOW);
+        }
+
 
         newPointOfInterest = pointOfInterestRepository.save(newPointOfInterest);
         pointOfInterestRepository.flush();
@@ -77,7 +92,6 @@ public class PointOfInterestService {
         for(PointOfInterest curr : allPois){
             if( poiId == curr.getPoiId()){
                 poi = curr;
-                log.debug("PointOfInterest with id: "+ poiId + " in roadtrip: "+roadtripId + " found." );
                 return poi;
             }
         }
