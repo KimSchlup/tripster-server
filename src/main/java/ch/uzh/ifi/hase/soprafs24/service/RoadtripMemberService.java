@@ -50,6 +50,15 @@ public class RoadtripMemberService {
         this.roadtripRepository = roadtripRepository;
     }
 
+    public List<RoadtripMember> getRoadtripMembers(Long roadtripId) {
+        // verify roadtrip exists
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        // get all members of the roadtrip
+        return roadtripMemberRepository.findByRoadtrip(roadtrip);
+    }
+
     public RoadtripMember createRoadtripMember(Long roadtripId, User invitingUser, Long userId) {
         // verify roadtrip exists
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
