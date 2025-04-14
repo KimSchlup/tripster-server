@@ -34,9 +34,6 @@ jobs:
     # Setup environment variables so application.yml can setup the datasource
     env:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://${{ secrets.PROD_DB_HOST }}:${{ secrets.PROD_DB_PORT }}/${{ secrets.PROD_DB_NAME }}
-      SPRING_DATASOURCE_USERNAME: ${{ secrets.PROD_DB_USERNAME }}
-      SPRING_DATASOURCE_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
 
     # needs: test
 
