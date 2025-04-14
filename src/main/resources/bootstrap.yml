@@ -1,3 +1,5 @@
 spring:
-  config:
-    import: "sm://PROD_DB_URL,sm://PROD_DB_USERNAME,sm://PROD_DB_PASSWORD"
+  cloud:
+    gcp:
+      secretmanager:
+        project-id: sopra-fs25-group-08-server
