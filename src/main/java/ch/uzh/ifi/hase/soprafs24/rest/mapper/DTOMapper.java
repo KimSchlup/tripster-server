@@ -18,6 +18,12 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
+import ch.uzh.ifi.hase.soprafs24.entity.ChecklistElement;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistPostDTO;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
@@ -251,4 +257,33 @@ public interface DTOMapper {
     }
   }
 
+
+  // ChecklistElement mappings
+  @Mapping(source = "checklistElementId", target = "checklistElementId")
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "isCompleted", target = "isCompleted")
+  @Mapping(source = "assignedUser.id", target = "assignedUserId")
+  @Mapping(source = "priority", target = "priority")
+  @Mapping(source = "category", target = "category")
+  ChecklistElementGetDTO convertEntityToChecklistElementGetDTO(ChecklistElement checklistElement);
+
+  @Mapping(target = "checklistElementId", ignore = true)
+  @Mapping(target = "checklist", ignore = true)
+  @Mapping(target = "assignedUser", ignore = true)
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "isCompleted", target = "isCompleted")
+  @Mapping(source = "assignedUserId", target = "assignedUser.id")
+  @Mapping(source = "priority", target = "priority")
+  @Mapping(source = "category", target = "category")
+  ChecklistElement convertChecklistElementPostDTOToEntity(ChecklistElementPostDTO postDTO);
+
+  // Checklist mappings
+  @Mapping(source = "roadtripId", target = "roadtripId")
+  @Mapping(source = "checklistElements", target = "checklistElements")
+  ChecklistGetDTO convertEntityToChecklistGetDTO(Checklist checklist);
+
+  @Mapping(target = "roadtripId", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(source = "checklistElements", target = "checklistElements")
+  Checklist convertChecklistPostDTOToEntity(ChecklistPostDTO postDTO);
 }
