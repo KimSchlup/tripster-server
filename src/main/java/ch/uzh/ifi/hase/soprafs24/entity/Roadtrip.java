@@ -36,6 +36,9 @@ public class Roadtrip implements Serializable {
   @OneToMany(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<RoadtripMember> roadtripMembers = new ArrayList<>();
 
+  @OneToOne(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
+  private RoadtripSettings roadtripSettings;  // Add this line
+
   public Long getRoadtripId() {
     return roadtripId;
   }

@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
     private final UserRepository userRepository;
-    
+
     public AuthenticationInterceptor(UserRepository userRepository) {
         this.userRepository = userRepository;
     }

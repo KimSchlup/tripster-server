@@ -58,6 +58,11 @@ public class RoadtripController {
         return DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(createdRoadtrip);
     }
 
+    /**
+     * GET /roadtrips a user is owner of or has an accepted or pending invitation
+     * 
+     * @return List of RoadtripGetDTO
+     */
     @GetMapping("/roadtrips")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -78,6 +83,12 @@ public class RoadtripController {
         return roadtripGetDTOs;
     }
 
+    /**
+     * GET /roadtrips/{roadtripId} a user is owner of or has an accepted
+     * invitation
+     * 
+     * @return RoadtripGetDTO
+     */
     @GetMapping("/roadtrips/{roadtripId}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
