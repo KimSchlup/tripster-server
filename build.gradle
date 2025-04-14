@@ -74,7 +74,7 @@ dependencies {
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 
     // spring-cloud-starter-config
-    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config:4.2.2'
 
     // Google Cloud Secret Manager Starter (version comes from the BOM above)
     implementation 'com.google.cloud:spring-cloud-gcp-starter-secretmanager'
