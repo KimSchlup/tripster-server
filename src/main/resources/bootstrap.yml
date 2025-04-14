@@ -1,5 +1,0 @@
-spring:
-  cloud:
-    gcp:
-      secretmanager:
-        project-id: sopra-fs25-group-08-server
