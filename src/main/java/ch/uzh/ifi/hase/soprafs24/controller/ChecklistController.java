@@ -21,6 +21,8 @@ import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
 import ch.uzh.ifi.hase.soprafs24.entity.ChecklistElement;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
@@ -50,15 +52,19 @@ public class ChecklistController{
         return DTOMapper.INSTANCE.convertEntityToChecklistGetDTO(checklist);
     }
     
+    //Post a new checklist element
+    @PostMapping("/{roadtripId}/checklist")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public ChecklistElementGetDTO addChecklistElement(@PathVariable Long roadtripId, @RequestBody ChecklistElementPostDTO checklistElementPostDTO) {
 
-    // @PostMapping("/{roadtripId}/checklist")
-    // @ResponseStatus(HttpStatus.CREATED)
-    // @ResponseBody
-    // public ChecklistGetDTO createEmptyChecklist(@PathVariable Long roadtripId) {
-    //     // Create an empty checklist
-    //     Checklist createdChecklist = checklistService.createEmptyChecklist(roadtripId);
+        // Add checklist element to the existing checklist
+        ChecklistElement element = DTOMapper.INSTANCE.convertChecklistElementPostDTOToEntity(checklistElementPostDTO);
+        ChecklistElement createdElement = checklistService.addChecklistElement(roadtripId, element);
 
-    //     // Convert to API representation
-    //     return DTOMapper.INSTANCE.convertEntityToChecklistGetDTO(createdChecklist);
-    // }
+        // Convert to API representation
+        return DTOMapper.INSTANCE.convertEntityToChecklistElementGetDTO(createdElement);
+    }
+
+    //Update a checklist element
 }

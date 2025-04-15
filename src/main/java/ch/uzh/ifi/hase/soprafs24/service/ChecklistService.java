@@ -18,6 +18,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
 import ch.uzh.ifi.hase.soprafs24.entity.ChecklistElement;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.repository.ChecklistRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.ChecklistElementRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementPostDTO;
@@ -35,17 +36,57 @@ public class ChecklistService {
   private final ChecklistRepository checklistRepository;
   private final RoadtripRepository roadtripRepository;
   private final UserRepository userRepository;
+  private final ChecklistElementRepository checklistElementRepository;
+  private static final Logger log = LoggerFactory.getLogger(ChecklistService.class);
 
   @Autowired
-  public ChecklistService(ChecklistRepository checklistRepository, RoadtripRepository roadtripRepository, UserRepository userRepository) {
+  public ChecklistService(ChecklistRepository checklistRepository, RoadtripRepository roadtripRepository, UserRepository userRepository, ChecklistElementRepository checklistElementRepository) {
       this.checklistRepository = checklistRepository;
       this.roadtripRepository = roadtripRepository;
       this.userRepository = userRepository;
+      this.checklistElementRepository = checklistElementRepository;
   }
 
   public Checklist getChecklistByRoadtripId(Long roadtripId) {
     return checklistRepository.findByRoadtripId(roadtripId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Checklist not found for this roadtrip"));
+}
+
+public ChecklistElement addChecklistElement(Long roadtripId, ChecklistElement element) {
+    // Retrieve the Checklist entity associated with the roadtrip
+    Checklist checklist = checklistRepository.findByRoadtripId(roadtripId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Checklist not found for this roadtrip"));
+
+    // Set the checklist for the element
+    element.setChecklist(checklist);
+    System.out.println(element.getAssignedUser().getUsername());
+
+    // Check if assignedUser is provided and valid
+    if (element.getAssignedUser() != null && element.getAssignedUser().getUsername() != null) {
+        String assignedUsername = element.getAssignedUser().getUsername();
+        System.out.println("Assigned User: " + assignedUsername); // Use System.out.println for debugging
+
+        // Retrieve userId by username
+        Long userId = userRepository.findIdByUsername(assignedUsername)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // Retrieve the User entity using userId
+        User assignedUser = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // Ensure the User entity is managed
+        assignedUser = userRepository.save(assignedUser);
+
+        element.setAssignedUser(assignedUser);
+        System.out.println("Assigned User set: " + assignedUser.getUsername()); // Use System.out.println for debugging
+    } else {
+        System.out.println("No assigned user provided"); // Use System.out.println for debugging
+        element.setAssignedUser(null); // Ensure assignedUser is null if not provided
+    }
+
+    // Save the checklist element
+    return checklistElementRepository.save(element);
+    
 }
 
     // public Checklist createChecklist(Long roadtripId, Checklist newChecklist) {

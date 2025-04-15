@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 public interface ChecklistElementRepository extends JpaRepository<ChecklistElement, Long> {
-    public List<ChecklistElement> getChecklistElementsByUsername(String username) {
-        return checklistElementRepository.findByAssignedUserUsername(username);
-    }
+    // public List<ChecklistElement> getChecklistElementsByUsername(String username) {
+    //     return checklistElementRepository.findByAssignedUserUsername(username);
+    // }
 }
