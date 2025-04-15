@@ -51,7 +51,12 @@ jobs:
           echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/mapmates_dev" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_USERNAME=postgres" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_PASSWORD=mapmates123" >> $GITHUB_ENV
-          echo "SPRING_PROFILES_ACTIVE=dev" >> $GITHUB_ENV
+          echo "SPRING_PROFILES_ACTIVE=test" >> $GITHUB_ENV
+
+      - name: Set up Google Cloud credentials
+        run: |
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > /tmp/key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json" >> $GITHUB_ENV
 
       - name: Run tests
         run: ./gradlew test

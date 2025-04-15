@@ -21,6 +21,15 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
+      - name: Set environment variables
+        run: |
+          echo "SPRING_PROFILES_ACTIVE=test" >> $GITHUB_ENV
+
+      - name: Set up Google Cloud credentials
+        run: |
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > /tmp/key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json" >> $GITHUB_ENV
+
       - name: Test and analyze
         run: ./gradlew test jacocoTestReport sonar
         env:
@@ -51,6 +60,7 @@ jobs:
           deliverables: app.yaml
           version: v1
           credentials: ${{ secrets.GCP_SERVICE_CREDENTIALS }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Test
         run: curl "${{ steps.deploy.outputs.url }}"
