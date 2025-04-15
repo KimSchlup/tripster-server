@@ -128,6 +128,9 @@ public interface DTOMapper {
 
   @Named("polygonToGeoJsonNode")
   public static JsonNode polygonToGeoJsonNode(Polygon polygon) {
+    if (polygon == null) {
+      return null; // Return null if the input polygon is null
+    }
     try {
       GeoJsonWriter writer = new GeoJsonWriter();
       String geoJson = writer.write(polygon);
@@ -139,6 +142,9 @@ public interface DTOMapper {
 
   @Named("mapGeoJsonToPolygon")
   public static Polygon mapGeoJsonToPolygon(JsonNode geoJsonNode) {
+    if (geoJsonNode == null) {
+      return null; // Return null if the input JsonNode is null
+    }
     try {
       // GeojsonReader expects a String
       String geoJson = objectMapper.writeValueAsString(geoJsonNode);
@@ -160,7 +166,7 @@ public interface DTOMapper {
   @Mapping(source = "creatorId", target = "creatorId")
   @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "mapGeoJsonToPoint")
   PointOfInterest convertPointOfInterestPostDTOToEntity(PointOfInterestPostDTO pointOfInterestPostDTO);
-  
+
   @Mapping(source = "creatorId", target = "creatorId")
   @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "pointToGeoJsonNode")
   PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
@@ -173,6 +179,9 @@ public interface DTOMapper {
 
   @Named("mapGeoJsonToPoint")
   public static Point mapGeoJsonToPoint(JsonNode geoJsonNode) {
+    if (geoJsonNode == null) {
+      return null; // Return null if the input JsonNode is null
+    }
     try {
       // GeojsonReader expects a String
       String geoJson = objectMapper.writeValueAsString(geoJsonNode);
@@ -191,6 +200,9 @@ public interface DTOMapper {
 
   @Named("pointToGeoJsonNode")
   public static JsonNode pointToGeoJsonNode(Point point) {
+    if (point == null) {
+      return null; // Return null if the input point is null
+    }
     try {
       GeoJsonWriter writer = new GeoJsonWriter();
       String geoJson = writer.write(point);
