@@ -7,7 +7,7 @@ public class ChecklistElementGetDTO {
     private Long checklistElementId;
     private String name;
     private Boolean isCompleted;
-    private Long assignedUserId; // Assuming you only send the ID
+    private String assignedUser; // Assuming you only send the ID
     private Priority priority;
     private ChecklistCategory category;
 
@@ -36,12 +36,12 @@ public class ChecklistElementGetDTO {
         this.isCompleted = isCompleted;
     }
 
-    public Long getAssignedUserId() {
-        return assignedUserId;
+    public String getAssignedUser() {
+        return assignedUser;
     }
 
-    public void setAssignedUserId(Long assignedUserId) {
-        this.assignedUserId = assignedUserId;
+    public void setAssignedUser(String assignedUsername) {
+        this.assignedUser = assignedUsername;
     }
 
     public Priority getPriority() {

@@ -28,7 +28,7 @@ public class ChecklistElement implements Serializable {
     private Checklist checklist;
 
     @ManyToOne
-    @JoinColumn(name = "assigned_user_id", nullable = false)
+    @JoinColumn(name = "assigned_user_id", nullable = true)
     private User assignedUser;
 
     @Column(nullable = false)

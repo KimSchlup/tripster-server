@@ -6,7 +6,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.ChecklistCategory;
 public class ChecklistElementPostDTO {
     private String name;
     private Boolean isCompleted;
-    private Long assignedUserId;
+    private String assignedUser;
     private Priority priority;
     private ChecklistCategory category;
 
@@ -27,12 +27,12 @@ public class ChecklistElementPostDTO {
         this.isCompleted = isCompleted;
     }
 
-    public Long getAssignedUserId() {
-        return assignedUserId;
+    public String getAssignedUser() {
+        return assignedUser;
     }
 
-    public void setAssignedUserId(Long assignedUserId) {
-        this.assignedUserId = assignedUserId;
+    public void setAssignedUser(String assignedUsername) {
+        this.assignedUser = assignedUsername;
     }
 
     public Priority getPriority() {

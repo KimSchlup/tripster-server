@@ -262,7 +262,7 @@ public interface DTOMapper {
   @Mapping(source = "checklistElementId", target = "checklistElementId")
   @Mapping(source = "name", target = "name")
   @Mapping(source = "isCompleted", target = "isCompleted")
-  @Mapping(source = "assignedUser.id", target = "assignedUserId")
+  @Mapping(source = "assignedUser.username", target = "assignedUser")
   @Mapping(source = "priority", target = "priority")
   @Mapping(source = "category", target = "category")
   ChecklistElementGetDTO convertEntityToChecklistElementGetDTO(ChecklistElement checklistElement);
@@ -272,7 +272,7 @@ public interface DTOMapper {
   @Mapping(target = "assignedUser", ignore = true)
   @Mapping(source = "name", target = "name")
   @Mapping(source = "isCompleted", target = "isCompleted")
-  @Mapping(source = "assignedUserId", target = "assignedUser.id")
+  @Mapping(source = "assignedUser", target = "assignedUser.username")
   @Mapping(source = "priority", target = "priority")
   @Mapping(source = "category", target = "category")
   ChecklistElement convertChecklistElementPostDTOToEntity(ChecklistElementPostDTO postDTO);
