@@ -19,6 +19,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPutDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.VotePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.PointOfInterestService;
 
@@ -75,5 +76,21 @@ public class PointOfInterestController {
         pointOfInterestService.deletePointOfInterest(poiId);
         
     }
+
+    @PutMapping("/roadtrips/{roadtripId}/pois/{poiId}/votes")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void castVote(@PathVariable Long roadtripId, @PathVariable Long poiId, @RequestHeader("Authorization") String token, @RequestBody VotePutDTO votePutDTO){
+        String vote = votePutDTO.getVote();
+        pointOfInterestService.castVote(token, roadtripId, poiId, vote);
+    }
+
+    @DeleteMapping("/roadtrips/{roadtripId}/pois/{poiId}/votes")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void deleteVote(@PathVariable Long roadtripId, @PathVariable Long poiId, @RequestHeader("Authorization") String token){
+        pointOfInterestService.deleteVote(token,roadtripId,poiId);
+    }
+
 
 }

@@ -163,6 +163,8 @@ public interface DTOMapper {
 
   @Mapping(target = "poiId", ignore = true)
   @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(target = "upvotes", ignore = true)
+  @Mapping(target = "downvotes", ignore = true)
   @Mapping(source = "creatorId", target = "creatorId")
   @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "mapGeoJsonToPoint")
   PointOfInterest convertPointOfInterestPostDTOToEntity(PointOfInterestPostDTO pointOfInterestPostDTO);
@@ -173,6 +175,8 @@ public interface DTOMapper {
 
   @Mapping(target = "poiId", ignore = true)
   @Mapping(target = "roadtrip", ignore = true)
+  @Mapping(target = "upvotes", ignore = true)
+  @Mapping(target = "downvotes", ignore = true)
   @Mapping(source = "creatorId", target = "creatorId")
   @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "pointToGeoJsonNode")
   PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
