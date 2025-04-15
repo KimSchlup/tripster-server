@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+import java.util.ArrayList;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
@@ -17,6 +19,8 @@ public class PointOfInterestGetDTO {
     private AcceptanceStatus status;
     private Integer eligibleVoteCount;
     private PoiPriority priority;
+    private ArrayList<Long> upvotes;
+    private ArrayList<Long> downvotes;
 
 
     // Getter and Setter for poiId
@@ -98,5 +102,24 @@ public class PointOfInterestGetDTO {
     public void setPriority(PoiPriority priority) {
         this.priority = priority;
     }
+
+    public ArrayList<Long> getUpvotes() {
+        return upvotes;
+    }
+
+    // Setter for upvotes
+    public void setUpvotes(ArrayList<Long> upvotes) {
+        this.upvotes = upvotes;
+    }
+
+    // Getter for downvotes
+    public ArrayList<Long> getDownvotes() {
+        return downvotes;
+    }
+
+    // Setter for downvotes
+    public void setDownvotes(ArrayList<Long> downvotes) {
+        this.downvotes = downvotes;
+    } 
 
 }
