@@ -6,6 +6,7 @@ public class RoadtripMemberGetDTO {
     private Long userId;
     private Long roadtripId;
     private InvitationStatus invitationStatus;
+    private String username;
 
     public Long getUserId() {
         return userId;
@@ -29,5 +30,13 @@ public class RoadtripMemberGetDTO {
 
     public void setInvitationStatus(InvitationStatus invitationStatus) {
         this.invitationStatus = invitationStatus;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

@@ -103,6 +103,7 @@ public interface DTOMapper {
   @Mapping(source = "roadtripMemberId.userId", target = "userId")
   @Mapping(source = "roadtripMemberId.roadtripId", target = "roadtripId")
   @Mapping(source = "invitationStatus", target = "invitationStatus")
+  @Mapping(source = "user.username", target = "username")
   RoadtripMemberGetDTO convertEntityToRoadtripMemberGetDTO(RoadtripMember roadtripMember);
 
   // RoadtripSettings mappings
