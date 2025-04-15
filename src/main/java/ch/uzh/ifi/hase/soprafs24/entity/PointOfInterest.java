@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import org.locationtech.jts.geom.Point;
 
@@ -47,7 +48,12 @@ public class PointOfInterest implements Serializable{
 
     @Column
     private Integer eligibleVoteCount;
+    
+    @Column
+    private ArrayList<Long> upvotes;
 
+    @Column
+    private ArrayList<Long> downvotes;
     
     // Getters and Setters
     public Long getPoiId() {
@@ -129,5 +135,26 @@ public class PointOfInterest implements Serializable{
     public void setPriority(PoiPriority priority) {
         this.priority = priority;
     }
+
+
+    public ArrayList<Long> getUpvotes() {
+            return upvotes;
+        }
+    
+        // Setter for upvotes
+        public void setUpvotes(ArrayList<Long> upvotes) {
+            this.upvotes = upvotes;
+        }
+    
+        // Getter for downvotes
+        public ArrayList<Long> getDownvotes() {
+            return downvotes;
+        }
+    
+        // Setter for downvotes
+        public void setDownvotes(ArrayList<Long> downvotes) {
+            this.downvotes = downvotes;
+        } 
+    
 
 }

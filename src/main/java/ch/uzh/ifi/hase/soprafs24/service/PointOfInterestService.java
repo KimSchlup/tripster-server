@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +51,6 @@ public class PointOfInterestService {
     }
 
     public List<PointOfInterest> getPointOfInterestsByRoadTrip(Long roadtripId){
-        System.out.println("looking for Pois for roadtrip: " + roadtripId);
         List<PointOfInterest> pois = this.pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
         
         return pois;
@@ -131,5 +131,78 @@ public class PointOfInterestService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PointOfInterest not found");
         }
         pointOfInterestRepository.deleteById(poiId);
+    }
+
+    public void castVote(String token, Long roadtripId, Long poiId, String vote) {
+        if(!(vote.equals("upvote") || vote.equals("downvote"))){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Casted vote does not match requirement: "+ vote);
+        }
+
+        List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
+        PointOfInterest poi = new PointOfInterest();
+        User user = userRepository.findByToken(token);
+        Long userId = user.getUserId();
+        for(PointOfInterest temp : pois){
+            if(temp.getPoiId() == poiId){
+                poi = temp;
+                break;
+            }
+        }
+
+        if(poi.getUpvotes()== null){
+            poi.setUpvotes(new ArrayList<Long>());
+        }
+        if(poi.getDownvotes()== null){
+            poi.setDownvotes(new ArrayList<Long>());
+        }
+
+        ArrayList<Long> downvotes = poi.getDownvotes();
+        ArrayList<Long> upvotes = poi.getUpvotes();
+
+        if(vote.equals("upvote")){
+            System.out.println("upvote detected");
+            if(downvotes.contains(userId)){
+                downvotes.remove(userId);
+            }
+            if(!(upvotes.contains(userId))){
+                upvotes.add(userId);
+                poi.setUpvotes(upvotes);
+            }
+        }else if(vote.equals("downvote")){
+            System.out.println("downvote detected");
+            if(upvotes.contains(userId)){
+                upvotes.remove(userId);
+            }
+            if(!(downvotes.contains(userId))){
+                downvotes.add(userId);
+                poi.setDownvotes(downvotes);
+            }
+        }
+
+    }
+
+    public void deleteVote(String token, Long roadtripId, Long poiId) {
+        List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
+        PointOfInterest poi = new PointOfInterest();
+        User user = userRepository.findByToken(token);
+
+        for(PointOfInterest temp : pois){
+            if(temp.getPoiId() == poiId){
+                poi = temp;
+                break;
+            }
+        }
+        ArrayList<Long> upvotes = poi.getUpvotes();
+        ArrayList<Long> downvotes = poi.getDownvotes();
+
+        if(upvotes.contains(user.getUserId())){
+               upvotes.remove(user.getUserId());
+               poi.setUpvotes(upvotes);
+        }
+        if(downvotes.contains(user.getUserId())){
+               downvotes.remove(user.getUserId());
+               poi.setDownvotes(downvotes);
+        }
+
     }
 }
