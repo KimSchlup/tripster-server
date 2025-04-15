@@ -40,7 +40,7 @@ import java.util.List;
  * This only tests if the RoadtripController itself works.
  */
 @WebMvcTest(RoadtripController.class)
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class RoadtripControllerTest {
 
   @Autowired
