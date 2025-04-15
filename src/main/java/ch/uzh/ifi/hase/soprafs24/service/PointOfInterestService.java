@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
-
 import org.slf4j.Logger;
 
 import org.springframework.stereotype.Service;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 @Transactional
 public class PointOfInterestService {
@@ -38,47 +36,49 @@ public class PointOfInterestService {
     private final PointOfInterestRepository pointOfInterestRepository;
 
     @Autowired
-    public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, 
-                                                                                RoadtripRepository roadtripRepository,
-                                                                                UserRepository userRepository){
+    public PointOfInterestService(
+            @Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository,
+            RoadtripRepository roadtripRepository,
+            UserRepository userRepository) {
         this.pointOfInterestRepository = pointOfInterestRepository;
         this.roadtripRepository = roadtripRepository;
         this.userRepository = userRepository;
     }
 
-    public List<PointOfInterest> getPointOfInterests(){
+    public List<PointOfInterest> getPointOfInterests() {
         return this.pointOfInterestRepository.findAll();
     }
 
     public List<PointOfInterest> getPointOfInterestsByRoadTrip(Long roadtripId){
         List<PointOfInterest> pois = this.pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
-        
+
         return pois;
     }
 
-    public PointOfInterest createPointOfInterest(PointOfInterest newPointOfInterest, Long roadtripId, String token){
-        
+    public PointOfInterest createPointOfInterest(PointOfInterest newPointOfInterest, Long roadtripId, String token) {
+
         // set creatorId = userId
         User creator = userRepository.findByToken(token);
         newPointOfInterest.setCreatorId(creator.getUserId());
-        
+
         // set POI roadtrip to the roadtrip the POI has been created in
         Optional<Roadtrip> roadtrip = roadtripRepository.findById(roadtripId);
         newPointOfInterest.setRoadtrip(roadtrip.get());
 
-        // default value for eligibleVoteCount is set to 1 since there is at least one person anyway
-        if(newPointOfInterest.getEligibleVoteCount()==null){
+        // default value for eligibleVoteCount is set to 1 since there is at least one
+        // person anyway
+        if (newPointOfInterest.getEligibleVoteCount() == null) {
             newPointOfInterest.setEligibleVoteCount(1);
         }
         // default status is set to pending
-        if(newPointOfInterest.getStatus()== null){
+        if (newPointOfInterest.getStatus() == null) {
             newPointOfInterest.setStatus(AcceptanceStatus.PENDING);
         }
-        // default prio set to low since it can't be that high if one forgets to set is...
-        if(newPointOfInterest.getPriority()==null){
+        // default prio set to low since it can't be that high if one forgets to set
+        // is...
+        if (newPointOfInterest.getPriority() == null) {
             newPointOfInterest.setPriority(PoiPriority.LOW);
         }
-
 
         newPointOfInterest = pointOfInterestRepository.save(newPointOfInterest);
         pointOfInterestRepository.flush();
@@ -86,47 +86,48 @@ public class PointOfInterestService {
         return newPointOfInterest;
     }
 
-    public PointOfInterest getPointOfInterestByID(Long roadtripId, Long poiId){
+    public PointOfInterest getPointOfInterestByID(Long roadtripId, Long poiId) {
         List<PointOfInterest> allPois = getPointOfInterestsByRoadTrip(roadtripId);
         PointOfInterest poi = new PointOfInterest();
-        for(PointOfInterest curr : allPois){
-            if( poiId == curr.getPoiId()){
+        for (PointOfInterest curr : allPois) {
+            if (poiId == curr.getPoiId()) {
                 poi = curr;
                 return poi;
             }
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PointOfInterest with id: "+ poiId + " in roadtrip: "+roadtripId + " not found." );
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "PointOfInterest with id: " + poiId + " in roadtrip: " + roadtripId + " not found.");
     }
 
-    public void updatePointOfInterest(PointOfInterest oldPointOfInterest, PointOfInterest newPointOfInterest){
+    public void updatePointOfInterest(PointOfInterest oldPointOfInterest, PointOfInterest newPointOfInterest) {
 
         // excludes option to update creatorId
-        if(newPointOfInterest.getName() != null){
+        if (newPointOfInterest.getName() != null) {
             oldPointOfInterest.setName(newPointOfInterest.getName());
         }
-        if(newPointOfInterest.getCoordinate() != null){
+        if (newPointOfInterest.getCoordinate() != null) {
             oldPointOfInterest.setCoordinate(newPointOfInterest.getCoordinate());
         }
-        if(newPointOfInterest.getDescription() != null){
+        if (newPointOfInterest.getDescription() != null) {
             oldPointOfInterest.setDescription(newPointOfInterest.getDescription());
         }
-        if(newPointOfInterest.getCategory() != null){
+        if (newPointOfInterest.getCategory() != null) {
             oldPointOfInterest.setCategory(newPointOfInterest.getCategory());
         }
-        if(newPointOfInterest.getStatus() != null){
+        if (newPointOfInterest.getStatus() != null) {
             oldPointOfInterest.setStatus(newPointOfInterest.getStatus());
         }
-        if(newPointOfInterest.getEligibleVoteCount() != null){
+        if (newPointOfInterest.getEligibleVoteCount() != null) {
             oldPointOfInterest.setEligibleVoteCount(newPointOfInterest.getEligibleVoteCount());
         }
-        if(newPointOfInterest.getPriority() != null){
+        if (newPointOfInterest.getPriority() != null) {
             oldPointOfInterest.setPriority(newPointOfInterest.getPriority());
         }
 
-        log.debug("PointOfInterest with id: "+ newPointOfInterest.getPoiId() + " has been updated" );   
+        log.debug("PointOfInterest with id: " + newPointOfInterest.getPoiId() + " has been updated");
     }
 
-    public void deletePointOfInterest(Long poiId){
+    public void deletePointOfInterest(Long poiId) {
         if (!pointOfInterestRepository.existsById(poiId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PointOfInterest not found");
         }

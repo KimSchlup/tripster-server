@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMemberPK;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
@@ -89,13 +90,31 @@ public class RoadtripService {
 
     public Roadtrip createRoadtrip(Roadtrip newRoadtrip, String token) {
 
-        // saves the given entity but data is only persisted in the database once
-        // flush() is called
-        newRoadtrip.setOwner(userRepository.findByToken(token));
+        // Get the user from token and set as owner
+        User owner = userRepository.findByToken(token);
+        newRoadtrip.setOwner(owner);
+
+        // Save the roadtrip
         newRoadtrip = roadtripRepository.save(newRoadtrip);
         roadtripSettingsService.createRoadtripSettings(newRoadtrip);
 
+        // Create a RoadtripMember entry for the owner with ACCEPTED status
+        RoadtripMemberPK pk = new RoadtripMemberPK();
+        pk.setUserId(owner.getUserId());
+        pk.setRoadtripId(newRoadtrip.getRoadtripId());
+
+        RoadtripMember ownerMember = new RoadtripMember();
+        ownerMember.setRoadtripMemberId(pk);
+        ownerMember.setUser(owner);
+        ownerMember.setRoadtrip(newRoadtrip);
+        ownerMember.setInvitationStatus(InvitationStatus.ACCEPTED);
+
+        // Save the roadtrip member
+        roadtripMemberRepository.save(ownerMember);
+
+        // Flush all changes to the database
         roadtripRepository.flush();
+        roadtripMemberRepository.flush();
 
         log.debug("Created Information for Roadtrip: {}", newRoadtrip);
         return newRoadtrip;
