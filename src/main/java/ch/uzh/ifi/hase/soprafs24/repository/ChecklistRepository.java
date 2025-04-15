@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 public interface ChecklistRepository extends JpaRepository<Checklist, Long> {
     //find by roadtripId
     @Query("SELECT c FROM Checklist c WHERE c.roadtrip.roadtripId = :roadtripId")
-    List<Checklist> findByRoadtripId(@Param("roadtripId") Long roadtripId);
+    Optional<Checklist> findByRoadtripId(@Param("roadtripId") Long roadtripId);
 
     //check if checklist exists for roadtrip
     boolean existsByRoadtripId(Long roadtripId);

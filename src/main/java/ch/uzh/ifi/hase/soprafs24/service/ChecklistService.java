@@ -43,22 +43,9 @@ public class ChecklistService {
       this.userRepository = userRepository;
   }
 
-  public Checklist createEmptyChecklist(Long roadtripId) {
-    // Verify if a checklist already exists for the roadtrip
-    if (checklistRepository.existsByRoadtripId(roadtripId)) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Checklist already exists for this roadtrip");
-    }
-
-    // Retrieve the Roadtrip entity
-    Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
-
-    // Create a new Checklist
-    Checklist newChecklist = new Checklist();
-    newChecklist.setRoadtrip(roadtrip);
-
-    // Save the checklist
-    return checklistRepository.save(newChecklist);
+  public Checklist getChecklistByRoadtripId(Long roadtripId) {
+    return checklistRepository.findByRoadtripId(roadtripId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Checklist not found for this roadtrip"));
 }
 
     // public Checklist createChecklist(Long roadtripId, Checklist newChecklist) {

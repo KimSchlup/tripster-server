@@ -27,6 +27,8 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.ChecklistService;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/roadtrips")
@@ -37,14 +39,26 @@ public class ChecklistController{
         this.checklistService = checklistService;
         }
 
-    @PostMapping("/{roadtripId}/checklist")
-    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping("/{roadtripId}/checklist")
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public ChecklistGetDTO createEmptyChecklist(@PathVariable Long roadtripId) {
-        // Create an empty checklist
-        Checklist createdChecklist = checklistService.createEmptyChecklist(roadtripId);
+    public ChecklistGetDTO getChecklist(@PathVariable Long roadtripId) {
+        // Retrieve the checklist for the given roadtripId
+        Checklist checklist = checklistService.getChecklistByRoadtripId(roadtripId);
 
         // Convert to API representation
-        return DTOMapper.INSTANCE.convertEntityToChecklistGetDTO(createdChecklist);
+        return DTOMapper.INSTANCE.convertEntityToChecklistGetDTO(checklist);
     }
+    
+
+    // @PostMapping("/{roadtripId}/checklist")
+    // @ResponseStatus(HttpStatus.CREATED)
+    // @ResponseBody
+    // public ChecklistGetDTO createEmptyChecklist(@PathVariable Long roadtripId) {
+    //     // Create an empty checklist
+    //     Checklist createdChecklist = checklistService.createEmptyChecklist(roadtripId);
+
+    //     // Convert to API representation
+    //     return DTOMapper.INSTANCE.convertEntityToChecklistGetDTO(createdChecklist);
+    // }
 }
