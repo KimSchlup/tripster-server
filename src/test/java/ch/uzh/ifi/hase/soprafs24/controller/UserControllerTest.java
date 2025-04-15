@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * This tests if the UserController works.
  */
 @WebMvcTest(UserController.class)
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class UserControllerTest {
 
   @Autowired
