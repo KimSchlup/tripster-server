@@ -2,7 +2,6 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
-import java.util.Locale.Category;
 
 import ch.uzh.ifi.hase.soprafs24.constant.Priority;
 import ch.uzh.ifi.hase.soprafs24.constant.ChecklistCategory;
