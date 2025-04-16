@@ -20,7 +20,7 @@ public class ChecklistElement implements Serializable {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Boolean isCompleted;
 
     @ManyToOne

@@ -64,7 +64,6 @@ public ChecklistElement addChecklistElement(Long roadtripId, ChecklistElement el
     // Check if assignedUser is provided and valid
     if (element.getAssignedUser() != null && element.getAssignedUser().getUsername() != null) {
         String assignedUsername = element.getAssignedUser().getUsername();
-        System.out.println("Assigned User: " + assignedUsername); // Use System.out.println for debugging
 
         // Retrieve userId by username
         Long userId = userRepository.findIdByUsername(assignedUsername)
@@ -78,10 +77,13 @@ public ChecklistElement addChecklistElement(Long roadtripId, ChecklistElement el
         assignedUser = userRepository.save(assignedUser);
 
         element.setAssignedUser(assignedUser);
-        System.out.println("Assigned User set: " + assignedUser.getUsername()); // Use System.out.println for debugging
     } else {
-        System.out.println("No assigned user provided"); // Use System.out.println for debugging
         element.setAssignedUser(null); // Ensure assignedUser is null if not provided
+    }
+
+    //Check if isCompleted is set, if not put on default false
+    if (element.getIsCompleted() == null){
+        element.setIsCompleted(false);
     }
 
     // Save the checklist element
