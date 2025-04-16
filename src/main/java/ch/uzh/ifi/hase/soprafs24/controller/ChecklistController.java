@@ -82,9 +82,18 @@ public class ChecklistController{
         ChecklistElement element = DTOMapper.INSTANCE.convertChecklistElementPostDTOToEntity(checklistElementPostDTO);
 
         //update checklistelement
-        checklistService.updateElement(element, checklistelementId);
+        checklistService.updateChecklistElement(element, checklistelementId);
     }
 
 
     //Delete checklist element
+    @DeleteMapping("/{roadtripId}/checklist/{checklistelementId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void deleteUser(@PathVariable Long roadtripId, @PathVariable Long checklistelementId, @RequestHeader("Authorization") String token){
+        //add method to validate access rights
+        User authenticatedUser = userService.getUserByToken(token);
+
+        checklistService.deleteChecklistElement(checklistelementId);
+    }
 }
