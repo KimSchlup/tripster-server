@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import org.slf4j.LoggerFactory;
 
 import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMemberPK;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.repository.ChecklistRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,16 +43,18 @@ public class RoadtripService {
     private final UserRepository userRepository;
     private final RoadtripMemberRepository roadtripMemberRepository;
     private final RoadtripSettingsService roadtripSettingsService;
+    private final ChecklistRepository checklistRepository;
 
     private final Logger log = LoggerFactory.getLogger(RoadtripService.class);
 
     public RoadtripService(@Qualifier("roadtripRepository") RoadtripRepository roadtripRepository,
             UserRepository userRepository, RoadtripMemberRepository roadtripMemberRepository,
-            RoadtripSettingsService roadtripSettingsService) {
+            RoadtripSettingsService roadtripSettingsService, ChecklistRepository checklistRepository) {
         this.roadtripRepository = roadtripRepository;
         this.userRepository = userRepository;
         this.roadtripMemberRepository = roadtripMemberRepository;
         this.roadtripSettingsService = roadtripSettingsService;
+        this.checklistRepository =  checklistRepository;
     }
 
     public List<Roadtrip> getRoadtrips(User user) {
@@ -97,6 +101,11 @@ public class RoadtripService {
         // Save the roadtrip
         newRoadtrip = roadtripRepository.save(newRoadtrip);
         roadtripSettingsService.createRoadtripSettings(newRoadtrip);
+
+        // Automatically create a checklist for the roadtrip
+        Checklist checklist = new Checklist();
+        checklist.setRoadtrip(newRoadtrip);
+        checklistRepository.save(checklist);
 
         // Create a RoadtripMember entry for the owner with ACCEPTED status
         RoadtripMemberPK pk = new RoadtripMemberPK();
