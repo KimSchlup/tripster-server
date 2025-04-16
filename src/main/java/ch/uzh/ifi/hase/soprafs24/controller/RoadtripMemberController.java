@@ -51,15 +51,13 @@ public class RoadtripMemberController {
             @PathVariable Long roadtripId,
             @RequestHeader("Authorization") String token) {
 
-        User invitingUser = userService.getUserByToken(token); // No need to verify if user exists, otherwise
-                                                               // authentication
-        // fails
-        // convert API user to internal representation
-        Long userId = roadtripMemberPostDTO.getUserId();
+        User invitingUser = userService.getUserByToken(token);
+
+        String invitedUsername = roadtripMemberPostDTO.getUsername();
 
         // create roadtrip
         RoadtripMember createdRoadtripMember = roadtripMemberService.createRoadtripMember(roadtripId, invitingUser,
-                userId);
+        invitedUsername);
 
         // convert internal representation of user back to API
         return DTOMapper.INSTANCE.convertEntityToRoadtripMemberGetDTO(createdRoadtripMember);

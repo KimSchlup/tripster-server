@@ -55,7 +55,7 @@ public class RoadtripService {
         this.roadtripSettingsService = roadtripSettingsService;
     }
 
-    public List<RoadtripGetDTO> getRoadtrips(User user) {
+    public List<RoadtripGetDTO> getRoadtripsOfUser(User user) {
 
         // Get roadtrips where user is owner
         List<Roadtrip> ownedTrips = roadtripRepository.findByOwner(user);

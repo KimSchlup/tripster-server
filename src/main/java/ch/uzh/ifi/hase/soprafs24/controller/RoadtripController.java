@@ -63,7 +63,7 @@ public class RoadtripController {
     @ResponseBody
     public List<RoadtripGetDTO> getRoadtrips(@RequestHeader("Authorization") String token) {
         User user = userService.getUserByToken(token);
-        return roadtripService.getRoadtrips(user);
+        return roadtripService.getRoadtripsOfUser(user);
     }
 
     /**

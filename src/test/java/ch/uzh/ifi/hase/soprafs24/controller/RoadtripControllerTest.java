@@ -115,7 +115,7 @@ public class RoadtripControllerTest {
     roadtripGetDTO.setDescription(roadtrip.getDescription());
     List<RoadtripGetDTO> allRoadtrips = Collections.singletonList(roadtripGetDTO);
 
-    given(roadtripService.getRoadtrips(Mockito.any())).willReturn(allRoadtrips);
+    given(roadtripService.getRoadtripsOfUser(Mockito.any())).willReturn(allRoadtrips);
     given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
 
     // when
