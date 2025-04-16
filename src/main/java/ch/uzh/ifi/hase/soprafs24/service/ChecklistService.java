@@ -1,18 +1,11 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 import jakarta.transaction.Transactional;
-import java.util.Objects;
-import java.util.UUID;
-import java.time.LocalDate;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ch.uzh.ifi.hase.soprafs24.constant.Priority;
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
 import ch.uzh.ifi.hase.soprafs24.entity.ChecklistElement;
@@ -22,14 +15,7 @@ import ch.uzh.ifi.hase.soprafs24.repository.ChecklistRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.ChecklistElementRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
-import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
-import ch.uzh.ifi.hase.soprafs24.constant.ChecklistCategory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 @Service
@@ -41,7 +27,6 @@ public class ChecklistService {
     private final RoadtripMemberRepository roadtripMemberRepository;
     private final UserRepository userRepository;
     private final ChecklistElementRepository checklistElementRepository;
-    private static final Logger log = LoggerFactory.getLogger(ChecklistService.class);
 
     @Autowired
     public ChecklistService(ChecklistRepository checklistRepository, RoadtripRepository roadtripRepository, RoadtripMemberRepository roadtripMemberRepository, UserRepository userRepository, ChecklistElementRepository checklistElementRepository) {
@@ -169,12 +154,7 @@ public class ChecklistService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
         RoadtripMember roadtripMember = roadtripMemberRepository.findByUserAndRoadtrip(user, roadtrip);
-        // System.out.println("roadtrip member: " + roadtripMember.getUser().getUsername());
-        // List<RoadtripMember> roadtripMembersList = roadtripMemberRepository.findByRoadtrip(roadtrip);
-        // for (RoadtripMember member : roadtripMembersList) {
-        //      System.out.println(member.getUser().getUsername());
-        //      if (member.getUser().getUsername())
-        //  }
+
         //check if user is a member of this roadtrip
         if (roadtripMember == null ) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The user you tried to assign is not part of this roadtrip");

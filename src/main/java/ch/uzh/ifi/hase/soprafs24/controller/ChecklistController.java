@@ -1,8 +1,5 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,32 +13,23 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import ch.uzh.ifi.hase.soprafs24.service.UserService;
-import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
 import ch.uzh.ifi.hase.soprafs24.entity.ChecklistElement;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistGetDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.ChecklistService;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
 @RequestMapping("/roadtrips")
 public class ChecklistController{
     private final ChecklistService checklistService;
-    private final UserService userService;
 
-    ChecklistController(ChecklistService checklistService, UserService userService) {
+    ChecklistController(ChecklistService checklistService) {
         this.checklistService = checklistService;
-        this.userService = userService;
         }
 
     @GetMapping("/{roadtripId}/checklist")
