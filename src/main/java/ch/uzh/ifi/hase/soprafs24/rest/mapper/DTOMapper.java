@@ -116,8 +116,8 @@ public interface DTOMapper {
   // RoadtripSettings mappings
   @Mapping(source = "roadtripSettingsId", target = "roadtripSettingsId")
   @Mapping(source = "roadtrip.roadtripId", target = "roadtripId") // Map roadtripId from Roadtrip entity
-  @Mapping(source = "basemapType", target = "basemapType")
-  @Mapping(source = "decisionProcess", target = "decisionProcess")
+  @Mapping(source = "basemapType", target = "basemapType", qualifiedByName = "stringToBasemapType")
+  @Mapping(source = "decisionProcess", target = "decisionProcess", qualifiedByName = "stringToDecisionProcess")
   @Mapping(source = "boundingBox", target = "boundingBox", qualifiedByName = "polygonToGeoJsonNode")
   @Mapping(source = "startDate", target = "startDate")
   @Mapping(source = "endDate", target = "endDate")
@@ -125,8 +125,8 @@ public interface DTOMapper {
 
   @Mapping(target = "roadtripSettingsId", ignore = true)
   @Mapping(target = "roadtrip.roadtripId", ignore = true)
-  @Mapping(source = "basemapType", target = "basemapType")
-  @Mapping(source = "decisionProcess", target = "decisionProcess")
+  @Mapping(source = "basemapType", target = "basemapType", qualifiedByName = "stringToBasemapType")
+  @Mapping(source = "decisionProcess", target = "decisionProcess", qualifiedByName = "stringToDecisionProcess")
   @Mapping(source = "boundingBox", target = "boundingBox", qualifiedByName = "mapGeoJsonToPolygon")
   @Mapping(source = "startDate", target = "startDate")
   @Mapping(source = "endDate", target = "endDate")
@@ -221,6 +221,33 @@ public interface DTOMapper {
       return new ObjectMapper().readTree(geoJson);
     } catch (Exception e) {
       throw new RuntimeException("Failed to convert Point to GeoJSON", e);
+    }
+  }
+
+  @Named("stringToBasemapType")
+  public static ch.uzh.ifi.hase.soprafs24.constant.BasemapType stringToBasemapType(String basemapType) {
+    if (basemapType == null) {
+      return null;
+    }
+    try {
+      return ch.uzh.ifi.hase.soprafs24.constant.BasemapType.valueOf(basemapType.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Invalid basemapType: " + basemapType
+              + ". Valid values are: SATELLITE, SATELLITE_HYBRID, OPEN_STREET_MAP, DEFAULT");
+    }
+  }
+
+  @Named("stringToDecisionProcess")
+  public static ch.uzh.ifi.hase.soprafs24.constant.DecisionProcess stringToDecisionProcess(String decisionProcess) {
+    if (decisionProcess == null) {
+      return null;
+    }
+    try {
+      return ch.uzh.ifi.hase.soprafs24.constant.DecisionProcess.valueOf(decisionProcess.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Invalid decisionProcess: " + decisionProcess + ". Valid values are: MAJORITY, OWNER_DECISION, DEFAULT");
     }
   }
 

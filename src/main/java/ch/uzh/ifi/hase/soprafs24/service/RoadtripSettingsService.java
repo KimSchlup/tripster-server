@@ -90,8 +90,8 @@ public class RoadtripSettingsService {
         if (updatedRoadtripSettings.getStartDate() != null) {
             roadtripSettings.setStartDate(updatedRoadtripSettings.getStartDate());
         }
-        if (updatedRoadtripSettings.getStartDate() != null) {
-            roadtripSettings.setEndDate(updatedRoadtripSettings.getStartDate());
+        if (updatedRoadtripSettings.getEndDate() != null) {
+            roadtripSettings.setEndDate(updatedRoadtripSettings.getEndDate());
         }
 
         this.roadtripSettingsRepository.save(roadtripSettings);
