@@ -68,6 +68,8 @@ dependencies {
 
     // Google Cloud Secret Manager Starter (version comes from the BOM above)
     implementation 'com.google.cloud:spring-cloud-gcp-starter-secretmanager:3.4.2'
+    implementation 'com.google.cloud:spring-cloud-gcp-starter:3.4.2'
+
 }
 
 bootJar {
