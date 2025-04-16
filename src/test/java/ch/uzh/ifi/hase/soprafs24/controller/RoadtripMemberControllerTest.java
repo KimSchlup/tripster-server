@@ -51,6 +51,7 @@ public class RoadtripMemberControllerTest {
 
         Long roadtripId = 1L;
         Long invitedUserId = 2L;
+        String invitedUsername = "test_name";
 
         User roadtripOwner = new User();
         roadtripOwner.setUserId(3L);
@@ -67,7 +68,7 @@ public class RoadtripMemberControllerTest {
         roadtripMember.setInvitationStatus(InvitationStatus.PENDING);
 
         RoadtripMemberPostDTO postDTO = new RoadtripMemberPostDTO();
-        postDTO.setUserId(invitedUserId);
+        postDTO.setUsername(invitedUsername);
 
         // mock all services used on controller and authentication
         given(userService.getUserByToken(token)).willReturn(roadtripOwner);

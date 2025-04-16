@@ -37,7 +37,7 @@ public class Roadtrip implements Serializable {
   private List<RoadtripMember> roadtripMembers = new ArrayList<>();
 
   @OneToOne(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
-  private RoadtripSettings roadtripSettings;  // Add this line
+  private RoadtripSettings roadtripSettings; // Add this line
 
   @OneToOne(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
   private Checklist checklist;
@@ -73,13 +73,15 @@ public class Roadtrip implements Serializable {
    * public TripProjectSettings getTripProjectSettings(){
    * return this.tripProjectSettings;
    * }
-   * public void setTripProjectMembers(TripProjectMember tripProjectMember){
-   * this.tripProjectMembers.add(tripProjectMember);
-   * }
-   * public ArrayList<TripProjectMember> getTripProjectMembers(){
-   * return this.tripProjectMembers;
-   * }
    */
+  public void setRoadtripMembers(RoadtripMember roadtripMembers) {
+    this.roadtripMembers.add(roadtripMembers);
+  }
+
+  public List<RoadtripMember> getRoadtripMembers() {
+    return this.roadtripMembers;
+  }
+
   public void setOwner(User user) {
     this.owner = user;
   }

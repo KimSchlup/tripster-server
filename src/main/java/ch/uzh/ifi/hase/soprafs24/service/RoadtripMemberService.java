@@ -59,7 +59,7 @@ public class RoadtripMemberService {
         return roadtripMemberRepository.findByRoadtrip(roadtrip);
     }
 
-    public RoadtripMember createRoadtripMember(Long roadtripId, User invitingUser, Long userId) {
+    public RoadtripMember createRoadtripMember(Long roadtripId, User invitingUser, String invitedUsername) {
         // verify roadtrip exists
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
@@ -70,19 +70,21 @@ public class RoadtripMemberService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not allowed to invite");
         }
 
-        // verify user exists
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        // verify invited user exists
+        User invitedUser = userRepository.findByUsername(invitedUsername);
+        if (invitedUser == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
 
         // verify userId provided is not the owner itself
-        if (Objects.equals(invitingUser, user)) {
+        if (Objects.equals(invitingUser, invitedUser)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner cannot invite itself");
         }
 
-        // verify user is not already member of roadtrip
+        // verify invited user is not already member of roadtrip
         List<RoadtripMember> roadtripMembers = roadtripMemberRepository.findByRoadtrip(roadtrip);
         boolean isAlreadyMember = roadtripMembers.stream()
-                .anyMatch(member -> Objects.equals(member.getUser(), user));
+                .anyMatch(member -> Objects.equals(member.getUser(), invitedUser));
 
         if (isAlreadyMember) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -91,13 +93,13 @@ public class RoadtripMemberService {
 
         // Create composite key
         RoadtripMemberPK pk = new RoadtripMemberPK();
-        pk.setUserId(userId);
+        pk.setUserId(invitedUser.getUserId());
         pk.setRoadtripId(roadtripId);
 
         // Set user and roadtrip
         RoadtripMember newRoadtripMember = new RoadtripMember();
         newRoadtripMember.setRoadtripMemberId(pk);
-        newRoadtripMember.setUser(user);
+        newRoadtripMember.setUser(invitedUser);
         newRoadtripMember.setRoadtrip(roadtrip);
         newRoadtripMember.setInvitationStatus(InvitationStatus.PENDING);
 
@@ -119,15 +121,17 @@ public class RoadtripMemberService {
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
-        // verify invitingUser is owner of roadtrip
-        boolean isOwner = Objects.equals(roadtrip.getOwner(), updatingUser);
-        if (!isOwner) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not allowed to update");
-        }
-
         // verify user exists
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // only roadtrip owner or the user itself can update its roadtrip membership
+        // status
+        boolean isOwner = Objects.equals(roadtrip.getOwner(), updatingUser);
+        boolean isSameUser = Objects.equals(updatingUser.getUserId(), userId);
+        if (!isOwner && !isSameUser) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not allowed to update");
+        }
 
         // verify user is member of roadtrip
         RoadtripMemberPK roadtripMemberPK = new RoadtripMemberPK();
