@@ -3,16 +3,17 @@ server:
 ---
 spring:
   config:
-    import: "sm://"
+    import: sm://
     
     activate:
       on-profile: prod
 
   datasource:
-    url: jdbc:postgresql://34.59.238.31:5432/mapmates
-    username: postgres
-    password: mapmates123
+    url: ${sm://PROD_DB_URL}
     driver-class-name: org.postgresql.Driver
+    username: ${sm://PROD_DB_USERNAME}
+    password: ${sm://PROD_DB_PASSWORD}
+
 
   jpa:
     hibernate:
