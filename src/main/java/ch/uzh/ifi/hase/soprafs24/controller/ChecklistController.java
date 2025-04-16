@@ -47,7 +47,10 @@ public class ChecklistController{
     @GetMapping("/{roadtripId}/checklist")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public ChecklistGetDTO getChecklist(@PathVariable Long roadtripId) {
+    public ChecklistGetDTO getChecklist(@PathVariable Long roadtripId, @RequestHeader("Authorization") String token) {
+        //check access rights
+        checklistService.checkAccessRights(roadtripId, token);
+
         // Retrieve the checklist for the given roadtripId
         Checklist checklist = checklistService.getChecklistByRoadtripId(roadtripId);
 
@@ -59,7 +62,9 @@ public class ChecklistController{
     @PostMapping("/{roadtripId}/checklist")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public ChecklistElementGetDTO addChecklistElement(@PathVariable Long roadtripId, @RequestBody ChecklistElementPostDTO checklistElementPostDTO) {
+    public ChecklistElementGetDTO addChecklistElement(@PathVariable Long roadtripId, @RequestBody ChecklistElementPostDTO checklistElementPostDTO, @RequestHeader("Authorization") String token) {
+        //check access rights
+        checklistService.checkAccessRights(roadtripId, token);
 
         // Add checklist element to the existing checklist
         ChecklistElement element = DTOMapper.INSTANCE.convertChecklistElementPostDTOToEntity(checklistElementPostDTO);
@@ -73,16 +78,15 @@ public class ChecklistController{
     @PutMapping("/{roadtripId}/checklist/{checklistelementId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void updateUser(@PathVariable Long roadtripId, @PathVariable Long checklistelementId, @RequestBody ChecklistElementPostDTO checklistElementPostDTO, @RequestHeader("Authorization") String token){
-        //add method to validate user access rights
-        User authenticatedUser = userService.getUserByToken(token);
-        //Long authenticatedUserId = authenticatedUser.getUserId();
+    public void updateChecklistElement(@PathVariable Long roadtripId, @PathVariable Long checklistelementId, @RequestBody ChecklistElementPostDTO checklistElementPostDTO, @RequestHeader("Authorization") String token){
+        //validate user access rights
+        checklistService.checkAccessRights(roadtripId, token);
 
         //convert API element to internal element
         ChecklistElement element = DTOMapper.INSTANCE.convertChecklistElementPostDTOToEntity(checklistElementPostDTO);
 
         //update checklistelement
-        checklistService.updateChecklistElement(element, checklistelementId);
+        checklistService.updateChecklistElement(element, checklistelementId, roadtripId);
     }
 
 
@@ -90,9 +94,9 @@ public class ChecklistController{
     @DeleteMapping("/{roadtripId}/checklist/{checklistelementId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void deleteUser(@PathVariable Long roadtripId, @PathVariable Long checklistelementId, @RequestHeader("Authorization") String token){
-        //add method to validate access rights
-        User authenticatedUser = userService.getUserByToken(token);
+    public void deleteChecklistElement(@PathVariable Long roadtripId, @PathVariable Long checklistelementId, @RequestHeader("Authorization") String token){
+        //validate access rights
+        checklistService.checkAccessRights(roadtripId, token);
 
         checklistService.deleteChecklistElement(checklistelementId);
     }

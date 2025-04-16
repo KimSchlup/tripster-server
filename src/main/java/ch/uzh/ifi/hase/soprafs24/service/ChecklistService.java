@@ -17,9 +17,12 @@ import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
 import ch.uzh.ifi.hase.soprafs24.entity.ChecklistElement;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.repository.ChecklistRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.ChecklistElementRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
@@ -35,16 +38,18 @@ public class ChecklistService {
 
     private final ChecklistRepository checklistRepository;
     private final RoadtripRepository roadtripRepository;
+    private final RoadtripMemberRepository roadtripMemberRepository;
     private final UserRepository userRepository;
     private final ChecklistElementRepository checklistElementRepository;
     private static final Logger log = LoggerFactory.getLogger(ChecklistService.class);
 
     @Autowired
-    public ChecklistService(ChecklistRepository checklistRepository, RoadtripRepository roadtripRepository, UserRepository userRepository, ChecklistElementRepository checklistElementRepository) {
+    public ChecklistService(ChecklistRepository checklistRepository, RoadtripRepository roadtripRepository, RoadtripMemberRepository roadtripMemberRepository, UserRepository userRepository, ChecklistElementRepository checklistElementRepository) {
         this.checklistRepository = checklistRepository;
         this.roadtripRepository = roadtripRepository;
         this.userRepository = userRepository;
         this.checklistElementRepository = checklistElementRepository;
+        this.roadtripMemberRepository = roadtripMemberRepository;
     }
 
     public Checklist getChecklistByRoadtripId(Long roadtripId) {
@@ -59,7 +64,7 @@ public class ChecklistService {
 
         // Set the checklist for the element
         element.setChecklist(checklist);
-        System.out.println(element.getAssignedUser().getUsername());
+
 
         // Check if assignedUser is provided and valid
         if (element.getAssignedUser() != null && element.getAssignedUser().getUsername() != null) {
@@ -72,6 +77,9 @@ public class ChecklistService {
             // Retrieve the User entity using userId
             User assignedUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            
+            //ensure that assigned User is part of the roadtrip
+            checkIfAssignedUserIsInRoadtrip(roadtripId, assignedUser);
 
             // Ensure the User entity is managed
             assignedUser = userRepository.save(assignedUser);
@@ -91,7 +99,7 @@ public class ChecklistService {
         
     }
 
-    public void updateChecklistElement(ChecklistElement updatedElement, Long elementId){
+    public void updateChecklistElement(ChecklistElement updatedElement, Long elementId, Long roadtripId){
         ChecklistElement element = this.checklistElementRepository.findById(elementId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ChecklistElement not found"));
         
@@ -120,6 +128,9 @@ public class ChecklistService {
                 // Retrieve the User entity using userId
                 User assignedUser = userRepository.findById(assignedUserId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+                //ensure that assigned User is part of the roadtrip
+                checkIfAssignedUserIsInRoadtrip(roadtripId, assignedUser);
                 
                 // Ensure the User entity is managed
                 assignedUser = userRepository.save(assignedUser);
@@ -140,15 +151,35 @@ public class ChecklistService {
     }
 
     //Helper method to check if checklist already exists for roadtrip
-    public void checkifChecklistexists(Checklist checklisTtoBeCreated){
-        Boolean checklistByRoadtripId = checklistRepository.existsByRoadtripId(checklisTtoBeCreated.getRoadtripId());
+    public void checkAccessRights(long roadtripId, String token){
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+        User user = userRepository.findByToken(token);
 
-        if (checklistByRoadtripId != false){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Checklist already exists for this roadtrip");
-            }
-  }
+        RoadtripMember roadtripMember = roadtripMemberRepository.findByUserAndRoadtrip(user, roadtrip);
+        //check if user is a member of this roadtrip
+        if (roadtripMember == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowd to access this resource");
+        }
+    }
 
-  //Helper method to verify access rights
+  //Helper method to verify if assignedUser is part of the roadtrip
+    public void checkIfAssignedUserIsInRoadtrip(long roadtripId, User user){
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        RoadtripMember roadtripMember = roadtripMemberRepository.findByUserAndRoadtrip(user, roadtrip);
+        // System.out.println("roadtrip member: " + roadtripMember.getUser().getUsername());
+        // List<RoadtripMember> roadtripMembersList = roadtripMemberRepository.findByRoadtrip(roadtrip);
+        // for (RoadtripMember member : roadtripMembersList) {
+        //      System.out.println(member.getUser().getUsername());
+        //      if (member.getUser().getUsername())
+        //  }
+        //check if user is a member of this roadtrip
+        if (roadtripMember == null ) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The user you tried to assign is not part of this roadtrip");
+        }  
+    }
 
 
 
