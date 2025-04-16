@@ -91,43 +91,45 @@ public ChecklistElement addChecklistElement(Long roadtripId, ChecklistElement el
     
 }
 
-    // public Checklist createChecklist(Long roadtripId, Checklist newChecklist) {
-    //     // Verify if a checklist already exists for the roadtrip
-    //     checkifChecklistexists(newChecklist);
+public void updateElement(ChecklistElement updatedElement, Long elementId){
+    ChecklistElement element = this.checklistElementRepository.findById(elementId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ChecklistElement not found"));
+    
+        if (updatedElement.getName() != null) {
+            element.setName(updatedElement.getName());
+        }
+        if (updatedElement.getIsCompleted() != null) {
+            element.setIsCompleted(updatedElement.getIsCompleted());
+        }
+        if (updatedElement.getCategory() != null) {
+            element.setCategory(updatedElement.getCategory());
+        }
+        if (updatedElement.getPriority() != null) {
+            element.setPriority(updatedElement.getPriority());
+        }
 
-    //     // Retrieve the Roadtrip entity
-    //     Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
-    //         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+       // Update assigned user if provided
+       if (updatedElement.getAssignedUser() != null){
+        if (updatedElement.getAssignedUser().getUsername() != null) {
+            String assignedUsername = updatedElement.getAssignedUser().getUsername();
 
-    //     // Set the roadtrip to the checklist
-    //     newChecklist.setRoadtrip(roadtrip);
+            // Retrieve userId by username
+            Long assignedUserId = userRepository.findIdByUsername(assignedUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-    //     // Ensure each ChecklistElement has a valid assignedUser if provided
-    //     for (ChecklistElementPostDTO elementDTO : newChecklist.getChecklistElements()) {
-    //         ChecklistElement element = DTOMapper.INSTANCE.convertChecklistElementPostDTOToEntity(elementDTO);
-    //         element.setChecklist(newChecklist);
+            // Retrieve the User entity using userId
+            User assignedUser = userRepository.findById(assignedUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            
+            // Ensure the User entity is managed
+            assignedUser = userRepository.save(assignedUser);
 
-    //         // Check if assignedUser is provided and valid
-    //         if (elementDTO.getAssignedUser() != null && !elementDTO.getAssignedUser().isEmpty()) {
-    //             User assignedUser = userRepository.findByUsername(elementDTO.getAssignedUser())
-    //                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    //             element.setAssignedUser(assignedUser);
-    //         } else {
-    //             element.setAssignedUser(null); // Ensure assignedUser is null if not provided
-    //         }
-
-    //         // Add the converted element back to the checklist
-    //         newChecklist.getChecklistElements().add(element);
-    //     }
-    //     // Save the checklist
-    //     newChecklist = checklistRepository.save(newChecklist);
-    //     checklistRepository.flush();
-
-    //     // Log the creation (uncomment if you have a logger configured)
-    //     // log.debug("Created Information for Checklist: {}", newChecklist);
-
-    //     return newChecklist;
-    // }
+            element.setAssignedUser(assignedUser);
+            } else {
+                element.setAssignedUser(null);
+            }
+        }
+    }
 
     //Helper method to check if checklist already exists for roadtrip
     public void checkifChecklistexists(Checklist checklisTtoBeCreated){
@@ -139,5 +141,8 @@ public ChecklistElement addChecklistElement(Long roadtripId, ChecklistElement el
   }
 
   //Helper method to verify access rights
+
+
+
 
 }

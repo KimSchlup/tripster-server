@@ -27,6 +27,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.ChecklistService;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,9 +37,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/roadtrips")
 public class ChecklistController{
     private final ChecklistService checklistService;
+    private final UserService userService;
 
-    ChecklistController(ChecklistService checklistService) {
+    ChecklistController(ChecklistService checklistService, UserService userService) {
         this.checklistService = checklistService;
+        this.userService = userService;
         }
 
     @GetMapping("/{roadtripId}/checklist")
@@ -67,4 +70,21 @@ public class ChecklistController{
     }
 
     //Update a checklist element
+    @PutMapping("/{roadtripId}/checklist/{checklistelementId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void updateUser(@PathVariable Long roadtripId, @PathVariable Long checklistelementId, @RequestBody ChecklistElementPostDTO checklistElementPostDTO, @RequestHeader("Authorization") String token){
+        //add method to validate user access rights
+        User authenticatedUser = userService.getUserByToken(token);
+        //Long authenticatedUserId = authenticatedUser.getUserId();
+
+        //convert API element to internal element
+        ChecklistElement element = DTOMapper.INSTANCE.convertChecklistElementPostDTOToEntity(checklistElementPostDTO);
+
+        //update checklistelement
+        checklistService.updateElement(element, checklistelementId);
+    }
+
+
+    //Delete checklist element
 }
