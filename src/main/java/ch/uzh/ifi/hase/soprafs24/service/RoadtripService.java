@@ -1,6 +1,8 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
+
 import org.slf4j.Logger;
 
 import org.springframework.stereotype.Service;
@@ -18,11 +20,11 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Roadtrip Service
@@ -53,7 +55,7 @@ public class RoadtripService {
         this.roadtripSettingsService = roadtripSettingsService;
     }
 
-    public List<Roadtrip> getRoadtrips(User user) {
+    public List<RoadtripGetDTO> getRoadtrips(User user) {
 
         // Get roadtrips where user is owner
         List<Roadtrip> ownedTrips = roadtripRepository.findByOwner(user);
@@ -66,12 +68,31 @@ public class RoadtripService {
         Set<Roadtrip> allTrips = new HashSet<>(ownedTrips);
         allTrips.addAll(memberTrips);
 
-        return new ArrayList<>(allTrips);
+        return allTrips.stream()
+                .map(r -> {
+                    InvitationStatus status = r.getOwner().getUserId().equals(user.getUserId())
+                            ? InvitationStatus.ACCEPTED
+                            : r.getRoadtripMembers().stream()
+                                    .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
+                                    .map(RoadtripMember::getInvitationStatus)
+                                    .findFirst()
+                                    .orElse(null);
+
+                    RoadtripGetDTO dto = new RoadtripGetDTO();
+                    dto.setRoadtripId(r.getRoadtripId());
+                    dto.setOwnerId(r.getOwner().getUserId());
+                    dto.setName(r.getName());
+                    dto.setDescription(r.getDescription());
+                    dto.setInvitationStatus(status);
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
-    public Roadtrip getRoadtripById(Long roadtripId, User user) {
+    public RoadtripGetDTO getRoadtripById(Long roadtripId, User user) {
 
-        // Check if roadtrip exists
+        // Fetch roadtrip or throw 404
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
@@ -84,8 +105,20 @@ public class RoadtripService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not a member of this roadtrip");
         }
 
-        return roadtrip;
+        // Map to DTO with invitationStatus
+        RoadtripGetDTO dto = new RoadtripGetDTO();
+        dto.setRoadtripId(roadtrip.getRoadtripId());
+        dto.setOwnerId(roadtrip.getOwner().getUserId());
+        dto.setName(roadtrip.getName());
+        dto.setDescription(roadtrip.getDescription());
 
+        InvitationStatus status = isOwner
+                ? InvitationStatus.ACCEPTED
+                : roadtripMember.getInvitationStatus(); // Should be safe due to check above
+
+        dto.setInvitationStatus(status);
+
+        return dto;
     }
 
     public Roadtrip createRoadtrip(Roadtrip newRoadtrip, String token) {
