@@ -11,9 +11,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import ch.uzh.ifi.hase.soprafs24.constant.BasemapType;
 import ch.uzh.ifi.hase.soprafs24.constant.DecisionProcess;
+import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMemberPK;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripSettingsRepository;
 import jakarta.transaction.Transactional;
@@ -25,10 +29,13 @@ public class RoadtripSettingsService {
     @Autowired
     private final RoadtripSettingsRepository roadtripSettingsRepository;
     private final RoadtripRepository roadtripRepository;
+    private final RoadtripMemberRepository roadtripMemberRepository;
 
     public RoadtripSettingsService(
             @Qualifier("roadtripSettingsRepository") RoadtripSettingsRepository roadtripSettingsRepository,
-            @Qualifier("roadtripRepository") RoadtripRepository roadtripRepository) {
+            @Qualifier("roadtripRepository") RoadtripRepository roadtripRepository,
+            @Qualifier("roadtripMemberRepository") RoadtripMemberRepository roadtripMemberRepository) {
+        this.roadtripMemberRepository = roadtripMemberRepository;
         this.roadtripRepository = roadtripRepository;
         this.roadtripSettingsRepository = roadtripSettingsRepository;
     }
@@ -39,11 +46,13 @@ public class RoadtripSettingsService {
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
-        // Check if user is owner
+        // Check if user is owner or member
         boolean isOwner = Objects.equals(roadtrip.getOwner(), user);
+        RoadtripMember roadtripMember = roadtripMemberRepository.findByUserAndRoadtrip(user, roadtrip);
+        boolean isMember = roadtripMember != null && roadtripMember.getInvitationStatus() == InvitationStatus.ACCEPTED;
 
-        if (!isOwner) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the roadtrip owner can access the settings");
+        if (!isOwner && !isMember) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not a member of this roadtrip");
         }
 
         // Fetch roadtrip settings
