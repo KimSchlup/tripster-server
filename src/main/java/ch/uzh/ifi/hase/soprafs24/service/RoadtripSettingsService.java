@@ -120,8 +120,8 @@ public class RoadtripSettingsService {
 
         RoadtripSettings roadtripSettings = new RoadtripSettings();
         roadtripSettings.setRoadtrip(roadtrip);
-        roadtripSettings.setBasemapType(BasemapType.getDefault());
-        roadtripSettings.setDecisionProcess(DecisionProcess.getDefault());
+        roadtripSettings.setBasemapType(BasemapType.OPEN_STREET_MAP);
+        roadtripSettings.setDecisionProcess(DecisionProcess.MAJORITY);
         roadtripSettings.setStartDate(LocalDate.now());
         roadtripSettings.setEndDate(LocalDate.now().plusDays(7));
 
