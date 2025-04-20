@@ -54,6 +54,8 @@ public class PointOfInterest implements Serializable{
 
     @Column
     private ArrayList<Long> downvotes;
+
+    private ArrayList<PointOfInterestComment> comments;
     
     // Getters and Setters
     public Long getPoiId() {
@@ -156,5 +158,12 @@ public class PointOfInterest implements Serializable{
             this.downvotes = downvotes;
         } 
     
+        public ArrayList<PointOfInterestComment> getPointOfInterestComment(){
+            return comments;
+        }
+
+        public void setPointOfInterestComments(ArrayList<PointOfInterestComment> comments){
+            this.comments = comments;
+        }
 
 }

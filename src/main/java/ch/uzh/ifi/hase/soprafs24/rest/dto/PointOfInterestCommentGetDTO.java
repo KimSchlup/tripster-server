@@ -1,62 +1,50 @@
-package ch.uzh.ifi.hase.soprafs24.entity;
+package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
-import jakarta.persistence.*;
-
-import java.io.Serializable;
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "point_of_interest_comment")
+import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 
-public class PointOfInterestComment implements Serializable{
+public class PointOfInterestCommentGetDTO {
     
-
-    @Id
-    @GeneratedValue
     private Long commentId;
-
-    @ManyToOne
-    @MapsId("poiId")
-    @JoinColumn(name = "poi_id")
     private PointOfInterest poi;
-
-    @Column(nullable = false)
     private Long authorId;
-
-    @Column(nullable = false)
     private String comment;
-
-    @Column(nullable = false)
     private LocalDate creationDate;
 
-public PointOfInterest getPoi() {
+    
+// Getter and Setter for poi
+    public PointOfInterest getPoi() {
         return poi;
     }
-    
+
     public void setPoi(PointOfInterest poi) {
         this.poi = poi;
     }
-    
+
+    // Getter and Setter for authorId
     public Long getAuthorId() {
         return authorId;
     }
-    
+
     public void setAuthorId(Long authorId) {
         this.authorId = authorId;
     }
-    
+
+    // Getter and Setter for comment
     public String getComment() {
         return comment;
     }
-    
+
     public void setComment(String comment) {
         this.comment = comment;
     }
-    
+
+    // Getter and Setter for creationDate
     public LocalDate getCreationDate() {
         return creationDate;
     }
-    
+
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }
