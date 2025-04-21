@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "point_of_interest_comment")
 
@@ -18,7 +20,7 @@ public class PointOfInterestComment implements Serializable{
 
     @ManyToOne
     @JoinColumn(name = "poi_id", nullable = false)
-
+    @JsonBackReference
     private PointOfInterest poi;
 
     @Column(nullable = false)

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.locationtech.jts.geom.Point;
 
@@ -50,12 +51,13 @@ public class PointOfInterest implements Serializable{
     private Integer eligibleVoteCount;
     
     @Column
-    private ArrayList<Long> upvotes;
+    private List<Long> upvotes = new ArrayList<>();
 
     @Column
-    private ArrayList<Long> downvotes;
+    private List<Long> downvotes = new ArrayList<>();
 
-    private ArrayList<PointOfInterestComment> comments;
+    @OneToMany(mappedBy = "point_of_interest", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PointOfInterestComment> comments = new ArrayList<>();
     
     // Getters and Setters
     public Long getPoiId() {
@@ -139,31 +141,31 @@ public class PointOfInterest implements Serializable{
     }
 
 
-    public ArrayList<Long> getUpvotes() {
+    public List<Long> getUpvotes() {
             return upvotes;
-        }
-    
-        // Setter for upvotes
-        public void setUpvotes(ArrayList<Long> upvotes) {
-            this.upvotes = upvotes;
-        }
-    
-        // Getter for downvotes
-        public ArrayList<Long> getDownvotes() {
-            return downvotes;
-        }
-    
-        // Setter for downvotes
-        public void setDownvotes(ArrayList<Long> downvotes) {
-            this.downvotes = downvotes;
-        } 
-    
-        public ArrayList<PointOfInterestComment> getPointOfInterestComment(){
-            return comments;
-        }
+    }
 
-        public void setPointOfInterestComments(ArrayList<PointOfInterestComment> comments){
-            this.comments = comments;
-        }
+    // Setter for upvotes
+    public void setUpvotes(List<Long> upvotes) {
+        this.upvotes = upvotes;
+    }
+
+    // Getter for downvotes
+    public List<Long> getDownvotes() {
+        return downvotes;
+    }
+
+    // Setter for downvotes
+    public void setDownvotes(List<Long> downvotes) {
+        this.downvotes = downvotes;
+    } 
+
+    public List<PointOfInterestComment> getPointOfInterestComment(){
+        return comments;
+    }
+
+    public void setPointOfInterestComments(List<PointOfInterestComment> comments){
+        this.comments = comments;
+    }
 
 }

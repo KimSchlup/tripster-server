@@ -9,7 +9,6 @@ import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
@@ -26,7 +25,6 @@ public class PointOfInterestCommentService {
 
     private final PointOfInterestRepository pointOfInterestRepository;
 
-    @Autowired
     public PointOfInterestCommentService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, 
                                                                                 UserRepository userRepository){
         this.pointOfInterestRepository = pointOfInterestRepository;
@@ -50,7 +48,7 @@ public class PointOfInterestCommentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Poi "+ poiId + "was not found for roadtrip " + roadtripId );
         }
 
-        ArrayList<PointOfInterestComment> comments = poi.getPointOfInterestComment();
+        List<PointOfInterestComment> comments = poi.getPointOfInterestComment();
 
         if(comments.equals(null)){
             comments = new ArrayList<>();
@@ -64,12 +62,14 @@ public class PointOfInterestCommentService {
         comments.add(poiComment);
         
         poi.setPointOfInterestComments(comments);
+        pointOfInterestRepository.save(poi);
+        pointOfInterestRepository.flush();
 
         return poiComment;
     }
 
 
-    public ArrayList<PointOfInterestComment> getComment(String token, Long poiId, Long roadtripId){
+    public List<PointOfInterestComment> getComment(String token, Long poiId, Long roadtripId){
 
         List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
         PointOfInterest poi = new PointOfInterest();

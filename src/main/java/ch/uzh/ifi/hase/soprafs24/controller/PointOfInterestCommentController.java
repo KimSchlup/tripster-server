@@ -48,7 +48,6 @@ public class PointOfInterestCommentController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
     public void deleteComment(@RequestHeader("Authorization") String token, 
-                                                @RequestBody PointOfInterestCommentPostDTO commentPostDTO, 
                                                 @PathVariable Long roadtripId, 
                                                 @PathVariable Long poiId,
                                                 @PathVariable Long commentId){
@@ -61,8 +60,7 @@ public class PointOfInterestCommentController {
     @ResponseBody
     public List<PointOfInterestComment> getComments(@RequestHeader("Authorization") String token,  
                                                         @PathVariable Long roadtripId, 
-                                                        @PathVariable Long poiId,
-                                                        @PathVariable Long commentId){
+                                                        @PathVariable Long poiId){
         
         return pointOfInterestCommentService.getComment(token, poiId, roadtripId);
     }
