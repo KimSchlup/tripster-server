@@ -23,25 +23,38 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.VotePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.PointOfInterestService;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @RestController
 public class PointOfInterestController {
 
     private final PointOfInterestService pointOfInterestService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    PointOfInterestController(PointOfInterestService pointOfInterestService){
+    PointOfInterestController(PointOfInterestService pointOfInterestService, SimpMessagingTemplate messagingTemplate) {
         this.pointOfInterestService = pointOfInterestService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping("/roadtrips/{roadtripId}/pois")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public PointOfInterestGetDTO createPointOfInterest(@RequestHeader("Authorization") String token, @RequestBody PointOfInterestPostDTO pointOfInterestPostDTO, @PathVariable Long roadtripId) {
-        PointOfInterest pointOfInterestInput = DTOMapper.INSTANCE.convertPointOfInterestPostDTOToEntity(pointOfInterestPostDTO);
-        PointOfInterest createdPointOfInterest = pointOfInterestService.createPointOfInterest(pointOfInterestInput, roadtripId, token);
-        return DTOMapper.INSTANCE.convertEntityToPointOfInterestGetDTO(createdPointOfInterest);
+    public PointOfInterestGetDTO createPointOfInterest(@RequestHeader("Authorization") String token,
+            @RequestBody PointOfInterestPostDTO pointOfInterestPostDTO, @PathVariable Long roadtripId) {
+        PointOfInterest pointOfInterestInput = DTOMapper.INSTANCE
+                .convertPointOfInterestPostDTOToEntity(pointOfInterestPostDTO);
+        PointOfInterest createdPointOfInterest = pointOfInterestService.createPointOfInterest(pointOfInterestInput,
+                roadtripId, token);
+        PointOfInterestGetDTO pointOfInterestGetDTO = DTOMapper.INSTANCE
+                .convertEntityToPointOfInterestGetDTO(createdPointOfInterest);
+
+        // websocket: notify subscribers about new point of interest
+        messagingTemplate.convertAndSend("/topic/roadtrips/" + roadtripId + "/pois", pointOfInterestGetDTO);
+
+        return pointOfInterestGetDTO;
+
     }
-    
+
     @GetMapping("/roadtrips/{roadtripId}/pois")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -52,35 +65,38 @@ public class PointOfInterestController {
         for (PointOfInterest pointOfInterest : pointOfInterests) {
             pointOfInterestGetDTOs.add(DTOMapper.INSTANCE.convertEntityToPointOfInterestGetDTO(pointOfInterest));
         }
-        
+
         return pointOfInterestGetDTOs;
     }
 
     @PutMapping("/roadtrips/{roadtripId}/pois/{poiId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void updatePointOfInterest(@RequestBody PointOfInterestPutDTO pointOfInterestPutDTO, @PathVariable Long roadtripId, @PathVariable Long poiId){
-        
-        PointOfInterest newPointOfInterest = DTOMapper.INSTANCE.convertPointOfInterestPutDTOToEntity(pointOfInterestPutDTO);
+    public void updatePointOfInterest(@RequestBody PointOfInterestPutDTO pointOfInterestPutDTO,
+            @PathVariable Long roadtripId, @PathVariable Long poiId) {
+
+        PointOfInterest newPointOfInterest = DTOMapper.INSTANCE
+                .convertPointOfInterestPutDTOToEntity(pointOfInterestPutDTO);
         PointOfInterest oldPointOfInterest = pointOfInterestService.getPointOfInterestByID(roadtripId, poiId);
-        
+
         pointOfInterestService.updatePointOfInterest(oldPointOfInterest, newPointOfInterest);
-        
+
     }
 
     @DeleteMapping("/roadtrips/{roadtripId}/pois/{poiId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void deletePointOfInterest(@PathVariable Long roadtripId, @PathVariable Long poiId){
-        
+    public void deletePointOfInterest(@PathVariable Long roadtripId, @PathVariable Long poiId) {
+
         pointOfInterestService.deletePointOfInterest(poiId);
-        
+
     }
 
     @PutMapping("/roadtrips/{roadtripId}/pois/{poiId}/votes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void castVote(@PathVariable Long roadtripId, @PathVariable Long poiId, @RequestHeader("Authorization") String token, @RequestBody VotePutDTO votePutDTO){
+    public void castVote(@PathVariable Long roadtripId, @PathVariable Long poiId,
+            @RequestHeader("Authorization") String token, @RequestBody VotePutDTO votePutDTO) {
         String vote = votePutDTO.getVote();
         pointOfInterestService.castVote(token, roadtripId, poiId, vote);
     }
@@ -88,9 +104,9 @@ public class PointOfInterestController {
     @DeleteMapping("/roadtrips/{roadtripId}/pois/{poiId}/votes")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public void deleteVote(@PathVariable Long roadtripId, @PathVariable Long poiId, @RequestHeader("Authorization") String token){
-        pointOfInterestService.deleteVote(token,roadtripId,poiId);
+    public void deleteVote(@PathVariable Long roadtripId, @PathVariable Long poiId,
+            @RequestHeader("Authorization") String token) {
+        pointOfInterestService.deleteVote(token, roadtripId, poiId);
     }
-
 
 }

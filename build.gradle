@@ -62,6 +62,11 @@ dependencies {
     // To acccess Google Cloud Secrets of Prod Database
     implementation 'com.google.cloud:spring-cloud-gcp-starter-secretmanager:4.7.2'
 
+    // Webscokets
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator' // optional for health checks
+    implementation 'org.webjars:sockjs-client:1.5.1' // optional: useful for frontend compatibility
+    implementation 'org.webjars:stomp-websocket:2.3.4' // optional: STOMP client
 
 }
 

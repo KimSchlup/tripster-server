@@ -13,10 +13,10 @@ import ch.uzh.ifi.hase.soprafs24.constant.PoiPriority;
 
 @Entity
 @Table(name = "point_of_interest")
-public class PointOfInterest implements Serializable{
+public class PointOfInterest implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue
     private Long poiId;
@@ -28,7 +28,7 @@ public class PointOfInterest implements Serializable{
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "geometry(Point, 4326)")
     private Point coordinate;
 
     @Column
@@ -36,7 +36,7 @@ public class PointOfInterest implements Serializable{
 
     @Column
     private PoiCategory category;
-    
+
     @Column
     private PoiPriority priority;
 
@@ -48,13 +48,13 @@ public class PointOfInterest implements Serializable{
 
     @Column
     private Integer eligibleVoteCount;
-    
+
     @Column
     private ArrayList<Long> upvotes;
 
     @Column
     private ArrayList<Long> downvotes;
-    
+
     // Getters and Setters
     public Long getPoiId() {
         return poiId;
@@ -136,25 +136,23 @@ public class PointOfInterest implements Serializable{
         this.priority = priority;
     }
 
-
     public ArrayList<Long> getUpvotes() {
-            return upvotes;
-        }
-    
-        // Setter for upvotes
-        public void setUpvotes(ArrayList<Long> upvotes) {
-            this.upvotes = upvotes;
-        }
-    
-        // Getter for downvotes
-        public ArrayList<Long> getDownvotes() {
-            return downvotes;
-        }
-    
-        // Setter for downvotes
-        public void setDownvotes(ArrayList<Long> downvotes) {
-            this.downvotes = downvotes;
-        } 
-    
+        return upvotes;
+    }
+
+    // Setter for upvotes
+    public void setUpvotes(ArrayList<Long> upvotes) {
+        this.upvotes = upvotes;
+    }
+
+    // Getter for downvotes
+    public ArrayList<Long> getDownvotes() {
+        return downvotes;
+    }
+
+    // Setter for downvotes
+    public void setDownvotes(ArrayList<Long> downvotes) {
+        this.downvotes = downvotes;
+    }
 
 }
