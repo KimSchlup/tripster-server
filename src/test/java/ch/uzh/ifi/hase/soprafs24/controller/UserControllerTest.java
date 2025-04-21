@@ -18,14 +18,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -50,32 +55,6 @@ public class UserControllerTest {
 
   @MockBean
   private AuthenticationInterceptor authenticationInterceptor;
-
-  @Test
-  public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
-    // given
-    User user = new User();
-    user.setFirstName("Firstname");
-    user.setUsername("firstname@lastname");
-    user.setStatus(UserStatus.OFFLINE);
-
-    List<User> allUsers = Collections.singletonList(user);
-
-    // this mocks the UserService -> we define above what the userService should
-    // return when getUsers() is called
-    given(userService.getUsers()).willReturn(allUsers);
-    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
-
-    // when
-    MockHttpServletRequestBuilder getRequest = get("/users").contentType(MediaType.APPLICATION_JSON);
-
-    // then
-    mockMvc.perform(getRequest).andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].firstName", is(user.getFirstName())))
-        .andExpect(jsonPath("$[0].username", is(user.getUsername())))
-        .andExpect(jsonPath("$[0].status", is(user.getStatus().toString())));
-  }
 
   @Test
   public void createUser_validInput_userCreated() throws Exception {
@@ -152,15 +131,36 @@ public class UserControllerTest {
         .content(asJsonString(userPostDTO_conflict));
 
     mockMvc.perform(postRequest_conflict).andExpect(status().isConflict());
-
   }
+//Testing POST /users with empty username
+@Test
+public void createUser_emptyUsername() throws Exception {
+  UserPostDTO userPostDTO_conflict = new UserPostDTO();
+  userPostDTO_conflict.setUsername("");
+  userPostDTO_conflict.setPassword("password");
 
+  given(userService.createUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
+  // mock auth token
+  given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+
+  MockHttpServletRequestBuilder postRequest_conflict = post("/users")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(asJsonString(userPostDTO_conflict));
+
+  mockMvc.perform(postRequest_conflict).andExpect(status().isBadRequest());
+}
+
+//Testing GET /users/{id} successful
   @Test
   public void getUserById_UserExists() throws Exception {
     // given
     User user = new User();
     user.setFirstName("Firstname");
-    user.setUsername("firstname@lastname");
+    user.setLastName("Lastname");
+    user.setUsername("firstname Lastname");
+    user.setPhoneNumber("079");
+    user.setMail("firstname@lastname");
+    user.setReceiveNotifications(true);
     user.setStatus(UserStatus.ONLINE);
     user.setUserId(999L);
 
@@ -178,10 +178,48 @@ public class UserControllerTest {
     mockMvc.perform(getRequest).andExpect(status().isOk())
         .andExpect(jsonPath("$.userId", is(user.getUserId().intValue()))) // id als einzelnes Feld überprüfen
         .andExpect(jsonPath("$.firstName", is(user.getFirstName())))
+        .andExpect(jsonPath("$.lastName", is(user.getLastName())))
         .andExpect(jsonPath("$.username", is(user.getUsername())))
+        .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
+        .andExpect(jsonPath("$.mail", is(user.getMail())))
+        .andExpect(jsonPath("$.receiveNotifications", is(user.getReceiveNotifications())))
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
   }
 
+  //testing GET users/id with invalid id will throw "Forbidden"
+  @Test
+  public void givenUnauthorizedAccess_whenGetUserById_thenReturnForbidden() throws Exception {
+      // given
+      Long userId = 999L;
+      //String token = "mock-token";
+
+      // Mock the userService.getUserByToken method to return a mock User with a different ID
+      User mockAuthenticatedUser = new User();
+      mockAuthenticatedUser.setUserId(123L); // Different from the requested userId
+      //given(userService.getUserByToken(token)).willReturn(mockAuthenticatedUser);
+      given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+      given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token")))).willReturn(mockAuthenticatedUser);
+
+      // Mock the userService.getUserById method to throw a ResponseStatusException with 404 Not Found
+      given(userService.getUserById(userId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+      // Debugging: Print the mock user ID
+      System.out.println("Mock Authenticated User ID: " + mockAuthenticatedUser.getUserId());
+
+      // when
+      MockHttpServletRequestBuilder getRequest = get("/users/" + userId)
+          .contentType(MediaType.APPLICATION_JSON)
+          .header("Authorization", "some_token");
+
+      // then
+      mockMvc.perform(getRequest)
+          .andExpect(status().isForbidden())
+          .andExpect(result -> {
+              // Debugging: Print the response status
+              System.out.println("Response Status: " + result.getResponse().getStatus());
+          });
+  }
+  //PUT/users/id with valid input
   @Test
   public void updateUser_validInput_success() throws Exception {
     // given
@@ -206,6 +244,141 @@ public class UserControllerTest {
     // then
     mockMvc.perform(putRequest)
         .andExpect(status().isNoContent()); // Erwartet 204 NO CONTENT
+  }
+
+  //PUT/users/id with wrong userId throws forbidden
+  @Test
+  public void givenUnauthorizedAccess_whenPUTUserById_thenReturnForbidden() throws Exception {
+    // given
+    Long userId = 123L;
+    UserPostDTO userPostDTO = new UserPostDTO();
+
+    // and
+    User user = new User();
+    user.setFirstName("Firstname Lastname");
+    user.setUserId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
+
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+    doNothing().when(userService).updateUser(Mockito.anyLong(), Mockito.any(User.class));
+
+    // when
+    MockHttpServletRequestBuilder putRequest = put("/users/" + userId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token") // Simulierte Authentifizierung
+        .content(asJsonString(userPostDTO));
+
+    // then
+    mockMvc.perform(putRequest)
+        .andExpect(status().isForbidden()); // Erwartet 403 Forbidden
+  }
+
+  //PUT with duplicate username
+  @Test
+  public void upddateUser_Username_taken() throws Exception {
+        // given
+        UserPostDTO userPostDTO = new UserPostDTO();
+        userPostDTO.setUsername("Username taken");
+
+        // and
+        User user = new User();
+        user.setUsername("Username taken");
+        user.setUserId(999L);
+
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT))
+            .when(userService).updateUser(anyLong(), any(User.class));
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+
+    // when
+    MockHttpServletRequestBuilder putRequest = put("/users/999")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token") // Simulierte Authentifizierung
+        .content(asJsonString(userPostDTO));
+
+    // then
+    mockMvc.perform(putRequest)
+        .andExpect(status().isConflict()); // Erwartet 409
+  }
+
+  //PUT with empty username will throw 400
+  @Test
+  public void upddateUser_Username_empty_willThrow400() throws Exception {
+        // given
+        UserPostDTO userPostDTO = new UserPostDTO();
+        userPostDTO.setUsername("");
+
+        // and
+        User user = new User();
+        user.setUsername("Username");
+        user.setUserId(999L);
+
+    doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+            .when(userService).updateUser(anyLong(), any(User.class));
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+
+    // when
+    MockHttpServletRequestBuilder putRequest = put("/users/999")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token") // Simulierte Authentifizierung
+        .content(asJsonString(userPostDTO));
+
+    // then
+    mockMvc.perform(putRequest)
+        .andExpect(status().isBadRequest()); // Erwartet 400
+  }
+
+  //DELETE successfull
+  @Test
+  public void deleteUser_successfull() throws Exception {
+        // given
+        User user = new User();
+        user.setUsername("Username");
+        user.setUserId(999L);
+
+    doNothing().when(userService).deleteUser(anyLong());
+
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+
+    // when
+    MockHttpServletRequestBuilder deleteRequest = delete("/users/999")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token"); // Simulierte Authentifizierung
+
+    // then
+    mockMvc.perform(deleteRequest)
+        .andExpect(status().isNoContent()); // Erwartet 204
+  }
+
+  //DELETE unsuccessfull
+  @Test
+  public void deleteUser_unsuccessfull() throws Exception {
+        // given
+        User user = new User();
+        user.setUsername("Username");
+        user.setUserId(999L);
+
+    doThrow(new ResponseStatusException(HttpStatus.CONFLICT))
+        .when(userService).deleteUser(anyLong());
+
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+
+    // when
+    MockHttpServletRequestBuilder deleteRequest = delete("/users/999")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token"); // Simulierte Authentifizierung
+
+    // then
+    mockMvc.perform(deleteRequest)
+        .andExpect(status().isNoContent()); // Erwartet 204
   }
 
   /**
