@@ -16,7 +16,6 @@ import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
@@ -35,11 +34,9 @@ public class PointOfInterestService {
     private final Logger log = LoggerFactory.getLogger(PointOfInterestService.class);
     private final PointOfInterestRepository pointOfInterestRepository;
 
-    @Autowired
-    public PointOfInterestService(
-            @Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository,
-            RoadtripRepository roadtripRepository,
-            UserRepository userRepository) {
+    public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, 
+                                                                                RoadtripRepository roadtripRepository,
+                                                                                UserRepository userRepository){
         this.pointOfInterestRepository = pointOfInterestRepository;
         this.roadtripRepository = roadtripRepository;
         this.userRepository = userRepository;
@@ -157,8 +154,8 @@ public class PointOfInterestService {
             poi.setDownvotes(new ArrayList<Long>());
         }
 
-        ArrayList<Long> downvotes = poi.getDownvotes();
-        ArrayList<Long> upvotes = poi.getUpvotes();
+        List<Long> downvotes = poi.getDownvotes();
+        List<Long> upvotes = poi.getUpvotes();
 
         if(vote.equals("upvote")){
             System.out.println("upvote detected");
@@ -193,8 +190,8 @@ public class PointOfInterestService {
                 break;
             }
         }
-        ArrayList<Long> upvotes = poi.getUpvotes();
-        ArrayList<Long> downvotes = poi.getDownvotes();
+        List<Long> upvotes = poi.getUpvotes();
+        List<Long> downvotes = poi.getDownvotes();
 
         if(upvotes.contains(user.getUserId())){
                upvotes.remove(user.getUserId());

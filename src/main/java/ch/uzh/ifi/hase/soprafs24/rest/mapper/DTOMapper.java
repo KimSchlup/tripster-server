@@ -1,11 +1,13 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
+import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterestComment;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestCommentGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestCommentPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPutDTO;
@@ -181,6 +183,8 @@ public interface DTOMapper {
   @Mapping(target = "roadtrip", ignore = true)
   @Mapping(target = "upvotes", ignore = true)
   @Mapping(target = "downvotes", ignore = true)
+  @Mapping(target = "pointOfInterestComments", ignore = true)
+  @Mapping(target = "pointOfInterestComment", ignore = true)
   @Mapping(source = "creatorId", target = "creatorId")
   @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "mapGeoJsonToPoint")
   PointOfInterest convertPointOfInterestPostDTOToEntity(PointOfInterestPostDTO pointOfInterestPostDTO);
@@ -193,6 +197,8 @@ public interface DTOMapper {
   @Mapping(target = "roadtrip", ignore = true)
   @Mapping(target = "upvotes", ignore = true)
   @Mapping(target = "downvotes", ignore = true)
+  @Mapping(target = "pointOfInterestComments", ignore = true)
+  @Mapping(target = "pointOfInterestComment", ignore = true)
   @Mapping(source = "creatorId", target = "creatorId")
   @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "pointToGeoJsonNode")
   PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
@@ -288,4 +294,18 @@ public interface DTOMapper {
   @Mapping(target = "roadtrip", ignore = true)
   @Mapping(source = "checklistElements", target = "checklistElements")
   Checklist convertChecklistPostDTOToEntity(ChecklistPostDTO postDTO);
+  @Mapping(target = "commentId", ignore = true)
+  @Mapping(target = "authorId" , ignore = true)
+  @Mapping(target = "creationDate", ignore = true)
+  @Mapping(target = "poi", ignore = true)
+  @Mapping(source = "comment", target = "comment")
+  PointOfInterestComment converPointOfInterestCommentPostDTOToEntity(PointOfInterestCommentPostDTO pointOfInterestCommentPostDTO);
+
+  @Mapping(source = "commentId", target = "commentId")
+  @Mapping(source = "authorId", target = "authorId")
+  @Mapping(source = "creationDate", target = "creationDate")
+  @Mapping(source = "poi", target = "poi")
+  @Mapping(source = "comment", target = "comment")
+  PointOfInterestCommentGetDTO convertEntityToPointOfInterestCommentGetDTO(PointOfInterestComment pointOfInterestComment);
+
 }
