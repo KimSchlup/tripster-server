@@ -82,8 +82,10 @@ public class ChecklistService {
         }
 
         // Save the checklist element
-        return checklistElementRepository.save(element);
-
+        checklistElementRepository.save(element);
+        checklistElementRepository.flush();
+        return element;
+        
     }
 
     public void updateChecklistElement(ChecklistElement updatedElement, Long elementId, Long roadtripId) {
