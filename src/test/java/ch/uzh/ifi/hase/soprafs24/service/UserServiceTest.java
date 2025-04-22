@@ -78,15 +78,36 @@ public class UserServiceTest {
     User retrievedUser = userService.getUserById(testUser.getUserId());
 
     // then
-    assertEquals(testUser.getUserId(), retrievedUser.getUserId());
+    assertEquals(testUser.getUsername(), retrievedUser.getUsername());
   }
 
   @Test
   public void getUserById_InvalidInput() {
-    User WrongIdUser = new User();
-    WrongIdUser.setUserId(2L);
+    // User WrongIdUser = new User();
+    // WrongIdUser.setUserId(2L);
 
     // then
-    assertThrows(ResponseStatusException.class, () -> userService.getUserById(testUser.getUserId()));
+    assertThrows(ResponseStatusException.class, () -> userService.getUserById(2L));
   }
+
+  @Test
+  public void getUserByToken_validInput() {
+    // Mock the repository to return the test user when findByUserId is called
+    Mockito.when(userRepository.findByToken(testUser.getToken())).thenReturn(testUser);
+
+    // when
+    User retrievedUser = userService.getUserByToken(testUser.getToken());
+
+    // then
+    assertEquals(testUser.getUsername(), retrievedUser.getUsername());
+  }
+
+  // @Test
+  // public void getUserByToken_InvalidInput() {
+  //   User WrongIdUser = new User();
+  //   WrongIdUser.setToken("wrongToken"));
+
+  //   // then
+  //   assertThrows(ResponseStatusException.class, () -> userService.getUserByToken(testUser.getToken()));
+  // }
 }
