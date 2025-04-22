@@ -315,34 +315,7 @@ public class PointOfInterestService {
         return false;
     }
 
-    public void decisionProcessUpdated(DecisionProcess process, PointOfInterest poi, Roadtrip roadtrip, Long userId){
-        List<Long> upvotes = poi.getUpvotes();
-        List<Long> downvotes = poi.getDownvotes();
-
-        List<RoadtripMember> roadtripMembers = roadtrip.getRoadtripMembers();
-        int voteCount = 0;
-        for(RoadtripMember member : roadtripMembers){
-            if(member.getInvitationStatus() == InvitationStatus.ACCEPTED){
-                voteCount++;
-            }
-        }
-        if(process == DecisionProcess.MAJORITY){
-            if(upvotes.size() > (voteCount/2)){
-                poi.setStatus(AcceptanceStatus.ACCEPTED);
-            }else if(downvotes.size() > (voteCount/2)){
-                poi.setStatus(AcceptanceStatus.DECLINED);
-            }
-        }else{
-            if(upvotes.contains(userId)){
-                poi.setStatus(AcceptanceStatus.ACCEPTED);
-        }else if(downvotes.contains(userId)){
-                poi.setStatus(AcceptanceStatus.DECLINED);
-            }
-        }
-    }
-
     public void calculateStatus(String token, PointOfInterest poi, Long roadtripId) {
-        // TODO Auto-generated method stub
         User user = userRepository.findByToken(token);
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));

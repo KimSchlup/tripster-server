@@ -1,7 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,17 +12,14 @@ import org.springframework.web.server.ResponseStatusException;
 import ch.uzh.ifi.hase.soprafs24.constant.BasemapType;
 import ch.uzh.ifi.hase.soprafs24.constant.DecisionProcess;
 import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
-import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMemberPK;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.repository.PointOfInterestRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripSettingsRepository;
-import io.opencensus.metrics.export.Point;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -34,20 +30,14 @@ public class RoadtripSettingsService {
     private final RoadtripSettingsRepository roadtripSettingsRepository;
     private final RoadtripRepository roadtripRepository;
     private final RoadtripMemberRepository roadtripMemberRepository;
-    private final PointOfInterestRepository pointOfInterestRepository;
-    private final PointOfInterestService pointOfInterestService;
 
     public RoadtripSettingsService(
             @Qualifier("roadtripSettingsRepository") RoadtripSettingsRepository roadtripSettingsRepository,
             @Qualifier("roadtripRepository") RoadtripRepository roadtripRepository,
-            @Qualifier("roadtripMemberRepository") RoadtripMemberRepository roadtripMemberRepository,
-            @Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository,
-            @Qualifier("pointOfInterestService") PointOfInterestService pointOfInterestService) {
+            @Qualifier("roadtripMemberRepository") RoadtripMemberRepository roadtripMemberRepository) {
         this.roadtripMemberRepository = roadtripMemberRepository;
         this.roadtripRepository = roadtripRepository;
         this.roadtripSettingsRepository = roadtripSettingsRepository;
-        this.pointOfInterestRepository = pointOfInterestRepository;
-        this.pointOfInterestService = pointOfInterestService;
     }
 
     public RoadtripSettings getRoadtripSettingsById(Long roadtripId, User user) {
@@ -92,7 +82,6 @@ public class RoadtripSettingsService {
         if (!isOwner) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the roadtrip owner can access the settings");
         }
-        List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
 
         // Fetch the existing RoadtripSettings object
         RoadtripSettings roadtripSettings = roadtripSettingsRepository.findByRoadtrip_RoadtripId(roadtripId)
@@ -103,11 +92,6 @@ public class RoadtripSettingsService {
         }
         if (updatedRoadtripSettings.getDecisionProcess() != null) {
             roadtripSettings.setDecisionProcess(updatedRoadtripSettings.getDecisionProcess());
-            // if decision process is updated, update all points of interest acceptance status
-            Long userId = user.getUserId();
-            for (PointOfInterest poi : pois) {
-                pointOfInterestService.decisionProcessUpdated(updatedRoadtripSettings.getDecisionProcess(), poi, roadtrip, userId);
-            }
         }
         if (updatedRoadtripSettings.getBoundingBox() != null) {
             roadtripSettings.setBoundingBox(updatedRoadtripSettings.getBoundingBox());
