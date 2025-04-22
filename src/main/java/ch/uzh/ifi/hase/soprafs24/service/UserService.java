@@ -36,9 +36,9 @@ public class UserService {
     this.userRepository = userRepository;
   }
 
-  public List<User> getUsers() {
-    return this.userRepository.findAll();
-  }
+  // public List<User> getUsers() {
+  //   return this.userRepository.findAll();
+  // }
 
   public User loginUser(User user) {
     User userByUsername = userRepository.findByUsername(user.getUsername());
@@ -88,7 +88,6 @@ public class UserService {
   }
 
   public User getUserByToken(String token) {
-    System.out.println(token);
     return this.userRepository.findByToken(token);
   }
 

@@ -2,7 +2,9 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -378,7 +381,66 @@ public void createUser_emptyUsername() throws Exception {
 
     // then
     mockMvc.perform(deleteRequest)
-        .andExpect(status().isNoContent()); // Erwartet 204
+        .andExpect(status().isConflict()); // Erwartet 409
+  }
+
+  //Login successfull
+  @Test
+  public void loginUser_successfull() throws Exception {
+
+    User mockUser = new User();
+    mockUser.setUserId(1L);
+    mockUser.setUsername("testuser");
+    mockUser.setPassword("password");
+    mockUser.setStatus(UserStatus.ONLINE);
+
+    // given
+    UserPostDTO userPostDTO = new UserPostDTO();
+    userPostDTO.setUsername("testuser");
+    userPostDTO.setPassword("password");
+
+    given(userService.loginUser(Mockito.any()))
+        .willReturn(mockUser);
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+
+    // when
+    MockHttpServletRequestBuilder postRequest = post("/auth/login")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(asJsonString(userPostDTO));
+
+    // then
+    mockMvc.perform(postRequest)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.username", is(mockUser.getUsername())))
+        .andExpect(jsonPath("$.userId", is(mockUser.getUserId().intValue())));
+  }
+
+  //logout successful
+  @Test
+  public void logoutUser_successfull() throws Exception {
+
+    // given
+    UserPostDTO userPostDTO = new UserPostDTO();
+
+    // and
+    User user = new User();
+    user.setFirstName("Firstname Lastname");
+    user.setUserId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
+
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+    doNothing().when(userService).deleteUser(Mockito.anyLong());
+
+    // when
+    MockHttpServletRequestBuilder deleteRequest = delete("/users/999")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token") // Simulierte Authentifizierung
+        .content(asJsonString(userPostDTO));
+
+    // then
+    mockMvc.perform(deleteRequest)
+        .andExpect(status().isNoContent()); // Erwartet 204 NO CONTENT
   }
 
   /**

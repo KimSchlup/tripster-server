@@ -69,4 +69,24 @@ public class UserServiceTest {
     assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
   }
 
+  @Test
+  public void getUserById_validInput() {
+    // Mock the repository to return the test user when findByUserId is called
+    Mockito.when(userRepository.findById(testUser.getUserId())).thenReturn(java.util.Optional.of(testUser));
+
+    // when
+    User retrievedUser = userService.getUserById(testUser.getUserId());
+
+    // then
+    assertEquals(testUser.getUserId(), retrievedUser.getUserId());
+  }
+
+  @Test
+  public void getUserById_InvalidInput() {
+    User WrongIdUser = new User();
+    WrongIdUser.setUserId(2L);
+
+    // then
+    assertThrows(ResponseStatusException.class, () -> userService.getUserById(testUser.getUserId()));
+  }
 }
