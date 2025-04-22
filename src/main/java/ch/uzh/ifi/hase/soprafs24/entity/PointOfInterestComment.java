@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 import jakarta.persistence.*;
 
+
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -9,15 +10,15 @@ import java.time.LocalDate;
 @Table(name = "point_of_interest_comment")
 
 public class PointOfInterestComment implements Serializable{
-    
+
 
     @Id
     @GeneratedValue
     private Long commentId;
 
     @ManyToOne
-    @MapsId("poiId")
-    @JoinColumn(name = "poi_id")
+    @JoinColumn(name = "poi_id", nullable = false)
+
     private PointOfInterest poi;
 
     @Column(nullable = false)
@@ -32,31 +33,31 @@ public class PointOfInterestComment implements Serializable{
 public PointOfInterest getPoi() {
         return poi;
     }
-    
+
     public void setPoi(PointOfInterest poi) {
         this.poi = poi;
     }
-    
+
     public Long getAuthorId() {
         return authorId;
     }
-    
+
     public void setAuthorId(Long authorId) {
         this.authorId = authorId;
     }
-    
+
     public String getComment() {
         return comment;
     }
-    
+
     public void setComment(String comment) {
         this.comment = comment;
     }
-    
+
     public LocalDate getCreationDate() {
         return creationDate;
     }
-    
+
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }
@@ -68,5 +69,5 @@ public PointOfInterest getPoi() {
     public void setCommentId(Long commentId){
         this.commentId = commentId;
     }
-    
+
 }
