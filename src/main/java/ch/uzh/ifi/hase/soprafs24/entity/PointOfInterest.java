@@ -14,10 +14,10 @@ import ch.uzh.ifi.hase.soprafs24.constant.PoiPriority;
 
 @Entity
 @Table(name = "point_of_interest")
-public class PointOfInterest implements Serializable{
+public class PointOfInterest implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue
     private Long poiId;
@@ -37,7 +37,7 @@ public class PointOfInterest implements Serializable{
 
     @Column
     private PoiCategory category;
-    
+
     @Column
     private PoiPriority priority;
 
@@ -49,16 +49,16 @@ public class PointOfInterest implements Serializable{
 
     @Column
     private Integer eligibleVoteCount;
-    
+
     @Column
     private List<Long> upvotes = new ArrayList<>();
 
     @Column
     private List<Long> downvotes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "point_of_interest", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "poi", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PointOfInterestComment> comments = new ArrayList<>();
-    
+
     // Getters and Setters
     public Long getPoiId() {
         return poiId;
@@ -140,9 +140,8 @@ public class PointOfInterest implements Serializable{
         this.priority = priority;
     }
 
-
     public List<Long> getUpvotes() {
-            return upvotes;
+        return upvotes;
     }
 
     // Setter for upvotes
@@ -158,13 +157,13 @@ public class PointOfInterest implements Serializable{
     // Setter for downvotes
     public void setDownvotes(List<Long> downvotes) {
         this.downvotes = downvotes;
-    } 
+    }
 
-    public List<PointOfInterestComment> getPointOfInterestComment(){
+    public List<PointOfInterestComment> getPointOfInterestComment() {
         return comments;
     }
 
-    public void setPointOfInterestComments(List<PointOfInterestComment> comments){
+    public void setPointOfInterestComments(List<PointOfInterestComment> comments) {
         this.comments = comments;
     }
 
