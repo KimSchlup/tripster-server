@@ -157,6 +157,7 @@ public class RoadtripService {
         // Flush all changes to the database
         roadtripRepository.flush();
         roadtripMemberRepository.flush();
+        checklistRepository.flush();
 
         log.debug("Created Information for Roadtrip: {}", newRoadtrip);
         return newRoadtrip;
