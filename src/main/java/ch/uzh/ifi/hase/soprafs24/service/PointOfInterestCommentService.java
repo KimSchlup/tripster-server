@@ -36,14 +36,14 @@ public class PointOfInterestCommentService {
         PointOfInterestComment poiComment = new PointOfInterestComment();
         List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
         PointOfInterest poi = new PointOfInterest();
-        User author = userRepository.findByToken(token);        
-        
+        User author = userRepository.findByToken(token);  
+
         for(PointOfInterest temp : pois){
             if(poiId.equals(temp.getPoiId())){
                 poi = temp;
             }
         }
-
+        
         if(poi.equals(null)){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Poi "+ poiId + "was not found for roadtrip " + roadtripId );
         }
@@ -87,34 +87,37 @@ public class PointOfInterestCommentService {
         return poi.getPointOfInterestComment();
     }
 
-    public void deleteComment(String token, Long commentId, Long poiId, Long roadtripId){
-
+    public void deleteComment(String token, Long commentId, Long poiId, Long roadtripId) {
         List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
-        PointOfInterest poi = new PointOfInterest();
+        PointOfInterest poi = null;
         User author = userRepository.findByToken(token);
-        Boolean deleted = false;
-    
-        for(PointOfInterest temp : pois){
-            if(poiId.equals(temp.getPoiId())){
+        boolean deleted = false;
+
+        for (PointOfInterest temp : pois) {
+            if (poiId.equals(temp.getPoiId())) {
                 poi = temp;
+                break;
             }
         }
 
-        if(poi.equals(null)){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Poi "+ poiId + "was not found for roadtrip " + roadtripId);
+        if (poi == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Poi " + poiId + " was not found for roadtrip " + roadtripId);
         }
 
         List<PointOfInterestComment> comments = poi.getPointOfInterestComment();
-        for(PointOfInterestComment temp : comments){
-            if(temp.getAuthorId().equals(author.getUserId()) && temp.getCommentId().equals(commentId)){
-                comments.remove(temp);
+        for (PointOfInterestComment temp : comments) {
+            if (temp.getAuthorId().equals(author.getUserId()) && temp.getCommentId().equals(commentId)) {
+                poi.removeComment(temp); // Use the helper method
                 deleted = true;
+                break;
             }
         }
-        if(!deleted){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No comment with matching id "+ commentId + " of the author " + author.getUserId()+ " was found");
-        }
-        poi.setPointOfInterestComments(new ArrayList<PointOfInterestComment>(comments));
 
+        if (!deleted) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No comment with matching id " + commentId + " of the author " + author.getUserId() + " was found");
+        }
+
+        pointOfInterestRepository.save(poi); // Persist the changes
+        pointOfInterestRepository.flush();
     }
 }

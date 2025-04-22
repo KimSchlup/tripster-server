@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.locationtech.jts.geom.Point;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.PoiCategory;
 import ch.uzh.ifi.hase.soprafs24.constant.PoiPriority;
@@ -57,6 +59,7 @@ public class PointOfInterest implements Serializable {
     private List<Long> downvotes = new ArrayList<>();
 
     @OneToMany(mappedBy = "poi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<PointOfInterestComment> comments = new ArrayList<>();
 
     // Getters and Setters
@@ -165,6 +168,16 @@ public class PointOfInterest implements Serializable {
 
     public void setPointOfInterestComments(List<PointOfInterestComment> comments) {
         this.comments = comments;
+    }
+
+    public void addComment(PointOfInterestComment comment) {
+        this.comments.add(comment);
+        comment.setPoi(this);
+    }
+
+    public void removeComment(PointOfInterestComment comment) {
+        this.comments.remove(comment);
+        comment.setPoi(null);
     }
 
 }
