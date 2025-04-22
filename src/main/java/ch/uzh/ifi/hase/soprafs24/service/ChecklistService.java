@@ -80,7 +80,9 @@ public class ChecklistService {
         }
 
         // Save the checklist element
-        return checklistElementRepository.save(element);
+        checklistElementRepository.save(element);
+        checklistElementRepository.flush();
+        return element;
         
     }
 
