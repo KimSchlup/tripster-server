@@ -238,7 +238,6 @@ public interface DTOMapper {
     }
   }
 
-<<<<<<< HEAD
   @Named("stringToBasemapType")
   public static ch.uzh.ifi.hase.soprafs24.constant.BasemapType stringToBasemapType(String basemapType) {
     if (basemapType == null) {
@@ -295,8 +294,6 @@ public interface DTOMapper {
   @Mapping(target = "roadtrip", ignore = true)
   @Mapping(source = "checklistElements", target = "checklistElements")
   Checklist convertChecklistPostDTOToEntity(ChecklistPostDTO postDTO);
-||||||| parent of 6c168be (started to implement comments on POI's, need to test it before deploying to develop)
-=======
   @Mapping(target = "commentId", ignore = true)
   @Mapping(target = "authorId" , ignore = true)
   @Mapping(target = "creationDate", ignore = true)
@@ -311,5 +308,4 @@ public interface DTOMapper {
   @Mapping(source = "comment", target = "comment")
   PointOfInterestCommentGetDTO convertEntityToPointOfInterestCommentGetDTO(PointOfInterestComment pointOfInterestComment);
 
->>>>>>> 6c168be (started to implement comments on POI's, need to test it before deploying to develop)
 }

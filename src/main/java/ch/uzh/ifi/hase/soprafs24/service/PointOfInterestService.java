@@ -34,22 +34,9 @@ public class PointOfInterestService {
     private final Logger log = LoggerFactory.getLogger(PointOfInterestService.class);
     private final PointOfInterestRepository pointOfInterestRepository;
 
-<<<<<<< HEAD
-    @Autowired
-    public PointOfInterestService(
-            @Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository,
-            RoadtripRepository roadtripRepository,
-            UserRepository userRepository) {
-||||||| parent of 5914937 (trying to fix the code to be able to run the docker server)
-    @Autowired
     public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, 
                                                                                 RoadtripRepository roadtripRepository,
                                                                                 UserRepository userRepository){
-=======
-    public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, 
-                                                                                RoadtripRepository roadtripRepository,
-                                                                                UserRepository userRepository){
->>>>>>> 5914937 (trying to fix the code to be able to run the docker server)
         this.pointOfInterestRepository = pointOfInterestRepository;
         this.roadtripRepository = roadtripRepository;
         this.userRepository = userRepository;
