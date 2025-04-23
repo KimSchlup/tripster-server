@@ -35,6 +35,14 @@ public class UserServiceIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Qualifier("userRepository")
+    @Autowired
+    private ChecklistRepository checklistRepository;
+
+    @Qualifier("userRepository")
+    @Autowired
+    private ChecklistElementRepository checklistElementRepository;
+
     @Qualifier("roadtripRepository")
     @Autowired
     private RoadtripRepository roadtripRepository;
@@ -45,6 +53,9 @@ public class UserServiceIntegrationTest {
     @Autowired
     private RoadtripService roadtripService;
 
+    @Autowired
+    private ChecklistService checklistService;
+
     @BeforeEach
     public void setup() {
         checklistElementRepository.deleteAll();
@@ -52,4 +63,55 @@ public class UserServiceIntegrationTest {
         roadtripRepository.deleteAll();
     }
 
+    @Test
+    public void getChecklistByRoadtripId_success() {
+
+        Roadtrip testTrip = new Roadtrip();
+        testTrip.setName("testName");
+        roadtripService.createRoadtrip(testTrip);
+
+        Long roadtripId = testTrip.getRoadtripId();
+
+        // when
+        Roadtrip fetchedTrip = checklistService.getChecklistByRoadtripId(rodtripId);
+
+        // then
+        assertEquals(testTrip.getName(), fetchedTrip.getName());
+    }
+
+    @Test
+    public void getChecklistByRoadtripId_fail() {
+
+        Roadtrip testTrip = new Roadtrip();
+        testTrip.setName("testName");
+        roadtripService.createRoadtrip(testTrip);
+
+        Long nonExistingId = 999L
+
+
+        // when and then
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            checklistService.getChecklistByRoadtripId(nonExistingId);
+        });
+
+        // Verify the exception status and message
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Checklist not found for this roadtrip", exception.getReason());
+    }
+
+    @Test
+    public void getChecklistByRoadtripId_success() {
+
+        Roadtrip testTrip = new Roadtrip();
+        testTrip.setName("testName");
+        roadtripService.createRoadtrip(testTrip);
+
+        Long roadtripId = testTrip.getRoadtripId();
+
+        // when
+        Roadtrip fetchedTrip = checklistService.getChecklistByRoadtripId(rodtripId);
+
+        // then
+        assertEquals(testTrip.getName(), fetchedTrip.getName());
+    }
 }

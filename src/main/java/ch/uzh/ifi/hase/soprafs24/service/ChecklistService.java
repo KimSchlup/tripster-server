@@ -46,9 +46,7 @@ public class ChecklistService {
 
     public ChecklistElement addChecklistElement(Long roadtripId, ChecklistElement element) {
         // Retrieve the Checklist entity associated with the roadtrip
-        Checklist checklist = checklistRepository.findByRoadtripId(roadtripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Checklist not found for this roadtrip"));
+        Checklist checklist = getChecklistByRoadtripId(roadtripId);
 
         // Set the checklist for the element
         element.setChecklist(checklist);
