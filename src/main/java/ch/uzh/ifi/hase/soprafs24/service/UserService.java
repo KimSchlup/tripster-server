@@ -64,7 +64,7 @@ public class UserService {
     userByUsername.setStatus(UserStatus.OFFLINE);
     userRepository.save(userByUsername);
     userRepository.flush();
-    return;
+    //return;
   }
 
   public User createUser(User newUser) {
@@ -88,12 +88,15 @@ public class UserService {
   }
 
   public User getUserByToken(String token) {
-    return this.userRepository.findByToken(token);
+    User user = userRepository.findByToken(token);
+    if (user == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+    }
+    return user;
   }
 
 public void updateUser(Long userId, User updatedUser) {
-  User user = this.userRepository.findById(userId)
-              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+  User user = getUserById(userId);
   
   //check that username is valid input            
   checkIfUserExists(updatedUser);
@@ -140,6 +143,7 @@ public void deleteUser(Long userId) {
   }
 }
 
+
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name
@@ -151,14 +155,16 @@ public void deleteUser(Long userId) {
    * @see User
    */
   private void checkIfUserExists(User userToBeCreated) {
+    //check to ensure the username is not empty
+    if (userToBeCreated.getUsername() != null && userToBeCreated.getUsername().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be empty");
+    }
+
+    //check for duplicate username
     User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
     
     if (userByUsername != null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
     } 
-    //check to ensure the username is not empty
-    if (userToBeCreated.getUsername() != null && userToBeCreated.getUsername().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be empty");
-    }
   }
 }
