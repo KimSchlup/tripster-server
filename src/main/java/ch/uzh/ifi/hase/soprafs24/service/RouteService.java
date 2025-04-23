@@ -63,7 +63,22 @@ public class RouteService {
 
     // Create a new route
     public Route createRoute(String token, Long roadtripId, Route route) {
-        System.out.println("Creating route: " + route);
+        // Find existing route first
+        Optional<Route> existingRoute = routeRepository.findByRoadtrip_RoadtripId(roadtripId)
+                .stream()
+                .filter(r -> r.getStartId().equals(route.getStartId()) 
+                         && r.getEndId().equals(route.getEndId()) 
+                         && r.getTravelMode() == route.getTravelMode())
+                .findFirst();
+
+        // If route exists, update its status and return it
+        if (existingRoute.isPresent()) {
+            Route foundRoute = existingRoute.get();
+            updateRouteStatus(foundRoute);
+            return foundRoute;
+        }
+
+        // If no existing route found, continue with creating a new one
         List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
         Long startId = route.getStartId();
         Long endId = route.getEndId();
