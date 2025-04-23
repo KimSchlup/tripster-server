@@ -76,7 +76,6 @@ services:
     volumes:
       - .:/app
       - ~/.gradle:/home/gradle/.gradle
-      - ./test-reports:/app/build/reports/tests/test
     command: sh -c "./gradlew --stop && ./gradlew test --no-daemon"
 
     profiles:

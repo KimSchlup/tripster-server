@@ -23,14 +23,25 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = { IllegalArgumentException.class, IllegalStateException.class })
   protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
-    String bodyOfResponse = "This should be application specific";
+    String bodyOfResponse = ex.getMessage() != null ? ex.getMessage()
+        : "A conflict occurred with the current state of the resource";
     return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.CONFLICT, request);
   }
 
   @ExceptionHandler(TransactionSystemException.class)
   public ResponseStatusException handleTransactionSystemException(Exception ex, HttpServletRequest request) {
     log.error("Request: {} raised {}", request.getRequestURL(), ex);
-    return new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
+
+    // Extract the root cause message if available
+    Throwable rootCause = ex;
+    while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+      rootCause = rootCause.getCause();
+    }
+
+    String errorMessage = rootCause.getMessage() != null ? rootCause.getMessage()
+        : "A conflict occurred with the current state of the resource";
+
+    return new ResponseStatusException(HttpStatus.CONFLICT, errorMessage, ex);
   }
 
   // Keep this one disable for all testing purposes -> it shows more detail with

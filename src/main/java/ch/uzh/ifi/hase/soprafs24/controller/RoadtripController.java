@@ -58,29 +58,12 @@ public class RoadtripController {
         return DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(createdRoadtrip);
     }
 
-    /**
-     * GET /roadtrips a user is owner of or has an accepted or pending invitation
-     * 
-     * @return List of RoadtripGetDTO
-     */
     @GetMapping("/roadtrips")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<RoadtripGetDTO> getRoadtrips(@RequestHeader("Authorization") String token) {
-
-        User user = userService.getUserByToken(token); // No need to verify if user exists, otherwise authentication
-                                                       // fails
-
-        // Fetch roadtrips user is owner, or has an accepted or pending invitation to
-        List<Roadtrip> roadtrips = roadtripService.getRoadtrips(user);
-
-        // convert internal representation of roadtrips back to API
-        List<RoadtripGetDTO> roadtripGetDTOs = new ArrayList<>();
-        for (Roadtrip roadtrip : roadtrips) {
-            roadtripGetDTOs.add(DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(roadtrip));
-        }
-
-        return roadtripGetDTOs;
+        User user = userService.getUserByToken(token);
+        return roadtripService.getRoadtripsOfUser(user);
     }
 
     /**
@@ -98,10 +81,7 @@ public class RoadtripController {
         User user = userService.getUserByToken(token);
 
         // Fetch roadtrips user is owner of or member of
-        Roadtrip roadtrip = roadtripService.getRoadtripById(roadtripId, user);
-
-        // convert internal representation of rodatrip back to API
-        RoadtripGetDTO roadtripGetDTO = DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(roadtrip);
+        RoadtripGetDTO roadtripGetDTO = roadtripService.getRoadtripById(roadtripId, user);
 
         return roadtripGetDTO;
     }
@@ -109,18 +89,23 @@ public class RoadtripController {
     @PutMapping("/roadtrips/{roadtripId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public RoadtripGetDTO updateRoadtrip(@PathVariable Long roadtripId, @RequestHeader("Authorization") String token) {
+    public RoadtripGetDTO updateRoadtrip(@PathVariable Long roadtripId, @RequestBody RoadtripPostDTO roadtripPostDTO,
+            @RequestHeader("Authorization") String token) {
 
         // Get user from token
         User user = userService.getUserByToken(token);
 
-        // Fetch roadtrips user is owner of or member of
-        Roadtrip roadtrip = roadtripService.getRoadtripById(roadtripId, user);
+        // Check if user has access to this roadtrip
+        roadtripService.getRoadtripById(roadtripId, user);
 
-        // convert internal representation of rodatrip back to API
-        RoadtripGetDTO roadtripGetDTO = DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(roadtrip);
+        // Convert API roadtrip to internal representation
+        Roadtrip roadtripInput = DTOMapper.INSTANCE.convertRoadtripPostDTOtoEntity(roadtripPostDTO);
 
-        return roadtripGetDTO;
+        // Update roadtrip
+        Roadtrip updatedRoadtrip = roadtripService.updateRoadtripById(roadtripId, roadtripInput);
+
+        // Convert internal representation of roadtrip back to API
+        return DTOMapper.INSTANCE.convertEntityToRoadtripGetDTO(updatedRoadtrip);
     }
 
     @DeleteMapping("/roadtrips/{roadtripId}")

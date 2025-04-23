@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
 import ch.uzh.ifi.hase.soprafs24.service.RoadtripService;
@@ -40,7 +41,7 @@ import java.util.List;
  * This only tests if the RoadtripController itself works.
  */
 @WebMvcTest(RoadtripController.class)
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class RoadtripControllerTest {
 
   @Autowired
@@ -108,8 +109,13 @@ public class RoadtripControllerTest {
     roadtrip.setName("Test User");
     roadtrip.setDescription("Test Description");
 
-    List<Roadtrip> allRoadtrips = Collections.singletonList(roadtrip);
-    given(roadtripService.getRoadtrips(Mockito.any())).willReturn(allRoadtrips);
+    RoadtripGetDTO roadtripGetDTO = new RoadtripGetDTO();
+    roadtripGetDTO.setRoadtripId(roadtrip.getRoadtripId());
+    roadtripGetDTO.setName(roadtrip.getName());
+    roadtripGetDTO.setDescription(roadtrip.getDescription());
+    List<RoadtripGetDTO> allRoadtrips = Collections.singletonList(roadtripGetDTO);
+
+    given(roadtripService.getRoadtripsOfUser(Mockito.any())).willReturn(allRoadtrips);
     given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
 
     // when
@@ -140,7 +146,13 @@ public class RoadtripControllerTest {
     roadtrip.setName("testName");
     roadtrip.setDescription("testDescription");
 
-    given(roadtripService.getRoadtripById(Mockito.any(), Mockito.any())).willReturn(roadtrip);
+
+    RoadtripGetDTO roadtripGetDTO = new RoadtripGetDTO();
+    roadtripGetDTO.setRoadtripId(roadtrip.getRoadtripId());
+    roadtripGetDTO.setName(roadtrip.getName());
+    roadtripGetDTO.setDescription(roadtrip.getDescription());
+    
+    given(roadtripService.getRoadtripById(Mockito.any(), Mockito.any())).willReturn(roadtripGetDTO);
     given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
 
     // when

@@ -30,36 +30,20 @@ public class UserController {
     this.userService = userService;
   }
 
-  @GetMapping("/users")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public List<UserGetDTO> getAllUsers() {
-    // fetch all users in the internal representation
-    List<User> users = userService.getUsers();
-    List<UserGetDTO> userGetDTOs = new ArrayList<>();
-
-    // convert each user to the API representation
-    for (User user : users) {
-      userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-    }
-    return userGetDTOs;
-  }
-
   @GetMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserGetDTO getUserbyId(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
+  public UserGetDTO getUserbyUserId(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
     // add Id authentication here
     User authenticatedUser = userService.getUserByToken(token);
 
     if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
-    }
-
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
+    } else {
     // fetch user in the internal representation
     User user = userService.getUserById(userId);
 
-    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);}
   }
 
   @PutMapping("/users/{userId}")
@@ -70,7 +54,7 @@ public class UserController {
     User authenticatedUser = userService.getUserByToken(token);
 
       if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
-          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
       }
 
       // convert API user to internal representation

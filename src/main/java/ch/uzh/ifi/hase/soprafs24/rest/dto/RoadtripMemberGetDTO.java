@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 
 public class RoadtripMemberGetDTO {
     private Long userId;
+    private String username;
     private Long roadtripId;
     private InvitationStatus invitationStatus;
 
@@ -14,6 +15,16 @@ public class RoadtripMemberGetDTO {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+   
 
     public Long getRoadtripId() {
         return roadtripId;
