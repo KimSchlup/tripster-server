@@ -50,6 +50,7 @@ public class PointOfInterestController {
         List<PointOfInterestGetDTO> pointOfInterestGetDTOs = new ArrayList<>();
 
         for (PointOfInterest pointOfInterest : pointOfInterests) {
+            pointOfInterestService.calculateStatus(token, pointOfInterest, roadtripId);
             pointOfInterestGetDTOs.add(DTOMapper.INSTANCE.convertEntityToPointOfInterestGetDTO(pointOfInterest));
         }
         
