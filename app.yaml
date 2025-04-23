@@ -2,17 +2,10 @@
 # https://cloud.google.com/appengine/docs/standard
 
 # This file is used to configure the Google App Engine Standard environment for Java 17.
-env: flex
-runtime: java
-
-runtime_config:
-  operating_system: "ubuntu22"
-  runtime_version: "17"
+runtime: java17
+instance_class: F2
 
 env_variables:
   SPRING_PROFILES_ACTIVE: "prod"
 
-resources:
-  cpu: 1
-  memory_gb: 1
-  disk_size_gb: 10
+
