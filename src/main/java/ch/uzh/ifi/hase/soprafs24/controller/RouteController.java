@@ -45,10 +45,15 @@ public class RouteController {
     }
 
     // DELETE: Delete a route
+    @DeleteMapping("/roadtrips/{roadtripId}/routes/{routeId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteRoute(@RequestHeader("Authorization") String token, @PathVariable Long roadtripId, @PathVariable Long routeId) {
+        routeService.deleteRoute(token, roadtripId, routeId);
+    }
+
     @DeleteMapping("/roadtrips/{roadtripId}/routes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteRoute(@RequestBody RouteDeleteDTO routeDeleteDTO) {
-        Route routeToDelete = DTOMapper.INSTANCE.convertRouteDeleteDTOToEntity(routeDeleteDTO);
-        routeService.deleteRoute(routeToDelete);
+    public void deleteRoutes(@RequestHeader("Authorization") String token, @PathVariable Long roadtripId) {
+        routeService.deleteRoutes(token, roadtripId);
     }
 }

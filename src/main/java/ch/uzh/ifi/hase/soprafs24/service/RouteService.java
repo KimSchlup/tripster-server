@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
+import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.TravelMode;
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
@@ -213,16 +214,7 @@ public class RouteService {
         return routes;
     }
 
-    // Delete a route
-    public void deleteRoute(Route route) {
-        // Check if the route exists
-        boolean exists = routeRepository.existsByStartIdAndEndId(route.getStartId(), route.getEndId());
-        if (!exists) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Route not found");
-        }
-        // Delete the route
-        routeRepository.deleteByStartIdAndEndId(route.getStartId(), route.getEndId());
-    }
+    
 
     public TravelMode convertToTravelMode(String travelMode){
         if (travelMode.equals("driving-car")) {
@@ -319,5 +311,84 @@ public class RouteService {
 
         GeometryFactory geometryFactory = new GeometryFactory();
         return geometryFactory.createLineString(coordinates.toArray(new Coordinate[0]));
+    }
+
+    public void deleteRoute(String token, Long roadtripId, Long routeId) {
+        // Verify user exists and is authenticated
+        User user = userRepository.findByToken(token);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+
+        // Check if the roadtrip exists
+        Roadtrip roadtrip = roadTripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Roadtrip not found"));
+
+        // Find and verify the user's membership status
+        RoadtripMember member = roadtrip.getRoadtripMembers().stream()
+                .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "User is not a member of this roadtrip"));
+
+        // Check if member has accepted the roadtrip invitation
+        if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before deleting routes");
+        }
+
+        // Find the route and verify it belongs to the roadtrip
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Route not found"));
+
+        if (!route.getRoadtrip().getRoadtripId().equals(roadtripId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "Route does not belong to this roadtrip");
+        }
+
+        // Delete the route
+        routeRepository.deleteById(routeId);
+    }
+
+
+    public void deleteRoutes(String token, Long roadtripId) {
+        // Verify user exists and is authenticated
+        User user = userRepository.findByToken(token);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+
+        // Check if the roadtrip exists
+        Roadtrip roadtrip = roadTripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Roadtrip not found"));
+
+        // Find and verify the user's membership status
+        RoadtripMember member = roadtrip.getRoadtripMembers().stream()
+                .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "User is not a member of this roadtrip"));
+
+        // Check if member has accepted the roadtrip invitation
+        if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before deleting routes");
+        }
+
+        // Get all routes for this roadtrip
+        List<Route> routes = routeRepository.findByRoadtrip_RoadtripId(roadtripId);
+        
+        if (routes.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                "No routes found for this roadtrip");
+        }
+
+        // Delete all routes
+        routeRepository.deleteAll(routes);
+
+        logger.info("Deleted {} routes for roadtrip {}", routes.size(), roadtripId);
     }
 }
