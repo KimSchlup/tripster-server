@@ -190,4 +190,12 @@ public class RoadtripService {
 
         return roadtripRepository.save(roadtripToBeUpdated);
     }
+
+    public Boolean isMember(Long roadtripId, Long userId) {
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        return roadtrip.getRoadtripMembers().stream()
+                .anyMatch(member -> member.getUser().getUserId().equals(userId));
+    }
 }

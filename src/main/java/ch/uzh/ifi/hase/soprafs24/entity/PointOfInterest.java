@@ -31,7 +31,7 @@ public class PointOfInterest implements Serializable {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "geometry(Point, 4326)")
     private Point coordinate;
 
     @Column
