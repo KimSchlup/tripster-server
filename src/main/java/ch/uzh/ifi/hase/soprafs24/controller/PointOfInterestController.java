@@ -45,11 +45,12 @@ public class PointOfInterestController {
     @GetMapping("/roadtrips/{roadtripId}/pois")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<PointOfInterestGetDTO> getPointOfInterests(@PathVariable Long roadtripId) {
-        List<PointOfInterest> pointOfInterests = pointOfInterestService.getPointOfInterestsByRoadTrip(roadtripId);
+    public List<PointOfInterestGetDTO> getPointOfInterests(@RequestHeader("Authorization") String token, @PathVariable Long roadtripId) {
+        List<PointOfInterest> pointOfInterests = pointOfInterestService.getPointOfInterestsByRoadTrip(token, roadtripId);
         List<PointOfInterestGetDTO> pointOfInterestGetDTOs = new ArrayList<>();
 
         for (PointOfInterest pointOfInterest : pointOfInterests) {
+            pointOfInterestService.calculateStatus(token, pointOfInterest, roadtripId);
             pointOfInterestGetDTOs.add(DTOMapper.INSTANCE.convertEntityToPointOfInterestGetDTO(pointOfInterest));
         }
         
@@ -59,10 +60,10 @@ public class PointOfInterestController {
     @PutMapping("/roadtrips/{roadtripId}/pois/{poiId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void updatePointOfInterest(@RequestBody PointOfInterestPutDTO pointOfInterestPutDTO, @PathVariable Long roadtripId, @PathVariable Long poiId){
+    public void updatePointOfInterest(@RequestHeader("Authorization") String token, @RequestBody PointOfInterestPutDTO pointOfInterestPutDTO, @PathVariable Long roadtripId, @PathVariable Long poiId){
         
         PointOfInterest newPointOfInterest = DTOMapper.INSTANCE.convertPointOfInterestPutDTOToEntity(pointOfInterestPutDTO);
-        PointOfInterest oldPointOfInterest = pointOfInterestService.getPointOfInterestByID(roadtripId, poiId);
+        PointOfInterest oldPointOfInterest = pointOfInterestService.getPointOfInterestByID(token, roadtripId, poiId);
         
         pointOfInterestService.updatePointOfInterest(oldPointOfInterest, newPointOfInterest);
         
@@ -71,10 +72,8 @@ public class PointOfInterestController {
     @DeleteMapping("/roadtrips/{roadtripId}/pois/{poiId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void deletePointOfInterest(@PathVariable Long roadtripId, @PathVariable Long poiId){
-        
-        pointOfInterestService.deletePointOfInterest(poiId);
-        
+    public void deletePointOfInterest(@RequestHeader("Authorization") String token, @PathVariable Long roadtripId, @PathVariable Long poiId) {
+        pointOfInterestService.deletePointOfInterest(token, roadtripId, poiId); // Pass all required arguments
     }
 
     @PutMapping("/roadtrips/{roadtripId}/pois/{poiId}/votes")

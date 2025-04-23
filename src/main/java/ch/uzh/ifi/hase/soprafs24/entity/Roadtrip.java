@@ -97,5 +97,13 @@ public class Roadtrip implements Serializable {
   public void setChecklist(Checklist checklist) {
       this.checklist = checklist;
   }
+
+  public RoadtripSettings getRoadtripSettings() {
+    return roadtripSettings;
+  }
+
+  public void setRoadtripSettings(RoadtripSettings roadtripSettings) {
+    this.roadtripSettings = roadtripSettings;
+  }
   
 }
