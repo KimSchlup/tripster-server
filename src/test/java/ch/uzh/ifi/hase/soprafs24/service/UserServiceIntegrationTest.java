@@ -17,8 +17,6 @@ import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
-
 /**
  * Test class for the UserResource REST resource.
  *
@@ -43,11 +41,25 @@ public class UserServiceIntegrationTest {
     @Autowired
     private RoadtripService roadtripService;
 
+    @Autowired
+    private ch.uzh.ifi.hase.soprafs24.repository.PointOfInterestRepository pointOfInterestRepository;
+
+    @Autowired
+    private ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository roadtripMemberRepository;
+
+    @Autowired
+    private ch.uzh.ifi.hase.soprafs24.repository.ChecklistRepository checklistRepository;
+
     @BeforeEach
     public void setup() {
+        // Delete in correct order to avoid foreign key constraint violations
+        pointOfInterestRepository.deleteAll();
+        checklistRepository.deleteAll();
+        roadtripMemberRepository.deleteAll();
         roadtripRepository.deleteAll();
         userRepository.deleteAll();
     }
+
     @Test
     public void createUser_validInputs_success() {
         // given
@@ -154,8 +166,7 @@ public class UserServiceIntegrationTest {
         updatedUser.setMail("newMail");
         updatedUser.setPassword("newPassword");
         updatedUser.setReceiveNotifications(false);
-        //updatedUser.setUserPreferences(new UserPreferences());
-
+        // updatedUser.setUserPreferences(new UserPreferences());
 
         // when
         userService.updateUser(testUserId, updatedUser);
@@ -170,7 +181,7 @@ public class UserServiceIntegrationTest {
         assertEquals("newMail", updatedTestUser.getMail());
         assertEquals("newPassword", updatedTestUser.getPassword());
         assertEquals(false, updatedTestUser.getReceiveNotifications());
-        //assertNotNull(updatedTestUser.getUserPreferences());
+        // assertNotNull(updatedTestUser.getUserPreferences());
     }
 
     @Test
@@ -203,17 +214,16 @@ public class UserServiceIntegrationTest {
         updatedUser.setMail("newMail");
         updatedUser.setPassword("newPassword");
         updatedUser.setReceiveNotifications(false);
-        //updatedUser.setUserPreferences(new UserPreferences());
+        // updatedUser.setUserPreferences(new UserPreferences());
 
+        // when and then
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            userService.updateUser(testUserId, updatedUser);
+        });
 
-    // when and then
-    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-        userService.updateUser(testUserId, updatedUser);
-    });
-
-    // Verify the exception status and message
-    assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
-    assertEquals("Username already taken", exception.getReason());
+        // Verify the exception status and message
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        assertEquals("Username already taken", exception.getReason());
     }
 
     @Test
@@ -239,17 +249,16 @@ public class UserServiceIntegrationTest {
         updatedUser.setMail("newMail");
         updatedUser.setPassword("newPassword");
         updatedUser.setReceiveNotifications(false);
-        //updatedUser.setUserPreferences(new UserPreferences());
+        // updatedUser.setUserPreferences(new UserPreferences());
 
+        // when and then
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            userService.updateUser(testUserId, updatedUser);
+        });
 
-    // when and then
-    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-        userService.updateUser(testUserId, updatedUser);
-    });
-
-    // Verify the exception status and message
-    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-    assertEquals("Username cannot be empty", exception.getReason());
+        // Verify the exception status and message
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        assertEquals("Username cannot be empty", exception.getReason());
     }
 
     @Test
@@ -265,7 +274,6 @@ public class UserServiceIntegrationTest {
         userService.createUser(testUser);
 
         Long testUserId = testUser.getUserId();
-
 
         // when
         userService.deleteUser(testUserId);
@@ -344,7 +352,7 @@ public class UserServiceIntegrationTest {
         testUser.setUsername("noUsername");
         testUser.setPassword("password");
 
-       // Verify
+        // Verify
         // when and then
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             userService.logoutUser(testUser);
@@ -353,7 +361,6 @@ public class UserServiceIntegrationTest {
         // Verify the exception status and message
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     }
-
 
     @Test
     public void loginUser_success() {
@@ -370,7 +377,7 @@ public class UserServiceIntegrationTest {
 
         assertEquals(UserStatus.OFFLINE, testUser.getStatus());
 
-        //when
+        // when
         userService.loginUser(testUser);
         userRepository.flush();
 
@@ -393,7 +400,7 @@ public class UserServiceIntegrationTest {
         testUser.setUsername("noUsername");
         testUser.setPassword("password");
 
-       // Verify
+        // Verify
         // when and then
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             userService.loginUser(testUser);
@@ -421,7 +428,7 @@ public class UserServiceIntegrationTest {
         fakeUser.setUsername("noUsername");
         fakeUser.setPassword("wrongpassword");
 
-       // Verify
+        // Verify
         // when and then
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             userService.loginUser(fakeUser);

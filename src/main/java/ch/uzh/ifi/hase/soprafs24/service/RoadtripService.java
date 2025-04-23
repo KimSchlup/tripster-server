@@ -101,7 +101,7 @@ public class RoadtripService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
         // Check if user is owner or member
-        boolean isOwner = Objects.equals(roadtrip.getOwner(), user);
+        boolean isOwner = Objects.equals(roadtrip.getOwner().getUserId(), user.getUserId());
         RoadtripMember roadtripMember = roadtripMemberRepository.findByUserAndRoadtrip(user, roadtrip);
         boolean isMember = roadtripMember != null && roadtripMember.getInvitationStatus() == InvitationStatus.ACCEPTED;
 

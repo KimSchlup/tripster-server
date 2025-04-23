@@ -47,7 +47,7 @@ public class RoadtripSettingsService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
         // Check if user is owner or member
-        boolean isOwner = Objects.equals(roadtrip.getOwner(), user);
+        boolean isOwner = Objects.equals(roadtrip.getOwner().getUserId(), user.getUserId());
         RoadtripMember roadtripMember = roadtripMemberRepository.findByUserAndRoadtrip(user, roadtrip);
         boolean isMember = roadtripMember != null && roadtripMember.getInvitationStatus() == InvitationStatus.ACCEPTED;
 
@@ -71,40 +71,82 @@ public class RoadtripSettingsService {
      * @return the updated RoadtripSettings object
      */
     public void updateRoadtripSettingsById(Long roadtripId, RoadtripSettings updatedRoadtripSettings, User user) {
+        try {
+            // Check if roadtrip exists
+            Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
-        // Check if roadtrip exists
-        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+            // Check if user is owner
+            boolean isOwner = Objects.equals(roadtrip.getOwner().getUserId(), user.getUserId());
 
-        // Check if user is owner
-        boolean isOwner = Objects.equals(roadtrip.getOwner(), user);
+            if (!isOwner) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Only the roadtrip owner can access the settings");
+            }
 
-        if (!isOwner) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the roadtrip owner can access the settings");
-        }
+            // Fetch the existing RoadtripSettings object
+            RoadtripSettings roadtripSettings = roadtripSettingsRepository.findByRoadtrip_RoadtripId(roadtripId)
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip settings not found"));
 
-        // Fetch the existing RoadtripSettings object
-        RoadtripSettings roadtripSettings = roadtripSettingsRepository.findByRoadtrip_RoadtripId(roadtripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip settings not found"));
+            // Update fields if they are not null
+            if (updatedRoadtripSettings.getBasemapType() != null) {
+                roadtripSettings.setBasemapType(updatedRoadtripSettings.getBasemapType());
+            }
+            if (updatedRoadtripSettings.getDecisionProcess() != null) {
+                roadtripSettings.setDecisionProcess(updatedRoadtripSettings.getDecisionProcess());
+            }
+            if (updatedRoadtripSettings.getBoundingBox() != null) {
+                roadtripSettings.setBoundingBox(updatedRoadtripSettings.getBoundingBox());
+            }
 
-        if (updatedRoadtripSettings.getBasemapType() != null) {
-            roadtripSettings.setBasemapType(updatedRoadtripSettings.getBasemapType());
-        }
-        if (updatedRoadtripSettings.getDecisionProcess() != null) {
-            roadtripSettings.setDecisionProcess(updatedRoadtripSettings.getDecisionProcess());
-        }
-        if (updatedRoadtripSettings.getBoundingBox() != null) {
-            roadtripSettings.setBoundingBox(updatedRoadtripSettings.getBoundingBox());
-        }
-        if (updatedRoadtripSettings.getStartDate() != null) {
-            roadtripSettings.setStartDate(updatedRoadtripSettings.getStartDate());
-        }
-        if (updatedRoadtripSettings.getEndDate() != null) {
-            roadtripSettings.setEndDate(updatedRoadtripSettings.getEndDate());
-        }
+            // Validate dates
+            if (updatedRoadtripSettings.getStartDate() != null && updatedRoadtripSettings.getEndDate() != null) {
+                LocalDate startDate = updatedRoadtripSettings.getStartDate();
+                LocalDate endDate = updatedRoadtripSettings.getEndDate();
 
-        this.roadtripSettingsRepository.save(roadtripSettings);
-        roadtripSettingsRepository.flush();
+                if (endDate.isBefore(startDate)) {
+                    throw new IllegalArgumentException("End date cannot be before start date");
+                }
+
+                roadtripSettings.setStartDate(startDate);
+                roadtripSettings.setEndDate(endDate);
+            } else {
+                // Update individual dates if provided
+                if (updatedRoadtripSettings.getStartDate() != null) {
+                    LocalDate startDate = updatedRoadtripSettings.getStartDate();
+                    LocalDate currentEndDate = roadtripSettings.getEndDate();
+
+                    if (currentEndDate != null && startDate.isAfter(currentEndDate)) {
+                        throw new IllegalArgumentException("Start date cannot be after end date");
+                    }
+
+                    roadtripSettings.setStartDate(startDate);
+                }
+
+                if (updatedRoadtripSettings.getEndDate() != null) {
+                    LocalDate endDate = updatedRoadtripSettings.getEndDate();
+                    LocalDate currentStartDate = roadtripSettings.getStartDate();
+
+                    if (currentStartDate != null && endDate.isBefore(currentStartDate)) {
+                        throw new IllegalArgumentException("End date cannot be before start date");
+                    }
+
+                    roadtripSettings.setEndDate(endDate);
+                }
+            }
+
+            this.roadtripSettingsRepository.save(roadtripSettings);
+            roadtripSettingsRepository.flush();
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        } catch (Exception e) {
+            if (e instanceof ResponseStatusException) {
+                throw e;
+            }
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "An error occurred while updating the settings: " + e.getMessage());
+        }
     }
 
     /**

@@ -139,12 +139,12 @@ public interface DTOMapper {
   RoadtripSettingsGetDTO convertEntityToRoadtripSettingsGetDTO(RoadtripSettings roadtripSettings);
 
   @Mapping(target = "roadtripSettingsId", ignore = true)
-  @Mapping(target = "roadtrip.roadtripId", ignore = true)
+  @Mapping(target = "roadtrip", ignore = true)
   @Mapping(source = "basemapType", target = "basemapType", qualifiedByName = "stringToBasemapType")
   @Mapping(source = "decisionProcess", target = "decisionProcess", qualifiedByName = "stringToDecisionProcess")
   @Mapping(source = "boundingBox", target = "boundingBox", qualifiedByName = "mapGeoJsonToPolygon")
-  @Mapping(source = "startDate", target = "startDate")
-  @Mapping(source = "endDate", target = "endDate")
+  @Mapping(source = "startDate", target = "startDate", qualifiedByName = "stringToLocalDate")
+  @Mapping(source = "endDate", target = "endDate", qualifiedByName = "stringToLocalDate")
   RoadtripSettings convertRoadtripSettingsPutDTOtoEntity(RoadtripSettingsPutDTO roadtripSettingsPutDTO);
 
   public static final ObjectMapper objectMapper = new ObjectMapper();
@@ -243,6 +243,19 @@ public interface DTOMapper {
     }
   }
 
+  @Named("stringToLocalDate")
+  public static java.time.LocalDate stringToLocalDate(String dateString) {
+    if (dateString == null || dateString.isEmpty()) {
+      return null;
+    }
+    try {
+      return java.time.LocalDate.parse(dateString);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Invalid date format: " + dateString + ". Expected format: YYYY-MM-DD");
+    }
+  }
+
   @Named("stringToBasemapType")
   public static ch.uzh.ifi.hase.soprafs24.constant.BasemapType stringToBasemapType(String basemapType) {
     if (basemapType == null) {
@@ -269,7 +282,6 @@ public interface DTOMapper {
           "Invalid decisionProcess: " + decisionProcess + ". Valid values are: MAJORITY, OWNER_DECISION, DEFAULT");
     }
   }
-
 
   // ChecklistElement mappings
   @Mapping(source = "checklistElementId", target = "checklistElementId")
@@ -299,19 +311,22 @@ public interface DTOMapper {
   @Mapping(target = "roadtrip", ignore = true)
   @Mapping(source = "checklistElements", target = "checklistElements")
   Checklist convertChecklistPostDTOToEntity(ChecklistPostDTO postDTO);
+
   @Mapping(target = "commentId", ignore = true)
-  @Mapping(target = "authorId" , ignore = true)
+  @Mapping(target = "authorId", ignore = true)
   @Mapping(target = "creationDate", ignore = true)
   @Mapping(target = "poi", ignore = true)
   @Mapping(source = "comment", target = "comment")
-  PointOfInterestComment converPointOfInterestCommentPostDTOToEntity(PointOfInterestCommentPostDTO pointOfInterestCommentPostDTO);
+  PointOfInterestComment converPointOfInterestCommentPostDTOToEntity(
+      PointOfInterestCommentPostDTO pointOfInterestCommentPostDTO);
 
   @Mapping(source = "commentId", target = "commentId")
   @Mapping(source = "authorId", target = "authorId")
   @Mapping(source = "creationDate", target = "creationDate")
   @Mapping(source = "poi", target = "poi")
   @Mapping(source = "comment", target = "comment")
-  PointOfInterestCommentGetDTO convertEntityToPointOfInterestCommentGetDTO(PointOfInterestComment pointOfInterestComment);
+  PointOfInterestCommentGetDTO convertEntityToPointOfInterestCommentGetDTO(
+      PointOfInterestComment pointOfInterestComment);
 
   // Map RoutePostDTO to Route entity
   @Mapping(target = "route", ignore = true) // Ignore the route field
@@ -333,32 +348,32 @@ public interface DTOMapper {
   @Named("lineStringToGeoJson")
   public static String lineStringToGeoJson(LineString lineString) {
     if (lineString == null) {
-        return null;
+      return null;
     }
     try {
-        GeoJsonWriter writer = new GeoJsonWriter();
-        return writer.write(lineString);
+      GeoJsonWriter writer = new GeoJsonWriter();
+      return writer.write(lineString);
     } catch (Exception e) {
-        throw new RuntimeException("Failed to convert LineString to GeoJSON", e);
+      throw new RuntimeException("Failed to convert LineString to GeoJSON", e);
     }
   }
 
   @Named("geoJsonToLineString")
   public static LineString geoJsonToLineString(String geoJson) {
     if (geoJson == null) {
-        return null;
+      return null;
     }
     try {
-        GeoJsonReader reader = new GeoJsonReader();
-        Geometry geometry = reader.read(geoJson);
+      GeoJsonReader reader = new GeoJsonReader();
+      Geometry geometry = reader.read(geoJson);
 
-        if (!(geometry instanceof LineString)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided geometry is not a LineString");
-        }
+      if (!(geometry instanceof LineString)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided geometry is not a LineString");
+      }
 
-        return (LineString) geometry;
+      return (LineString) geometry;
     } catch (Exception e) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid GeoJSON format");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid GeoJSON format");
     }
   }
 }
