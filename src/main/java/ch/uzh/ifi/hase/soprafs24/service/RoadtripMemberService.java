@@ -65,7 +65,7 @@ public class RoadtripMemberService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
         // verify invitingUser is owner of roadtrip
-        boolean isOwner = Objects.equals(roadtrip.getOwner(), invitingUser);
+        boolean isOwner = Objects.equals(roadtrip.getOwner().getUserId(), invitingUser.getUserId());
         if (!isOwner) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not allowed to invite");
         }
@@ -77,14 +77,14 @@ public class RoadtripMemberService {
         }
 
         // verify userId provided is not the owner itself
-        if (Objects.equals(invitingUser, invitedUser)) {
+        if (Objects.equals(invitingUser.getUserId(), invitedUser.getUserId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner cannot invite itself");
         }
 
         // verify invited user is not already member of roadtrip
         List<RoadtripMember> roadtripMembers = roadtripMemberRepository.findByRoadtrip(roadtrip);
         boolean isAlreadyMember = roadtripMembers.stream()
-                .anyMatch(member -> Objects.equals(member.getUser(), invitedUser));
+                .anyMatch(member -> Objects.equals(member.getUser().getUserId(), invitedUser.getUserId()));
 
         if (isAlreadyMember) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -127,7 +127,7 @@ public class RoadtripMemberService {
 
         // only roadtrip owner or the user itself can update its roadtrip membership
         // status
-        boolean isOwner = Objects.equals(roadtrip.getOwner(), updatingUser);
+        boolean isOwner = Objects.equals(roadtrip.getOwner().getUserId(), updatingUser.getUserId());
         boolean isSameUser = Objects.equals(updatingUser.getUserId(), userId);
         if (!isOwner && !isSameUser) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not allowed to update");
@@ -155,7 +155,7 @@ public class RoadtripMemberService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
 
         // verify deletingUser is owner of roadtrip
-        boolean isOwner = Objects.equals(roadtrip.getOwner(), deletingUser);
+        boolean isOwner = Objects.equals(roadtrip.getOwner().getUserId(), deletingUser.getUserId());
         if (!isOwner) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not allowed to delete");
         }
