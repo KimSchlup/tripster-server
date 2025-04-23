@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.locationtech.jts.geom.Point;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.PoiCategory;
@@ -50,10 +53,14 @@ public class PointOfInterest implements Serializable {
     private Integer eligibleVoteCount;
 
     @Column
-    private ArrayList<Long> upvotes;
+    private List<Long> upvotes = new ArrayList<>();
 
     @Column
-    private ArrayList<Long> downvotes;
+    private List<Long> downvotes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "poi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<PointOfInterestComment> comments = new ArrayList<>();
 
     // Getters and Setters
     public Long getPoiId() {
@@ -136,23 +143,41 @@ public class PointOfInterest implements Serializable {
         this.priority = priority;
     }
 
-    public ArrayList<Long> getUpvotes() {
+    public List<Long> getUpvotes() {
         return upvotes;
     }
 
     // Setter for upvotes
-    public void setUpvotes(ArrayList<Long> upvotes) {
+    public void setUpvotes(List<Long> upvotes) {
         this.upvotes = upvotes;
     }
 
     // Getter for downvotes
-    public ArrayList<Long> getDownvotes() {
+    public List<Long> getDownvotes() {
         return downvotes;
     }
 
     // Setter for downvotes
-    public void setDownvotes(ArrayList<Long> downvotes) {
+    public void setDownvotes(List<Long> downvotes) {
         this.downvotes = downvotes;
+    }
+
+    public List<PointOfInterestComment> getPointOfInterestComment() {
+        return comments;
+    }
+
+    public void setPointOfInterestComments(List<PointOfInterestComment> comments) {
+        this.comments = comments;
+    }
+
+    public void addComment(PointOfInterestComment comment) {
+        this.comments.add(comment);
+        comment.setPoi(this);
+    }
+
+    public void removeComment(PointOfInterestComment comment) {
+        this.comments.remove(comment);
+        comment.setPoi(null);
     }
 
 }

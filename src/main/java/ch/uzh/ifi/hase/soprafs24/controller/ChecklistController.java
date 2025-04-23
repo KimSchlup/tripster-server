@@ -77,7 +77,6 @@ public class ChecklistController{
         checklistService.updateChecklistElement(element, checklistelementId, roadtripId);
     }
 
-
     //Delete checklist element
     @DeleteMapping("/{roadtripId}/checklist/{checklistelementId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

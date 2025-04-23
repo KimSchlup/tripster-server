@@ -56,7 +56,7 @@ public class RoadtripService {
         this.userRepository = userRepository;
         this.roadtripMemberRepository = roadtripMemberRepository;
         this.roadtripSettingsService = roadtripSettingsService;
-        this.checklistRepository =  checklistRepository;
+        this.checklistRepository = checklistRepository;
     }
 
     public List<RoadtripGetDTO> getRoadtripsOfUser(User user) {
@@ -139,6 +139,7 @@ public class RoadtripService {
         Checklist checklist = new Checklist();
         checklist.setRoadtrip(newRoadtrip);
         checklistRepository.save(checklist);
+        checklistRepository.flush(); // Ensure the checklist is persisted immediately
 
         // Create a RoadtripMember entry for the owner with ACCEPTED status
         RoadtripMemberPK pk = new RoadtripMemberPK();
@@ -157,6 +158,7 @@ public class RoadtripService {
         // Flush all changes to the database
         roadtripRepository.flush();
         roadtripMemberRepository.flush();
+        checklistRepository.flush();
 
         log.debug("Created Information for Roadtrip: {}", newRoadtrip);
         return newRoadtrip;
