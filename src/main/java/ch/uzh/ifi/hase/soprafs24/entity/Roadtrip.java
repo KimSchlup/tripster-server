@@ -41,6 +41,9 @@ public class Roadtrip implements Serializable {
 
   @OneToOne(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
   private Checklist checklist;
+
+  @OneToMany(mappedBy = "roadtrip", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Route> routes = new ArrayList<>(); // List of associated routes
   
   public Long getRoadtripId() {
     return roadtripId;
@@ -104,6 +107,14 @@ public class Roadtrip implements Serializable {
 
   public void setRoadtripSettings(RoadtripSettings roadtripSettings) {
     this.roadtripSettings = roadtripSettings;
+  }
+
+  public List<Route> getRoutes() {
+    return routes;
+  }
+
+  public void setRoutes(List<Route> routes) {
+    this.routes = routes;
   }
   
 }

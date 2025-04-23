@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterestComment;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
+import ch.uzh.ifi.hase.soprafs24.entity.Route;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestCommentGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestCommentPostDTO;
@@ -18,6 +19,9 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsPutDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RouteDeleteDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RouteGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoutePostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
@@ -30,6 +34,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistPostDTO;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.LineString;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
@@ -308,4 +313,52 @@ public interface DTOMapper {
   @Mapping(source = "comment", target = "comment")
   PointOfInterestCommentGetDTO convertEntityToPointOfInterestCommentGetDTO(PointOfInterestComment pointOfInterestComment);
 
+  // Map RoutePostDTO to Route entity
+  @Mapping(target = "route", ignore = true) // Ignore the route field
+  @Mapping(target = "status", ignore = true) // Status is not set during creation
+  Route convertRoutePostDTOToEntity(RoutePostDTO routePostDTO);
+
+  // Map Route entity to RouteGetDTO
+  @Mapping(source = "route", target = "route", qualifiedByName = "lineStringToGeoJson")
+  RouteGetDTO convertEntityToRouteGetDTO(Route route);
+
+  // Map RouteDeleteDTO to Route entity (if needed)
+  @Mapping(target = "route", ignore = true) // Route geometry is not needed for deletion
+  @Mapping(target = "distance", ignore = true)
+  @Mapping(target = "travelTime", ignore = true)
+  @Mapping(target = "travelMode", ignore = true)
+  @Mapping(target = "status", ignore = true)
+  Route convertRouteDeleteDTOToEntity(RouteDeleteDTO routeDeleteDTO);
+
+  @Named("lineStringToGeoJson")
+  public static String lineStringToGeoJson(LineString lineString) {
+    if (lineString == null) {
+        return null;
+    }
+    try {
+        GeoJsonWriter writer = new GeoJsonWriter();
+        return writer.write(lineString);
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to convert LineString to GeoJSON", e);
+    }
+  }
+
+  @Named("geoJsonToLineString")
+  public static LineString geoJsonToLineString(String geoJson) {
+    if (geoJson == null) {
+        return null;
+    }
+    try {
+        GeoJsonReader reader = new GeoJsonReader();
+        Geometry geometry = reader.read(geoJson);
+
+        if (!(geometry instanceof LineString)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided geometry is not a LineString");
+        }
+
+        return (LineString) geometry;
+    } catch (Exception e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid GeoJSON format");
+    }
+  }
 }
