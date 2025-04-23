@@ -182,8 +182,11 @@ public class RouteService {
             route.setRoute(routeGeometry);
             route.setDistance(distance);
             route.setTravelTime(duration);
-            route.setStatus(AcceptanceStatus.PENDING);
             route.setRoadtrip(roadtrip);
+            updateRouteStatus(route);
+            route.setTravelMode(route.getTravelMode());
+            route.setStartId(startId);
+            route.setEndId(endId);
 
             return routeRepository.save(route);
         } catch (JsonProcessingException e) {
