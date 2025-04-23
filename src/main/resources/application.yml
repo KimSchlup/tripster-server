@@ -5,13 +5,12 @@ spring:
   config:
     activate:
       on-profile: prod
-    import: optional:sm://prod-db-url,optional:sm://prod-db-username,optional:sm://prod-db-password
 
   datasource:
-    url: ${prod-db-url}
+    url: jdbc:postgresql://34.59.238.31:5432/mapmates
+    username: postgres
+    password: mapmates123
     driver-class-name: org.postgresql.Driver
-    username: ${prod-db-username}
-    password: ${prod-db-password}
 
   jpa:
     hibernate:

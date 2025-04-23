@@ -11,6 +11,30 @@ jobs:
     name: Test and Sonarqube
     runs-on: ubuntu-latest
 
+    # Add environment variables for database connection
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/mapmates_dev
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: mapmates123
+
+    # Add PostgreSQL service container
+    services:
+      postgres:
+        image: postgis/postgis:15-3.3
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: mapmates123
+          POSTGRES_DB: mapmates_dev
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
@@ -50,6 +74,7 @@ jobs:
         with:
           deliverables: app.yaml
           version: v1
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           credentials: ${{ secrets.GCP_SERVICE_CREDENTIALS }}
 
       - name: Test
