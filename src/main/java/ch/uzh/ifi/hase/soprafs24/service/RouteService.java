@@ -63,6 +63,28 @@ public class RouteService {
 
     // Create a new route
     public Route createRoute(String token, Long roadtripId, Route route) {
+        // Verify user exists and is authenticated
+        User user = userRepository.findByToken(token);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+
+        // Check if the roadtrip exists
+        Roadtrip roadtrip = roadTripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        // Find and verify the user's membership status
+        RoadtripMember member = roadtrip.getRoadtripMembers().stream()
+                .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not a member of this roadtrip"));
+
+        // Check if member has accepted the roadtrip invitation
+        if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before creating routes");
+        }
+
         // Find existing route first
         Optional<Route> existingRoute = routeRepository.findByRoadtrip_RoadtripId(roadtripId)
                 .stream()
@@ -85,8 +107,6 @@ public class RouteService {
         PointOfInterest startPoi = null;
         PointOfInterest endPoi = null;
         String travelMode = convertFromTravelMode(route.getTravelMode());
-        Roadtrip roadtrip = roadTripRepository.findById(roadtripId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
         route.setRoadtrip(roadtrip);
 
         for (PointOfInterest poi : pois) {
