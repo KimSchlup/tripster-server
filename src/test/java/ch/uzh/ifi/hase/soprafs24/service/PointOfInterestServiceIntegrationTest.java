@@ -423,6 +423,147 @@ public class PointOfInterestServiceIntegrationTest {
         }
 
         @Test
+        public void deleteVote_validInputs_success() {
+                // Create test users with all required fields
+                User testUser = new User();
+                testUser.setUsername("testUsername");
+                testUser.setPassword("password");
+                testUser.setFirstName("Test");
+                testUser.setLastName("User");
+                testUser.setCreationDate(java.time.LocalDate.now());
+                testUser.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+                testUser.setToken("token-" + java.util.UUID.randomUUID().toString());
+                User createdUser = userService.createUser(testUser);
+
+                // Create roadtrip
+                Roadtrip testRoadtrip = new Roadtrip();
+                testRoadtrip.setName("Test Roadtrip");
+                testRoadtrip.setDescription("Test Description");
+                Roadtrip createdRoadtrip = roadtripService.createRoadtrip(testRoadtrip, createdUser.getToken());
+
+                // Create POI
+                PointOfInterest poi = new PointOfInterest();
+                poi.setName("Test POI");
+                poi.setDescription("Test Description");
+                poi.setCategory(PoiCategory.SIGHTSEEING);
+                org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory();
+                org.locationtech.jts.geom.Point point = geometryFactory.createPoint(
+                                new org.locationtech.jts.geom.Coordinate(8.5417, 47.3769));
+                poi.setCoordinate(point);
+                PointOfInterest createdPoi = pointOfInterestService.createPointOfInterest(
+                                poi, createdRoadtrip.getRoadtripId(), createdUser.getToken());
+
+                // Cast vote first
+                pointOfInterestService.castVote(
+                                createdUser.getToken(), createdRoadtrip.getRoadtripId(), createdPoi.getPoiId(), "upvote");
+
+                // When
+                pointOfInterestService.deleteVote(
+                                createdUser.getToken(), createdRoadtrip.getRoadtripId(), createdPoi.getPoiId());
+
+                // Then
+                PointOfInterest updatedPoi = pointOfInterestService.getPointOfInterestByID(
+                                createdUser.getToken(), createdRoadtrip.getRoadtripId(), createdPoi.getPoiId());
+                assertNotNull(updatedPoi);
+                assertTrue(updatedPoi.getUpvotes().isEmpty());
+        }
+
+        @Test
+        public void updatePointOfInterest_validInputs_success() {
+                // Create test user
+                User testUser = new User();
+                testUser.setUsername("testUsername");
+                testUser.setPassword("password");
+                testUser.setFirstName("Test");
+                testUser.setLastName("User");
+                testUser.setCreationDate(java.time.LocalDate.now());
+                testUser.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+                testUser.setToken("token-" + java.util.UUID.randomUUID().toString());
+                User createdUser = userService.createUser(testUser);
+
+                // Create roadtrip
+                Roadtrip testRoadtrip = new Roadtrip();
+                testRoadtrip.setName("Test Roadtrip");
+                testRoadtrip.setDescription("Test Description");
+                Roadtrip createdRoadtrip = roadtripService.createRoadtrip(testRoadtrip, createdUser.getToken());
+
+                // Create original POI
+                PointOfInterest poi = new PointOfInterest();
+                poi.setName("Original POI");
+                poi.setDescription("Original Description");
+                poi.setCategory(PoiCategory.SIGHTSEEING);
+                org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory();
+                org.locationtech.jts.geom.Point point = geometryFactory.createPoint(
+                                new org.locationtech.jts.geom.Coordinate(8.5417, 47.3769));
+                poi.setCoordinate(point);
+                PointOfInterest createdPoi = pointOfInterestService.createPointOfInterest(
+                                poi, createdRoadtrip.getRoadtripId(), createdUser.getToken());
+
+                // Create updated POI
+                PointOfInterest updatedPoi = new PointOfInterest();
+                updatedPoi.setName("Updated POI");
+                updatedPoi.setDescription("Updated Description");
+                updatedPoi.setCategory(PoiCategory.FOOD);
+                updatedPoi.setPriority(PoiPriority.HIGH);
+
+                // When
+                pointOfInterestService.updatePointOfInterest(createdPoi, updatedPoi);
+
+                // Then
+                PointOfInterest retrievedPoi = pointOfInterestService.getPointOfInterestByID(
+                                createdUser.getToken(), createdRoadtrip.getRoadtripId(), createdPoi.getPoiId());
+                assertEquals("Updated POI", retrievedPoi.getName());
+                assertEquals("Updated Description", retrievedPoi.getDescription());
+                assertEquals(PoiCategory.FOOD, retrievedPoi.getCategory());
+                assertEquals(PoiPriority.HIGH, retrievedPoi.getPriority());
+        }
+
+        @Test
+        public void calculateStatus_majorityVoting_success() {
+                // Create test users
+                User owner = new User();
+                owner.setUsername("owner");
+                owner.setPassword("password");
+                owner.setFirstName("Owner");
+                owner.setLastName("User");
+                owner.setCreationDate(java.time.LocalDate.now());
+                owner.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+                owner.setToken("token-" + java.util.UUID.randomUUID().toString());
+                User createdOwner = userService.createUser(owner);
+
+                // Create roadtrip
+                Roadtrip testRoadtrip = new Roadtrip();
+                testRoadtrip.setName("Test Roadtrip");
+                testRoadtrip.setDescription("Test Description");
+                Roadtrip createdRoadtrip = roadtripService.createRoadtrip(testRoadtrip, createdOwner.getToken());
+
+                // Create POI
+                PointOfInterest poi = new PointOfInterest();
+                poi.setName("Test POI");
+                poi.setDescription("Test Description");
+                poi.setCategory(PoiCategory.SIGHTSEEING);
+                org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory();
+                org.locationtech.jts.geom.Point point = geometryFactory.createPoint(
+                                new org.locationtech.jts.geom.Coordinate(8.5417, 47.3769));
+                poi.setCoordinate(point);
+                PointOfInterest createdPoi = pointOfInterestService.createPointOfInterest(
+                                poi, createdRoadtrip.getRoadtripId(), createdOwner.getToken());
+
+                // Cast vote
+                pointOfInterestService.castVote(
+                                createdOwner.getToken(), createdRoadtrip.getRoadtripId(), createdPoi.getPoiId(), "upvote");
+
+                // When
+                pointOfInterestService.calculateStatus(
+                                createdOwner.getToken(), createdPoi, createdRoadtrip.getRoadtripId());
+
+                // Then
+                PointOfInterest updatedPoi = pointOfInterestService.getPointOfInterestByID(
+                                createdOwner.getToken(), createdRoadtrip.getRoadtripId(), createdPoi.getPoiId());
+                assertEquals(AcceptanceStatus.ACCEPTED, updatedPoi.getStatus());
+        }
+
+        @Test
         public void isUserMemberOfRoadtrip_userIsMember_returnsTrue() {
                 // Create test user with all required fields
                 User testUser = new User();
