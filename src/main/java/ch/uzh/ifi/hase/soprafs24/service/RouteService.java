@@ -50,10 +50,10 @@ public class RouteService {
 
     @Autowired
     public RouteService(RouteRepository routeRepository,
-            @Qualifier("userRepository") UserRepository userRepository,
-            @Qualifier("roadtripRepository") RoadtripRepository roadTripRepository,
-            @Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository,
-            RestTemplate restTemplate) {
+                       @Qualifier("userRepository") UserRepository userRepository,
+                       @Qualifier("roadtripRepository") RoadtripRepository roadTripRepository,
+                       @Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository,
+                       RestTemplate restTemplate) {
         this.routeRepository = routeRepository;
         this.userRepository = userRepository;
         this.roadTripRepository = roadTripRepository;
@@ -77,21 +77,20 @@ public class RouteService {
         RoadtripMember member = roadtrip.getRoadtripMembers().stream()
                 .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "User is not a member of this roadtrip"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not a member of this roadtrip"));
 
         // Check if member has accepted the roadtrip invitation
         if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "User must accept the roadtrip invitation before creating routes");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before creating routes");
         }
 
         // Find existing route first
         Optional<Route> existingRoute = routeRepository.findByRoadtrip_RoadtripId(roadtripId)
                 .stream()
-                .filter(r -> r.getStartId().equals(route.getStartId())
-                        && r.getEndId().equals(route.getEndId())
-                        && r.getTravelMode() == route.getTravelMode())
+                .filter(r -> r.getStartId().equals(route.getStartId()) 
+                         && r.getEndId().equals(route.getEndId()) 
+                         && r.getTravelMode() == route.getTravelMode())
                 .findFirst();
 
         // If route exists, update its status and return it
@@ -125,15 +124,16 @@ public class RouteService {
 
         // Prepare coordinates for the API request
         String payload = String.format(
-                "{\"coordinates\":[[%f,%f],[%f,%f]]," +
-                        "\"profile\":\"%s\"," +
-                        "\"format\":\"geojson\"," + // Change to geojson format
-                        "\"units\":\"m\"," +
-                        "\"geometry_simplify\":false," + // Don't simplify geometry
-                        "\"instructions\":false}", // We don't need turn-by-turn instructions
-                startPoi.getCoordinate().getX(), startPoi.getCoordinate().getY(),
-                endPoi.getCoordinate().getX(), endPoi.getCoordinate().getY(),
-                travelMode);
+            "{\"coordinates\":[[%f,%f],[%f,%f]]," +
+            "\"profile\":\"%s\"," +
+            "\"format\":\"geojson\"," +
+            "\"units\":\"m\"," +
+            "\"geometry\":true," +
+            "\"instructions\":false}",
+            startPoi.getCoordinate().getY(), startPoi.getCoordinate().getX(), // Swap X/Y to match lon/lat format
+            endPoi.getCoordinate().getY(), endPoi.getCoordinate().getX(),
+            travelMode
+        );
 
         // Set headers
         HttpHeaders headers = new HttpHeaders();
@@ -159,7 +159,8 @@ public class RouteService {
         ResponseEntity<String> response = restTemplate.postForEntity(
                 "https://api.openrouteservice.org/v2/directions/" + travelMode,
                 entity,
-                String.class);
+                String.class
+        );
 
         // Log response
         logger.info("Response Status: {}", response.getStatusCode());
@@ -170,8 +171,8 @@ public class RouteService {
         logger.debug("Response body: {}", response.getBody());
 
         if (response.getStatusCode() != HttpStatus.OK) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Failed to fetch route from OpenRouteService. Status: " + response.getStatusCode());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Failed to fetch route from OpenRouteService. Status: " + response.getStatusCode());
         }
 
         // Enhanced logging of the OpenRouteService response
@@ -186,26 +187,26 @@ public class RouteService {
 
             // For OpenRouteService GeoJSON response, we need to look for 'routes' array
             if (!rootNode.has("routes") || rootNode.get("routes").size() == 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "No routes found in OpenRouteService response");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "No routes found in OpenRouteService response");
             }
 
             JsonNode firstRoute = rootNode.get("routes").get(0);
-
+            
             // Get summary information
             if (!firstRoute.has("summary")) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Missing summary in route response");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Missing summary in route response");
             }
-
+            
             JsonNode summary = firstRoute.get("summary");
             float distance = (float) summary.get("distance").asDouble();
             float duration = (float) summary.get("duration").asDouble();
 
             // Get geometry
             if (!firstRoute.has("geometry")) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Missing geometry in route response");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Missing geometry in route response");
             }
 
             // Convert the encoded polyline geometry
@@ -221,16 +222,16 @@ public class RouteService {
             route.setTravelMode(route.getTravelMode());
             route.setStartId(startId);
             route.setEndId(endId);
-
+ 
             return routeRepository.save(route);
         } catch (JsonProcessingException e) {
             logger.error("Failed to parse OpenRouteService response: {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to parse route response: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Failed to parse route response: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Error creating route: {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error creating route: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Error creating route: " + e.getMessage());
         }
     }
 
@@ -241,24 +242,26 @@ public class RouteService {
         RoadtripMember roadtripMember = roadtrip.get().getRoadtripMembers().stream()
                 .filter(member -> member.getUser().getUserId().equals(user.getUserId()))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "User is not a member of the roadtrip"));
-
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "User is not a member of the roadtrip"));
+        
         // Get all routes and update their status before returning
         List<Route> routes = routeRepository.findByRoadtrip_RoadtripId(roadtripId);
         routes.forEach(this::updateRouteStatus);
-
+        
         return routes;
     }
 
-    public TravelMode convertToTravelMode(String travelMode) {
+    
+
+    public TravelMode convertToTravelMode(String travelMode){
         if (travelMode.equals("driving-car")) {
             return TravelMode.DRIVING_CAR;
         } else if (travelMode.equals("cycling-regular")) {
             return TravelMode.CYCLING_REGULAR;
         } else if (travelMode.equals("foot-walking")) {
             return TravelMode.FOOT_WALKING;
-        } else if (travelMode.equals("public-transport")) {
+        } else if(travelMode.equals("public-transport")){
             return TravelMode.PUBLIC_TRANSPORT;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid travel mode");
@@ -282,27 +285,29 @@ public class RouteService {
     private void updateRouteStatus(Route route) {
         PointOfInterest startPoi = pointOfInterestRepository.findById(route.getStartId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Start POI not found"));
-
+        
         PointOfInterest endPoi = pointOfInterestRepository.findById(route.getEndId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "End POI not found"));
-
+    
         // If either POI is rejected, the route is rejected
-        if (startPoi.getStatus() == AcceptanceStatus.DECLINED ||
-                endPoi.getStatus() == AcceptanceStatus.DECLINED) {
+        if (startPoi.getStatus() == AcceptanceStatus.DECLINED || 
+            endPoi.getStatus() == AcceptanceStatus.DECLINED) {
             route.setStatus(AcceptanceStatus.DECLINED);
         }
         // If both POIs are accepted, the route is accepted
-        else if (startPoi.getStatus() == AcceptanceStatus.ACCEPTED &&
-                endPoi.getStatus() == AcceptanceStatus.ACCEPTED) {
+        else if (startPoi.getStatus() == AcceptanceStatus.ACCEPTED && 
+                 endPoi.getStatus() == AcceptanceStatus.ACCEPTED) {
             route.setStatus(AcceptanceStatus.ACCEPTED);
         }
         // Otherwise (if either or both are PENDING), the route stays/becomes PENDING
         else {
             route.setStatus(AcceptanceStatus.PENDING);
         }
-
+    
         routeRepository.save(route);
     }
+
+    
 
     private LineString decodePolyline(String encoded) {
         List<Coordinate> coordinates = new ArrayList<>();
@@ -314,25 +319,25 @@ public class RouteService {
             int b;
             int shift = 0;
             int result = 0;
-
+            
             do {
                 b = encoded.charAt(index++) - 63;
                 result |= (b & 0x1f) << shift;
                 shift += 5;
             } while (b >= 0x20);
-
+            
             int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
             lat += dlat;
 
             shift = 0;
             result = 0;
-
+            
             do {
                 b = encoded.charAt(index++) - 63;
                 result |= (b & 0x1f) << shift;
                 shift += 5;
             } while (b >= 0x20);
-
+            
             int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
             lng += dlng;
 
@@ -355,35 +360,36 @@ public class RouteService {
 
         // Check if the roadtrip exists
         Roadtrip roadtrip = roadTripRepository.findById(roadtripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Roadtrip not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Roadtrip not found"));
 
         // Find and verify the user's membership status
         RoadtripMember member = roadtrip.getRoadtripMembers().stream()
                 .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "User is not a member of this roadtrip"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "User is not a member of this roadtrip"));
 
         // Check if member has accepted the roadtrip invitation
         if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "User must accept the roadtrip invitation before deleting routes");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before deleting routes");
         }
 
         // Find the route and verify it belongs to the roadtrip
         Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Route not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Route not found"));
 
         if (!route.getRoadtrip().getRoadtripId().equals(roadtripId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Route does not belong to this roadtrip");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "Route does not belong to this roadtrip");
         }
 
         // Delete the route
         routeRepository.deleteById(routeId);
     }
+
 
     public void deleteRoutes(String token, Long roadtripId) {
         // Verify user exists and is authenticated
@@ -394,28 +400,28 @@ public class RouteService {
 
         // Check if the roadtrip exists
         Roadtrip roadtrip = roadTripRepository.findById(roadtripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Roadtrip not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Roadtrip not found"));
 
         // Find and verify the user's membership status
         RoadtripMember member = roadtrip.getRoadtripMembers().stream()
                 .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "User is not a member of this roadtrip"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "User is not a member of this roadtrip"));
 
         // Check if member has accepted the roadtrip invitation
         if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "User must accept the roadtrip invitation before deleting routes");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before deleting routes");
         }
 
         // Get all routes for this roadtrip
         List<Route> routes = routeRepository.findByRoadtrip_RoadtripId(roadtripId);
-
+        
         if (routes.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "No routes found for this roadtrip");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                "No routes found for this roadtrip");
         }
 
         // Delete all routes
@@ -439,13 +445,13 @@ public class RouteService {
         RoadtripMember member = roadtrip.getRoadtripMembers().stream()
                 .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "User is not a member of this roadtrip"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "User is not a member of this roadtrip"));
 
         // Check if member has accepted the roadtrip invitation
         if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "User must accept the roadtrip invitation before updating routes");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before updating routes");
         }
 
         // Find the existing route
@@ -454,8 +460,8 @@ public class RouteService {
 
         // Verify route belongs to this roadtrip
         if (!existingRoute.getRoadtrip().getRoadtripId().equals(roadtripId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Route does not belong to this roadtrip");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "Route does not belong to this roadtrip");
         }
 
         // Find POIs and verify they exist
@@ -485,15 +491,16 @@ public class RouteService {
 
         // Prepare API request payload
         String payload = String.format(
-                "{\"coordinates\":[[%f,%f],[%f,%f]]," +
-                        "\"profile\":\"%s\"," +
-                        "\"format\":\"geojson\"," +
-                        "\"units\":\"m\"," +
-                        "\"geometry\":true," +
-                        "\"instructions\":false}",
-                startPoi.getCoordinate().getY(), startPoi.getCoordinate().getX(),
-                endPoi.getCoordinate().getY(), endPoi.getCoordinate().getX(),
-                travelMode);
+            "{\"coordinates\":[[%f,%f],[%f,%f]]," +
+            "\"profile\":\"%s\"," +
+            "\"format\":\"geojson\"," +
+            "\"units\":\"m\"," +
+            "\"geometry\":true," +
+            "\"instructions\":false}",
+            startPoi.getCoordinate().getY(), startPoi.getCoordinate().getX(),
+            endPoi.getCoordinate().getY(), endPoi.getCoordinate().getX(),
+            travelMode
+        );
 
         try {
             // Make request to OpenRouteService
@@ -501,11 +508,12 @@ public class RouteService {
             ResponseEntity<String> response = restTemplate.postForEntity(
                     "https://api.openrouteservice.org/v2/directions/" + travelMode,
                     entity,
-                    String.class);
+                    String.class
+            );
 
             if (response.getStatusCode() != HttpStatus.OK) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Failed to fetch updated route from OpenRouteService");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Failed to fetch updated route from OpenRouteService");
             }
 
             // Parse response and update route
@@ -529,12 +537,12 @@ public class RouteService {
 
         } catch (JsonProcessingException e) {
             logger.error("Failed to parse OpenRouteService response: {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to update route: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Failed to update route: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating route: {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error updating route: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Error updating route: " + e.getMessage());
         }
     }
 }
