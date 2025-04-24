@@ -131,6 +131,8 @@ public class PointOfInterestService {
             oldPointOfInterest.setPriority(newPointOfInterest.getPriority());
         }
 
+        pointOfInterestRepository.save(oldPointOfInterest);
+        pointOfInterestRepository.flush();
         log.debug("PointOfInterest with id: " + newPointOfInterest.getPoiId() + " has been updated");
     }
 
