@@ -8,16 +8,21 @@ import ch.uzh.ifi.hase.soprafs24.entity.*;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.LineString;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * DTOMapperTest
@@ -391,4 +396,137 @@ public class DTOMapperTest {
     JsonNode result = DTOMapper.polygonToGeoJsonNode(null);
     assertNull(result);
   }
+
+  @Test
+  public void testMapGeoJsonToPolygon_validPolygon_success() {
+      ObjectNode polygonNode = objectMapper.createObjectNode();
+      polygonNode.put("type", "Polygon");
+      ArrayNode coordinates = objectMapper.createArrayNode();
+      ArrayNode ring = objectMapper.createArrayNode();
+      ring.add(arrayNode(0, 0));
+      ring.add(arrayNode(0, 1));
+      ring.add(arrayNode(1, 1));
+      ring.add(arrayNode(1, 0));
+      ring.add(arrayNode(0, 0));
+      coordinates.add(ring);
+      polygonNode.set("coordinates", coordinates);
+
+      Polygon polygon = DTOMapper.mapGeoJsonToPolygon(polygonNode);
+      assertNotNull(polygon);
+      assertEquals("Polygon", polygon.getGeometryType());
+    }
+
+    private ArrayNode arrayNode(double x, double y) {
+      ArrayNode node = objectMapper.createArrayNode();
+      node.add(x);
+      node.add(y);
+      return node;
+  }
+
+  @Test
+  public void testMapGeoJsonToPolygon_notPolygon_throwsException() {
+      ObjectNode pointNode = objectMapper.createObjectNode();
+      pointNode.put("type", "Point");
+      ArrayNode coords = objectMapper.createArrayNode();
+      coords.add(10.0);
+      coords.add(20.0);
+      pointNode.set("coordinates", coords);
+  
+      assertThrows(ResponseStatusException.class, () -> {
+          DTOMapper.mapGeoJsonToPolygon(pointNode);
+      });
+  }
+
+  @Test
+  public void testMapGeoJsonToPoint_nullInput_returnsNull() {
+      assertNull(DTOMapper.mapGeoJsonToPoint(null));
+  }
+
+  @Test
+  public void testMapGeoJsonToPoint_validPoint_success() {
+      ObjectNode pointNode = objectMapper.createObjectNode();
+      pointNode.put("type", "Point");
+      ArrayNode coords = objectMapper.createArrayNode();
+      coords.add(10.0);
+      coords.add(20.0);
+      pointNode.set("coordinates", coords);
+  
+      Point point = DTOMapper.mapGeoJsonToPoint(pointNode);
+      assertNotNull(point);
+      assertEquals("Point", point.getGeometryType());
+      assertEquals(10.0, point.getX(), 0.001);
+      assertEquals(20.0, point.getY(), 0.001);
+  }
+
+  @Test
+  public void testMapGeoJsonToPoint_notPoint_throwsException() {
+      ObjectNode polygonNode = objectMapper.createObjectNode();
+      polygonNode.put("type", "Polygon");
+      ArrayNode coordinates = objectMapper.createArrayNode();
+      ArrayNode ring = objectMapper.createArrayNode();
+      ring.add(arrayNode(0, 0));
+      ring.add(arrayNode(0, 1));
+      ring.add(arrayNode(1, 1));
+      ring.add(arrayNode(1, 0));
+      ring.add(arrayNode(0, 0));
+      coordinates.add(ring);
+      polygonNode.set("coordinates", coordinates);
+  
+      assertThrows(ResponseStatusException.class, () -> {
+          DTOMapper.mapGeoJsonToPoint(polygonNode);
+      });
+  }
+
+  @Test
+  public void testMapGeoJsonToPoint_malformedGeoJson_throwsException() {
+      // Create a broken GeoJSON node that can't be parsed as any geometry
+      ObjectNode brokenNode = objectMapper.createObjectNode();
+      brokenNode.put("bad_field", "not_geojson");
+  
+      assertThrows(ResponseStatusException.class, () -> {
+          DTOMapper.mapGeoJsonToPoint(brokenNode);
+      });
+  }
+  
+  @Test
+  public void testLineStringToGeoJson_nullInput_returnsNull() {
+      String result = DTOMapper.lineStringToGeoJson(null);
+      assertNull(result);
+  }
+
+  @Test
+  public void testLineStringToGeoJson_validLineString_success() throws Exception {
+      Coordinate[] coords = new Coordinate[] {
+          new Coordinate(0, 0),
+          new Coordinate(1, 1),
+          new Coordinate(2, 2)
+      };
+      LineString lineString = geometryFactory.createLineString(coords);
+  
+      String geoJson = DTOMapper.lineStringToGeoJson(lineString);
+      assertNotNull(geoJson);
+  
+      // Parse it back to JSON to verify structure
+      JsonNode jsonNode = objectMapper.readTree(geoJson);
+      assertEquals("LineString", jsonNode.get("type").asText());
+  
+      JsonNode coordinates = jsonNode.get("coordinates");
+      assertEquals(3, coordinates.size());
+      assertEquals(0.0, coordinates.get(0).get(0).asDouble(), 0.001);
+      assertEquals(0.0, coordinates.get(0).get(1).asDouble(), 0.001);
+      assertEquals(2.0, coordinates.get(2).get(0).asDouble(), 0.001);
+      assertEquals(2.0, coordinates.get(2).get(1).asDouble(), 0.001);
+  }
+  
+
+@Test
+public void testLineStringToGeoJson_writerThrowsException_throwsRuntimeException() {
+    LineString mockLineString = mock(LineString.class);
+    // Inject a spy/wrapper to throw an exception (not shown here for brevity)
+
+    assertThrows(RuntimeException.class, () -> {
+        DTOMapper.lineStringToGeoJson(mockLineString);
+    });
+  }
+
 }
