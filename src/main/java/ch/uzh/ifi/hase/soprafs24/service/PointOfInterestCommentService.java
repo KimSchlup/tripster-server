@@ -1,10 +1,15 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 import org.springframework.stereotype.Service;
+
+import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterestComment;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMemberPK;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.PointOfInterestRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -21,47 +26,61 @@ import java.util.List;
 @Transactional
 public class PointOfInterestCommentService {
     private final UserRepository userRepository;
-
-
     private final PointOfInterestRepository pointOfInterestRepository;
+    private final RoadtripMemberRepository roadtripMemberRepository; // Add this
 
-    public PointOfInterestCommentService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, 
-                                                                                UserRepository userRepository){
+    public PointOfInterestCommentService(
+            @Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository,
+            UserRepository userRepository,
+            RoadtripMemberRepository roadtripMemberRepository) { // Add parameter
         this.pointOfInterestRepository = pointOfInterestRepository;
         this.userRepository = userRepository;
+        this.roadtripMemberRepository = roadtripMemberRepository; // Add this
     }
 
-    public PointOfInterestComment addComment(String token, String comment, Long poiId, Long roadtripId){
+    public PointOfInterestComment addComment(String token, String comment, Long poiId, Long roadtripId) {
+        // Verify user exists and is authenticated
+        User author = userRepository.findByToken(token);
+        if (author == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
 
-        PointOfInterestComment poiComment = new PointOfInterestComment();
+        // Find point of interest and verify it exists
         List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
-        PointOfInterest poi = new PointOfInterest();
-        User author = userRepository.findByToken(token);  
+        PointOfInterest poi = pois.stream()
+                .filter(p -> p.getPoiId().equals(poiId))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                    "Poi " + poiId + " was not found for roadtrip " + roadtripId));
 
-        for(PointOfInterest temp : pois){
-            if(poiId.equals(temp.getPoiId())){
-                poi = temp;
-            }
-        }
-        
-        if(poi.equals(null)){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Poi "+ poiId + "was not found for roadtrip " + roadtripId );
+        // Find and verify the user's membership status
+        RoadtripMember member = poi.getRoadtrip().getRoadtripMembers().stream()
+                .filter(m -> m.getUser().getUserId().equals(author.getUserId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "User is not a member of this roadtrip"));
+
+        if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before adding comments");
         }
 
-        List<PointOfInterestComment> comments = poi.getPointOfInterestComment();
-
-        if(comments.equals(null)){
-            comments = new ArrayList<>();
-        }
-        
+        // Create and set up the comment
+        PointOfInterestComment poiComment = new PointOfInterestComment();
         poiComment.setPoi(poi);
         poiComment.setAuthorId(author.getUserId());
         poiComment.setComment(comment);
         poiComment.setCreationDate(LocalDate.now());
-        
+
+        // Add comment to POI
+        List<PointOfInterestComment> comments = poi.getPointOfInterestComment();
+        if (comments == null) {
+            comments = new ArrayList<>();
+        }
         comments.add(poiComment);
-        
         poi.setPointOfInterestComments(comments);
+
+        // Save changes
         pointOfInterestRepository.save(poi);
         pointOfInterestRepository.flush();
 
