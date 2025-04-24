@@ -4,6 +4,8 @@ import ch.uzh.ifi.hase.soprafs24.constant.TravelMode;
 import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
 
 public class RouteGetDTO {
+    
+    private Long routeId;
     private Long startId;
     private Long endId;
     private String route; // GeoJSON representation of the route
@@ -12,6 +14,14 @@ public class RouteGetDTO {
     private TravelMode travelMode;
     private AcceptanceStatus status;
 
+
+    public Long getRouteId() {
+        return routeId;
+    }
+
+    public void setRouteId(Long routeId) {
+        this.routeId = routeId;
+    }
     public Long getStartId() {
         return startId;
     }

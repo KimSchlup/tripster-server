@@ -33,7 +33,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import java.util.ArrayList;
-    import org.slf4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Service
@@ -126,10 +126,10 @@ public class RouteService {
         String payload = String.format(
             "{\"coordinates\":[[%f,%f],[%f,%f]]," +
             "\"profile\":\"%s\"," +
-            "\"format\":\"geojson\"," + // Change to geojson format
+            "\"format\":\"geojson\"," +
             "\"units\":\"m\"," +
-            "\"geometry_simplify\":false," + // Don't simplify geometry
-            "\"instructions\":false}",  // We don't need turn-by-turn instructions
+            "\"geometry\":true," +
+            "\"instructions\":false}",
             startPoi.getCoordinate().getY(), startPoi.getCoordinate().getX(), // Swap X/Y to match lon/lat format
             endPoi.getCoordinate().getY(), endPoi.getCoordinate().getX(),
             travelMode
@@ -428,5 +428,121 @@ public class RouteService {
         routeRepository.deleteAll(routes);
 
         logger.info("Deleted {} routes for roadtrip {}", routes.size(), roadtripId);
+    }
+
+    public Route updateRoute(String token, Long roadtripId, Long routeId, Route routeInput) {
+        // Verify user exists and is authenticated
+        User user = userRepository.findByToken(token);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+        }
+
+        // Check if the roadtrip exists
+        Roadtrip roadtrip = roadTripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        // Find and verify the user's membership status
+        RoadtripMember member = roadtrip.getRoadtripMembers().stream()
+                .filter(m -> m.getUser().getUserId().equals(user.getUserId()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "User is not a member of this roadtrip"));
+
+        // Check if member has accepted the roadtrip invitation
+        if (member.getInvitationStatus() != InvitationStatus.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "User must accept the roadtrip invitation before updating routes");
+        }
+
+        // Find the existing route
+        Route existingRoute = routeRepository.findById(routeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Route not found"));
+
+        // Verify route belongs to this roadtrip
+        if (!existingRoute.getRoadtrip().getRoadtripId().equals(roadtripId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "Route does not belong to this roadtrip");
+        }
+
+        // Find POIs and verify they exist
+        List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
+        PointOfInterest startPoi = null;
+        PointOfInterest endPoi = null;
+        String travelMode = convertFromTravelMode(routeInput.getTravelMode());
+
+        for (PointOfInterest poi : pois) {
+            if (routeInput.getStartId().equals(poi.getPoiId())) {
+                startPoi = poi;
+            }
+            if (routeInput.getEndId().equals(poi.getPoiId())) {
+                endPoi = poi;
+            }
+        }
+
+        if (startPoi == null || endPoi == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid start or end point");
+        }
+
+        // Prepare headers for OpenRouteService API
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "5b3ce3597851110001cf6248fee290d1e11b43ce857cfa00b93e3708");
+        headers.set("Accept", "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8");
+        headers.set("Content-Type", "application/json; charset=utf-8");
+
+        // Prepare API request payload
+        String payload = String.format(
+            "{\"coordinates\":[[%f,%f],[%f,%f]]," +
+            "\"profile\":\"%s\"," +
+            "\"format\":\"geojson\"," +
+            "\"units\":\"m\"," +
+            "\"geometry\":true," +
+            "\"instructions\":false}",
+            startPoi.getCoordinate().getY(), startPoi.getCoordinate().getX(),
+            endPoi.getCoordinate().getY(), endPoi.getCoordinate().getX(),
+            travelMode
+        );
+
+        try {
+            // Make request to OpenRouteService
+            HttpEntity<String> entity = new HttpEntity<>(payload, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    "https://api.openrouteservice.org/v2/directions/" + travelMode,
+                    entity,
+                    String.class
+            );
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Failed to fetch updated route from OpenRouteService");
+            }
+
+            // Parse response and update route
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(response.getBody());
+            JsonNode firstRoute = rootNode.get("routes").get(0);
+            JsonNode summary = firstRoute.get("summary");
+
+            // Update route properties
+            existingRoute.setRoute(decodePolyline(firstRoute.get("geometry").asText()));
+            existingRoute.setDistance((float) summary.get("distance").asDouble());
+            existingRoute.setTravelTime((float) summary.get("duration").asDouble());
+            existingRoute.setTravelMode(routeInput.getTravelMode());
+            existingRoute.setStartId(routeInput.getStartId());
+            existingRoute.setEndId(routeInput.getEndId());
+
+            // Update route status based on POI statuses
+            updateRouteStatus(existingRoute);
+
+            return routeRepository.save(existingRoute);
+
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to parse OpenRouteService response: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Failed to update route: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error updating route: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Error updating route: " + e.getMessage());
+        }
     }
 }

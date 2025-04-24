@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.PoiCategory;
 import ch.uzh.ifi.hase.soprafs24.constant.TravelMode;
+import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
@@ -379,6 +380,113 @@ public class RouteServiceIntegrationTest {
         Long routeId = createdRoute.getRouteId();
         assertThrows(ResponseStatusException.class, () -> {
             routeService.deleteRoute(unauthorizedToken, createdRoadtrip.getRoadtripId(), routeId);
+        });
+    }
+
+    @Test
+    public void updateRoute_validInputs_success() {
+        // Create initial route
+        Route route = new Route();
+        route.setStartId(createdStartPoi.getPoiId());
+        route.setEndId(createdEndPoi.getPoiId());
+        route.setTravelMode(TravelMode.DRIVING_CAR);
+        Route createdRoute = routeService.createRoute(createdUser.getToken(), 
+                createdRoadtrip.getRoadtripId(), route);
+
+        // Create updated route data
+        Route updatedRoute = new Route();
+        updatedRoute.setStartId(createdEndPoi.getPoiId());  // Swap start and end
+        updatedRoute.setEndId(createdStartPoi.getPoiId());
+        updatedRoute.setTravelMode(TravelMode.CYCLING_REGULAR);  // Change travel mode
+
+        // When
+        Route result = routeService.updateRoute(createdUser.getToken(), 
+                createdRoadtrip.getRoadtripId(), 
+                createdRoute.getRouteId(), 
+                updatedRoute);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(updatedRoute.getStartId(), result.getStartId());
+        assertEquals(updatedRoute.getEndId(), result.getEndId());
+        assertEquals(updatedRoute.getTravelMode(), result.getTravelMode());
+        assertNotNull(result.getRoute());
+        assertTrue(result.getDistance() > 0);
+        assertTrue(result.getTravelTime() > 0);
+    }
+
+    @Test
+    public void updateRoute_invalidRouteId_throwsException() {
+        Route updatedRoute = new Route();
+        updatedRoute.setStartId(createdStartPoi.getPoiId());
+        updatedRoute.setEndId(createdEndPoi.getPoiId());
+        updatedRoute.setTravelMode(TravelMode.DRIVING_CAR);
+
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.updateRoute(createdUser.getToken(), 
+                    createdRoadtrip.getRoadtripId(), 
+                    999L,  // Non-existent route ID
+                    updatedRoute);
+        });
+    }
+
+    @Test
+    public void updateRoute_unauthorizedUser_throwsException() {
+        // Create initial route
+        Route route = new Route();
+        route.setStartId(createdStartPoi.getPoiId());
+        route.setEndId(createdEndPoi.getPoiId());
+        route.setTravelMode(TravelMode.DRIVING_CAR);
+        Route createdRoute = routeService.createRoute(createdUser.getToken(), 
+                createdRoadtrip.getRoadtripId(), route);
+
+        // Create unauthorized user
+        User unauthorizedUser = new User();
+        unauthorizedUser.setUsername("unauthorized");
+        unauthorizedUser.setPassword("password");
+        unauthorizedUser.setFirstName("Unauthorized");
+        unauthorizedUser.setLastName("User");
+        unauthorizedUser.setCreationDate(java.time.LocalDate.now());
+        unauthorizedUser.setStatus(UserStatus.ONLINE);
+        unauthorizedUser.setToken("token-" + java.util.UUID.randomUUID().toString());
+        userService.createUser(unauthorizedUser);
+
+        // Create update data
+        Route updatedRoute = new Route();
+        updatedRoute.setStartId(createdEndPoi.getPoiId());
+        updatedRoute.setEndId(createdStartPoi.getPoiId());
+        updatedRoute.setTravelMode(TravelMode.CYCLING_REGULAR);
+
+        // Then
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.updateRoute(unauthorizedUser.getToken(), 
+                    createdRoadtrip.getRoadtripId(), 
+                    createdRoute.getRouteId(), 
+                    updatedRoute);
+        });
+    }
+
+    @Test
+    public void updateRoute_invalidPOIs_throwsException() {
+        // Create initial route
+        Route route = new Route();
+        route.setStartId(createdStartPoi.getPoiId());
+        route.setEndId(createdEndPoi.getPoiId());
+        route.setTravelMode(TravelMode.DRIVING_CAR);
+        Route createdRoute = routeService.createRoute(createdUser.getToken(), 
+                createdRoadtrip.getRoadtripId(), route);
+
+        // Create update with invalid POIs
+        Route updatedRoute = new Route();
+        updatedRoute.setStartId(999L);  // Non-existent POI
+        updatedRoute.setEndId(998L);    // Non-existent POI
+        updatedRoute.setTravelMode(TravelMode.CYCLING_REGULAR);
+
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.updateRoute(createdUser.getToken(), 
+                    createdRoadtrip.getRoadtripId(), 
+                    createdRoute.getRouteId(), 
+                    updatedRoute);
         });
     }
 
