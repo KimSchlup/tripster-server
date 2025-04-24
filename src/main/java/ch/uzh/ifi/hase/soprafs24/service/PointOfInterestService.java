@@ -50,23 +50,27 @@ public class PointOfInterestService {
         return this.pointOfInterestRepository.findAll();
     }
 
-    public List<PointOfInterest> getPointOfInterestsByRoadTrip(String token, Long roadtripId){
-        if(!isUserMemberOfRoadtrip(token, roadtripId)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a member of the roadtrip");
-        }
-
-        List<PointOfInterest> pois = this.pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
-
-        return pois;
+    // Update getPointOfInterestsByRoadTrip
+    public List<PointOfInterest> getPointOfInterestsByRoadTrip(String token, Long roadtripId) {
+        verifyUserAccess(token, roadtripId);
+        return this.pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
     }
 
+    @Transactional
+    // Update createPointOfInterest
     public PointOfInterest createPointOfInterest(PointOfInterest newPointOfInterest, Long roadtripId, String token) {
-        if(!isUserMemberOfRoadtrip(token, roadtripId)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a member of the roadtrip");
+        verifyUserAccess(token, roadtripId);
+        // Validate POI data
+        if (newPointOfInterest.getName() == null || newPointOfInterest.getName().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "POI name cannot be empty");
         }
+        if (newPointOfInterest.getCoordinate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "POI coordinates are required");
+        }
+
         // set creatorId = userId
-        User creator = userRepository.findByToken(token);
-        newPointOfInterest.setCreatorId(creator.getUserId());
+        User user = userRepository.findByToken(token);
+        newPointOfInterest.setCreatorId(user.getUserId());
 
         // set POI roadtrip to the roadtrip the POI has been created in
         Optional<Roadtrip> roadtrip = roadtripRepository.findById(roadtripId);
@@ -106,9 +110,15 @@ public class PointOfInterestService {
                 "PointOfInterest with id: " + poiId + " in roadtrip: " + roadtripId + " not found.");
     }
 
+    // Update updatePointOfInterest - add token and roadtripId parameters
+    @Transactional
     public void updatePointOfInterest(PointOfInterest oldPointOfInterest, PointOfInterest newPointOfInterest) {
+        // Validate input
+        if (newPointOfInterest.getName() != null && newPointOfInterest.getName().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "POI name cannot be empty");
+        }
 
-        // excludes option to update creatorId
+        // Update fields
         if (newPointOfInterest.getName() != null) {
             oldPointOfInterest.setName(newPointOfInterest.getName());
         }
@@ -133,19 +143,19 @@ public class PointOfInterestService {
 
         pointOfInterestRepository.save(oldPointOfInterest);
         pointOfInterestRepository.flush();
-        log.debug("PointOfInterest with id: " + newPointOfInterest.getPoiId() + " has been updated");
+        log.debug("PointOfInterest with id: {} has been updated", oldPointOfInterest.getPoiId());
     }
 
+    // Update deletePointOfInterest
     public void deletePointOfInterest(String token, Long roadtripId, Long poiId) {
-        if(!isUserMemberOfRoadtrip(token, roadtripId)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a member of the roadtrip");
-        }
+        verifyUserAccess(token, roadtripId);
         if (!pointOfInterestRepository.existsById(poiId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PointOfInterest not found");
         }
         pointOfInterestRepository.deleteById(poiId);
     }
 
+    // Update castVote
     public void castVote(String token, Long roadtripId, Long poiId, String vote) {
         if(!(vote.equals("upvote") || vote.equals("downvote"))){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Casted vote does not match requirement: "+ vote);
@@ -227,10 +237,8 @@ public class PointOfInterestService {
 
     }
 
+    // Update deleteVote
     public void deleteVote(String token, Long roadtripId, Long poiId) {
-        if(!isUserMemberOfRoadtrip(token, roadtripId)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a member of the roadtrip");
-        }
         List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
         PointOfInterest poi = new PointOfInterest();
         User user = userRepository.findByToken(token);
@@ -345,6 +353,12 @@ public class PointOfInterestService {
         }else if(downvotes.contains(user.getUserId())){
                 poi.setStatus(AcceptanceStatus.DECLINED);
             }
+        }
+    }
+
+    private void verifyUserAccess(String token, Long roadtripId) {
+        if(!isUserMemberOfRoadtrip(token, roadtripId)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a member of the roadtrip");
         }
     }
 
