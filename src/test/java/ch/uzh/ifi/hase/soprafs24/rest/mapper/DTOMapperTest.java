@@ -519,14 +519,63 @@ public class DTOMapperTest {
   }
   
 
-@Test
-public void testLineStringToGeoJson_writerThrowsException_throwsRuntimeException() {
-    LineString mockLineString = mock(LineString.class);
-    // Inject a spy/wrapper to throw an exception (not shown here for brevity)
+  @Test
+  public void testLineStringToGeoJson_writerThrowsException_throwsRuntimeException() {
+      LineString mockLineString = mock(LineString.class);
+      // Inject a spy/wrapper to throw an exception (not shown here for brevity)
 
-    assertThrows(RuntimeException.class, () -> {
-        DTOMapper.lineStringToGeoJson(mockLineString);
-    });
+      assertThrows(RuntimeException.class, () -> {
+          DTOMapper.lineStringToGeoJson(mockLineString);
+      });
+    }
+
+  @Test
+  public void testGeoJsonToLineString_nullInput_returnsNull() {
+      assertNull(DTOMapper.geoJsonToLineString(null));
   }
+  
+  @Test
+  public void testGeoJsonToLineString_validInput_success() {
+      String geoJson = """
+          {
+            "type": "LineString",
+            "coordinates": [
+              [0, 0],
+              [1, 1],
+              [2, 2]
+            ]
+          }
+          """;
+  
+      LineString lineString = DTOMapper.geoJsonToLineString(geoJson);
+      assertNotNull(lineString);
+      assertEquals("LineString", lineString.getGeometryType());
+      assertEquals(3, lineString.getNumPoints());
+      assertEquals(0.0, lineString.getCoordinateN(0).getX(), 0.001);
+      assertEquals(2.0, lineString.getCoordinateN(2).getX(), 0.001);
+  }
+
+  @Test
+  public void testGeoJsonToLineString_wrongGeometryType_throwsException() {
+      String geoJson = """
+          {
+            "type": "Point",
+            "coordinates": [10, 20]
+          }
+          """;
+  
+      assertThrows(ResponseStatusException.class, () -> {
+          DTOMapper.geoJsonToLineString(geoJson);
+      });
+  }
+
+  @Test
+  public void testGeoJsonToLineString_malformedJson_throwsException() {
+      String invalidGeoJson = "not-a-valid-geojson";
+  
+      assertThrows(ResponseStatusException.class, () -> {
+          DTOMapper.geoJsonToLineString(invalidGeoJson);
+      });
+  }  
 
 }
