@@ -458,5 +458,50 @@ public class RouteServiceIntegrationTest {
             routeService.deleteRoutes(createdUser.getToken(), savedTrip.getRoadtripId());
         });
     }
+
+    @Test
+    public void convertToTravelMode_drivingCar_returnsDRIVING_CAR() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("driving-car");
+    
+        // Then
+        assertEquals(TravelMode.DRIVING_CAR, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_cyclingRegular_returnsCYCLING_REGULAR() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("cycling-regular");
+    
+        // Then
+        assertEquals(TravelMode.CYCLING_REGULAR, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_footWalking_returnsFOOT_WALKING() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("foot-walking");
+    
+        // Then
+        assertEquals(TravelMode.FOOT_WALKING, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_publicTransport_returnsPUBLIC_TRANSPORT() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("public-transport");
+    
+        // Then
+        assertEquals(TravelMode.PUBLIC_TRANSPORT, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_invalidTravelMode_throwsException() {
+        // When & Then
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.convertToTravelMode("invalid-mode");
+        });
+    }
+    
         
 }
