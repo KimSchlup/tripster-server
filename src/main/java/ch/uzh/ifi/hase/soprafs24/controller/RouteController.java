@@ -59,7 +59,7 @@ public class RouteController {
     
     // PUT: Update an existing route
     @PutMapping("/roadtrips/{roadtripId}/routes/{routeId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
     public RouteGetDTO updateRoute(
             @RequestHeader("Authorization") String token,
