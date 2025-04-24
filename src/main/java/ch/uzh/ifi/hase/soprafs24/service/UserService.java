@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -35,10 +34,6 @@ public class UserService {
   public UserService(@Qualifier("userRepository") UserRepository userRepository) {
     this.userRepository = userRepository;
   }
-
-  // public List<User> getUsers() {
-  //   return this.userRepository.findAll();
-  // }
 
   public User loginUser(User user) {
     User userByUsername = userRepository.findByUsername(user.getUsername());
@@ -64,7 +59,6 @@ public class UserService {
     userByUsername.setStatus(UserStatus.OFFLINE);
     userRepository.save(userByUsername);
     userRepository.flush();
-    //return;
   }
 
   public User createUser(User newUser) {

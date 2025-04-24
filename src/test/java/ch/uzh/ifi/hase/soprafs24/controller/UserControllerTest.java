@@ -384,6 +384,35 @@ public void createUser_emptyUsername() throws Exception {
         .andExpect(status().isConflict()); // Erwartet 409
   }
 
+  //DELETE unauthorized
+  @Test
+  public void deleteUser_unauthorized() throws Exception {
+        // given
+        User user = new User();
+        user.setUsername("Username");
+        user.setUserId(999L);
+        user.setToken("someToken");
+
+        //and
+        User otherUser = new User();
+        otherUser.setFirstName("otherName");
+        otherUser.setUserId(111L);
+        otherUser.setToken("wrongToken");
+
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.any()))
+        .willReturn(otherUser); // Simuliert authentifizierten User
+
+    // when
+    MockHttpServletRequestBuilder deleteRequest = delete("/users/999")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "wrongToken"); // Simulierte Authentifizierung
+
+    // then
+    mockMvc.perform(deleteRequest)
+        .andExpect(status().isForbidden()); // Erwartet 403
+  }
+
   //Login successfull
   @Test
   public void loginUser_successfull() throws Exception {
@@ -418,11 +447,7 @@ public void createUser_emptyUsername() throws Exception {
   //logout successful
   @Test
   public void logoutUser_successfull() throws Exception {
-
     // given
-    UserPostDTO userPostDTO = new UserPostDTO();
-
-    // and
     User user = new User();
     user.setFirstName("Firstname Lastname");
     user.setUserId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
@@ -430,17 +455,47 @@ public void createUser_emptyUsername() throws Exception {
     given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
     given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
         .willReturn(user); // Simuliert authentifizierten User
-    doNothing().when(userService).deleteUser(Mockito.anyLong());
+    doNothing().when(userService).logoutUser(Mockito.any());
 
     // when
-    MockHttpServletRequestBuilder deleteRequest = delete("/users/999")
+    MockHttpServletRequestBuilder postRequest = post("/auth/logout")
         .contentType(MediaType.APPLICATION_JSON)
-        .header("Authorization", "some_token") // Simulierte Authentifizierung
-        .content(asJsonString(userPostDTO));
+        .header("Authorization", "some_token"); // Simulierte Authentifizierung
+        //.content(asJsonString(userPostDTO));
 
     // then
-    mockMvc.perform(deleteRequest)
-        .andExpect(status().isNoContent()); // Erwartet 204 NO CONTENT
+    mockMvc.perform(postRequest)
+        .andExpect(status().isOk()); // Erwartet 200
+  }
+
+  //test logout wrongId
+  @Test
+  public void logoutUser_Fail() throws Exception {
+    // given
+    User user = new User();
+    user.setFirstName("Firstname Lastname");
+    user.setUserId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
+    user.setToken("someToken");
+    //and
+    User otherUser = new User();
+    otherUser.setFirstName("otherName");
+    otherUser.setUserId(111L);
+    otherUser.setToken("wrongToken");
+
+    given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+    given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
+        .willReturn(user); // Simuliert authentifizierten User
+    doNothing().when(userService).logoutUser(Mockito.any());
+
+    // when
+    MockHttpServletRequestBuilder postRequest = post("/auth/logout")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", "some_token"); // Simulierte Authentifizierung
+        //.content(asJsonString(userPostDTO));
+
+    // then
+    mockMvc.perform(postRequest)
+        .andExpect(status().isOk()); // Erwartet 200
   }
 
   /**
