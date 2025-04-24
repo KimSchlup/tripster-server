@@ -185,6 +185,42 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
+    public void updateUser_success_empty_input() {
+        // given
+        assertNull(userRepository.findByUsername("testUsername"));
+        //assertNull(userRepository.findByUsername("newUsername"));
+
+        User testUser = new User();
+        testUser.setFirstName("testName");
+        testUser.setLastName("lastname");
+        testUser.setUsername("testUsername");
+        testUser.setPassword("password");
+        userService.createUser(testUser);
+
+        Long testUserId = testUser.getUserId();
+
+        User updatedUser = new User();
+        // updatedUser.setUsername("newUsername");
+        // updatedUser.setFirstName("newFirstName");
+        // updatedUser.setLastName("newLastName");
+        // updatedUser.setPhoneNumber("newPhoneNumber");
+        // updatedUser.setMail("newMail");
+        // updatedUser.setPassword("newPassword");
+        // updatedUser.setReceiveNotifications(false);
+        // updatedUser.setUserPreferences(new UserPreferences());
+
+        // when
+        userService.updateUser(testUserId, updatedUser);
+
+        // then
+        // Verify that the user is updated correctly
+        User updatedTestUser = userRepository.findById(testUserId).orElse(null);
+        assertEquals("testUsername", updatedTestUser.getUsername());
+        //assertEquals(false, updatedTestUser.getReceiveNotifications());
+        // assertNotNull(updatedTestUser.getUserPreferences());
+    }
+
+    @Test
     public void updateUser_NoSuccess_duplicateUsername() {
         // given
         assertNull(userRepository.findByUsername("testUsername"));

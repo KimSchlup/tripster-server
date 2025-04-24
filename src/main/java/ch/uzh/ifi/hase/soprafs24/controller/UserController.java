@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -98,7 +96,6 @@ public class UserController {
     User authenticatedUser = userService.getUserByToken(token);
 
     userService.logoutUser(authenticatedUser);
-    return;
   }
 
   @DeleteMapping("users/{userId}")
@@ -109,7 +106,7 @@ public class UserController {
     User authenticatedUser = userService.getUserByToken(token);
 
     if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
     }
 
     userService.deleteUser(userId);
