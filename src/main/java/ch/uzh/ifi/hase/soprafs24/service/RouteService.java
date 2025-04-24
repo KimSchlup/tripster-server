@@ -202,7 +202,7 @@ public class RouteService {
             route.setTravelMode(route.getTravelMode());
             route.setStartId(startId);
             route.setEndId(endId);
-
+ 
             return routeRepository.save(route);
         } catch (JsonProcessingException e) {
             logger.error("Failed to parse OpenRouteService response: {}", e.getMessage());

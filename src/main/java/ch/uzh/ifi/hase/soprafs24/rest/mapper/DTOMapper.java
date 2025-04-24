@@ -198,16 +198,6 @@ public interface DTOMapper {
   @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "pointToGeoJsonNode")
   PointOfInterestGetDTO convertEntityToPointOfInterestGetDTO(PointOfInterest pointOfInterest);
 
-  @Mapping(target = "poiId", ignore = true)
-  @Mapping(target = "roadtrip", ignore = true)
-  @Mapping(target = "upvotes", ignore = true)
-  @Mapping(target = "downvotes", ignore = true)
-  @Mapping(target = "pointOfInterestComments", ignore = true)
-  @Mapping(target = "pointOfInterestComment", ignore = true)
-  @Mapping(source = "creatorId", target = "creatorId")
-  @Mapping(source = "coordinate", target = "coordinate", qualifiedByName = "pointToGeoJsonNode")
-  PointOfInterest convertPointOfInterestPutDTOToEntity(PointOfInterestPutDTO pointOfInterestPutDTO);
-
   @Named("mapGeoJsonToPoint")
   public static Point mapGeoJsonToPoint(JsonNode geoJsonNode) {
     if (geoJsonNode == null) {
