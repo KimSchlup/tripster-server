@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.VotePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.PointOfInterestService;
@@ -40,7 +39,8 @@ public class PointOfInterestController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public PointOfInterestGetDTO createPointOfInterest(@RequestHeader("Authorization") String token,
-            @RequestBody PointOfInterestPostDTO pointOfInterestPostDTO, @PathVariable Long roadtripId) {
+                                                        @RequestBody PointOfInterestPostDTO pointOfInterestPostDTO, 
+                                                        @PathVariable Long roadtripId) {
         PointOfInterest pointOfInterestInput = DTOMapper.INSTANCE
                 .convertPointOfInterestPostDTOToEntity(pointOfInterestPostDTO);
         PointOfInterest createdPointOfInterest = pointOfInterestService.createPointOfInterest(pointOfInterestInput,
@@ -73,9 +73,12 @@ public class PointOfInterestController {
     @PutMapping("/roadtrips/{roadtripId}/pois/{poiId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
-    public void updatePointOfInterest(@RequestHeader("Authorization") String token, @RequestBody PointOfInterestPutDTO pointOfInterestPutDTO, @PathVariable Long roadtripId, @PathVariable Long poiId){
+    public void updatePointOfInterest(@RequestHeader("Authorization") String token, 
+                                        @RequestBody PointOfInterestPostDTO pointOfInterestPostDTO,  
+                                        @PathVariable Long roadtripId, 
+                                        @PathVariable Long poiId){
         
-        PointOfInterest newPointOfInterest = DTOMapper.INSTANCE.convertPointOfInterestPutDTOToEntity(pointOfInterestPutDTO);
+        PointOfInterest newPointOfInterest = DTOMapper.INSTANCE.convertPointOfInterestPostDTOToEntity(pointOfInterestPostDTO);
         PointOfInterest oldPointOfInterest = pointOfInterestService.getPointOfInterestByID(token, roadtripId, poiId);
         
         pointOfInterestService.updatePointOfInterest(oldPointOfInterest, newPointOfInterest);
