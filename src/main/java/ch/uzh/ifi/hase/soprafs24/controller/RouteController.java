@@ -56,4 +56,19 @@ public class RouteController {
     public void deleteRoutes(@RequestHeader("Authorization") String token, @PathVariable Long roadtripId) {
         routeService.deleteRoutes(token, roadtripId);
     }
+    
+    // PUT: Update an existing route
+    @PutMapping("/roadtrips/{roadtripId}/routes/{routeId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public RouteGetDTO updateRoute(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long roadtripId,
+            @PathVariable Long routeId,
+            @RequestBody RoutePostDTO routePostDTO) {
+        
+        Route routeInput = DTOMapper.INSTANCE.convertRoutePostDTOToEntity(routePostDTO);
+        Route updatedRoute = routeService.updateRoute(token, roadtripId, routeId, routeInput);
+        return DTOMapper.INSTANCE.convertEntityToRouteGetDTO(updatedRoute);
+    }
 }

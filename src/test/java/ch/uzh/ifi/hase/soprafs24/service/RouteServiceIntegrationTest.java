@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.AcceptanceStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
 import ch.uzh.ifi.hase.soprafs24.constant.PoiCategory;
 import ch.uzh.ifi.hase.soprafs24.constant.TravelMode;
+import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
@@ -382,6 +383,113 @@ public class RouteServiceIntegrationTest {
         });
     }
 
+    @Test
+    public void updateRoute_validInputs_success() {
+        // Create initial route
+        Route route = new Route();
+        route.setStartId(createdStartPoi.getPoiId());
+        route.setEndId(createdEndPoi.getPoiId());
+        route.setTravelMode(TravelMode.DRIVING_CAR);
+        Route createdRoute = routeService.createRoute(createdUser.getToken(), 
+                createdRoadtrip.getRoadtripId(), route);
+
+        // Create updated route data
+        Route updatedRoute = new Route();
+        updatedRoute.setStartId(createdEndPoi.getPoiId());  // Swap start and end
+        updatedRoute.setEndId(createdStartPoi.getPoiId());
+        updatedRoute.setTravelMode(TravelMode.CYCLING_REGULAR);  // Change travel mode
+
+        // When
+        Route result = routeService.updateRoute(createdUser.getToken(), 
+                createdRoadtrip.getRoadtripId(), 
+                createdRoute.getRouteId(), 
+                updatedRoute);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(updatedRoute.getStartId(), result.getStartId());
+        assertEquals(updatedRoute.getEndId(), result.getEndId());
+        assertEquals(updatedRoute.getTravelMode(), result.getTravelMode());
+        assertNotNull(result.getRoute());
+        assertTrue(result.getDistance() > 0);
+        assertTrue(result.getTravelTime() > 0);
+    }
+
+    @Test
+    public void updateRoute_invalidRouteId_throwsException() {
+        Route updatedRoute = new Route();
+        updatedRoute.setStartId(createdStartPoi.getPoiId());
+        updatedRoute.setEndId(createdEndPoi.getPoiId());
+        updatedRoute.setTravelMode(TravelMode.DRIVING_CAR);
+
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.updateRoute(createdUser.getToken(), 
+                    createdRoadtrip.getRoadtripId(), 
+                    999L,  // Non-existent route ID
+                    updatedRoute);
+        });
+    }
+
+    @Test
+    public void updateRoute_unauthorizedUser_throwsException() {
+        // Create initial route
+        Route route = new Route();
+        route.setStartId(createdStartPoi.getPoiId());
+        route.setEndId(createdEndPoi.getPoiId());
+        route.setTravelMode(TravelMode.DRIVING_CAR);
+        Route createdRoute = routeService.createRoute(createdUser.getToken(), 
+                createdRoadtrip.getRoadtripId(), route);
+
+        // Create unauthorized user
+        User unauthorizedUser = new User();
+        unauthorizedUser.setUsername("unauthorized");
+        unauthorizedUser.setPassword("password");
+        unauthorizedUser.setFirstName("Unauthorized");
+        unauthorizedUser.setLastName("User");
+        unauthorizedUser.setCreationDate(java.time.LocalDate.now());
+        unauthorizedUser.setStatus(UserStatus.ONLINE);
+        unauthorizedUser.setToken("token-" + java.util.UUID.randomUUID().toString());
+        userService.createUser(unauthorizedUser);
+
+        // Create update data
+        Route updatedRoute = new Route();
+        updatedRoute.setStartId(createdEndPoi.getPoiId());
+        updatedRoute.setEndId(createdStartPoi.getPoiId());
+        updatedRoute.setTravelMode(TravelMode.CYCLING_REGULAR);
+
+        // Then
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.updateRoute(unauthorizedUser.getToken(), 
+                    createdRoadtrip.getRoadtripId(), 
+                    createdRoute.getRouteId(), 
+                    updatedRoute);
+        });
+    }
+
+    @Test
+    public void updateRoute_invalidPOIs_throwsException() {
+        // Create initial route
+        Route route = new Route();
+        route.setStartId(createdStartPoi.getPoiId());
+        route.setEndId(createdEndPoi.getPoiId());
+        route.setTravelMode(TravelMode.DRIVING_CAR);
+        Route createdRoute = routeService.createRoute(createdUser.getToken(), 
+                createdRoadtrip.getRoadtripId(), route);
+
+        // Create update with invalid POIs
+        Route updatedRoute = new Route();
+        updatedRoute.setStartId(999L);  // Non-existent POI
+        updatedRoute.setEndId(998L);    // Non-existent POI
+        updatedRoute.setTravelMode(TravelMode.CYCLING_REGULAR);
+
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.updateRoute(createdUser.getToken(), 
+                    createdRoadtrip.getRoadtripId(), 
+                    createdRoute.getRouteId(), 
+                    updatedRoute);
+        });
+    }
+
     // Helper method to add in RouteServiceIntegrationTest
     private void makeUserRoadtripMember(User user, Roadtrip roadtrip) {
         RoadtripMemberPK pk = new RoadtripMemberPK();
@@ -396,4 +504,112 @@ public class RouteServiceIntegrationTest {
         roadtripMemberRepository.save(roadtripMember);
         roadtripMemberRepository.flush();
     }
+
+    @Test
+    public void deleteRoutes_roadtripNotFound_throwsException() {
+        Long nonExistentRoadtripId = 9999L;
+    
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.deleteRoutes(createdUser.getToken(), nonExistentRoadtripId);
+        });
+    }
+
+    @Test
+    public void deleteRoutes_userNotMember_throwsException() {
+        // Create a new roadtrip with a different owner
+        Roadtrip newRoadtrip = new Roadtrip();
+        newRoadtrip.setName("Lonely Roadtrip");
+        newRoadtrip.setDescription("Nobody is here");
+        newRoadtrip.setOwner(createdUser);
+        Roadtrip savedRoadtrip = roadtripRepository.saveAndFlush(newRoadtrip);
+    
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.deleteRoutes(createdUser.getToken(), savedRoadtrip.getRoadtripId());
+        });
+    }
+    
+
+    @Test
+    public void deleteRoutes_userNotAcceptedInvitation_throwsException() {
+        Roadtrip anotherRoadtrip = new Roadtrip();
+        anotherRoadtrip.setName("Pending Trip");
+        anotherRoadtrip.setDescription("Still waiting");
+        anotherRoadtrip.setOwner(createdUser); 
+        Roadtrip savedTrip = roadtripRepository.saveAndFlush(anotherRoadtrip);
+    
+        RoadtripMemberPK pk = new RoadtripMemberPK();
+        pk.setUserId(createdUser.getUserId());
+        pk.setRoadtripId(savedTrip.getRoadtripId());
+    
+        RoadtripMember member = new RoadtripMember();
+        member.setRoadtripMemberId(pk);
+        member.setUser(createdUser);
+        member.setRoadtrip(savedTrip);
+        member.setInvitationStatus(InvitationStatus.PENDING);
+        roadtripMemberRepository.saveAndFlush(member);
+    
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.deleteRoutes(createdUser.getToken(), savedTrip.getRoadtripId());
+        });
+    }
+    
+    @Test
+    public void deleteRoutes_noRoutesFound_throwsException() {
+        // Create new roadtrip and make user a member
+        Roadtrip trip = new Roadtrip();
+        trip.setName("Empty Trip");
+        trip.setDescription("No routes yet");
+        Roadtrip savedTrip = roadtripService.createRoadtrip(trip, createdUser.getToken());
+        makeUserRoadtripMember(createdUser, savedTrip);
+    
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.deleteRoutes(createdUser.getToken(), savedTrip.getRoadtripId());
+        });
+    }
+
+    @Test
+    public void convertToTravelMode_drivingCar_returnsDRIVING_CAR() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("driving-car");
+    
+        // Then
+        assertEquals(TravelMode.DRIVING_CAR, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_cyclingRegular_returnsCYCLING_REGULAR() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("cycling-regular");
+    
+        // Then
+        assertEquals(TravelMode.CYCLING_REGULAR, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_footWalking_returnsFOOT_WALKING() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("foot-walking");
+    
+        // Then
+        assertEquals(TravelMode.FOOT_WALKING, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_publicTransport_returnsPUBLIC_TRANSPORT() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("public-transport");
+    
+        // Then
+        assertEquals(TravelMode.PUBLIC_TRANSPORT, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_invalidTravelMode_throwsException() {
+        // When & Then
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.convertToTravelMode("invalid-mode");
+        });
+    }
+    
+        
 }
