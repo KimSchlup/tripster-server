@@ -195,7 +195,7 @@ class RouteControllerTest {
                 .header("Authorization", "testToken");
 
         mockMvc.perform(putRequest)
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.routeId", is(route.getRouteId().intValue())))
                 .andExpect(jsonPath("$.startId", is(route.getStartId().intValue())))
                 .andExpect(jsonPath("$.endId", is(route.getEndId().intValue())))
