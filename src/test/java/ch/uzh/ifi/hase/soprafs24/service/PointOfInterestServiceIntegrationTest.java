@@ -487,23 +487,44 @@ public class PointOfInterestServiceIntegrationTest {
                 testRoadtrip.setDescription("Test Description");
                 Roadtrip createdRoadtrip = roadtripService.createRoadtrip(testRoadtrip, createdUser.getToken());
 
+                // Make user a member of the roadtrip
+                RoadtripMemberPK pk = new RoadtripMemberPK();
+                pk.setUserId(createdUser.getUserId());
+                pk.setRoadtripId(createdRoadtrip.getRoadtripId());
+
+                RoadtripMember roadtripMember = new RoadtripMember();
+                roadtripMember.setRoadtripMemberId(pk);
+                roadtripMember.setUser(createdUser);
+                roadtripMember.setRoadtrip(createdRoadtrip);
+                roadtripMember.setInvitationStatus(InvitationStatus.ACCEPTED);
+                roadtripMemberRepository.save(roadtripMember);
+                roadtripMemberRepository.flush();
+
                 // Create original POI
-                PointOfInterest poi = new PointOfInterest();
-                poi.setName("Original POI");
-                poi.setDescription("Original Description");
-                poi.setCategory(PoiCategory.SIGHTSEEING);
+                PointOfInterest originalPoi = new PointOfInterest();
+                originalPoi.setName("Original POI");
+                originalPoi.setDescription("Original Description");
+                originalPoi.setCategory(PoiCategory.FOOD);
+                originalPoi.setPriority(PoiPriority.LOW);
+                originalPoi.setStatus(AcceptanceStatus.PENDING);
+                originalPoi.setRoadtrip(createdRoadtrip);
+
+                // Set coordinates
                 org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory();
                 org.locationtech.jts.geom.Point point = geometryFactory.createPoint(
                                 new org.locationtech.jts.geom.Coordinate(8.5417, 47.3769));
-                poi.setCoordinate(point);
-                PointOfInterest createdPoi = pointOfInterestService.createPointOfInterest(
-                                poi, createdRoadtrip.getRoadtripId(), createdUser.getToken());
+                originalPoi.setCoordinate(point);
 
-                // Create updated POI
+                // Save original POI
+                PointOfInterest createdPoi = pointOfInterestService.createPointOfInterest(
+                                originalPoi, createdRoadtrip.getRoadtripId(), createdUser.getToken());
+
+                // Create updated POI with new values
                 PointOfInterest updatedPoi = new PointOfInterest();
+                updatedPoi.setPoiId(createdPoi.getPoiId());
                 updatedPoi.setName("Updated POI");
                 updatedPoi.setDescription("Updated Description");
-                updatedPoi.setCategory(PoiCategory.FOOD);
+                updatedPoi.setCategory(PoiCategory.SIGHTSEEING);  // Actually change the category
                 updatedPoi.setPriority(PoiPriority.HIGH);
 
                 // When
@@ -512,10 +533,19 @@ public class PointOfInterestServiceIntegrationTest {
                 // Then
                 PointOfInterest retrievedPoi = pointOfInterestService.getPointOfInterestByID(
                                 createdUser.getToken(), createdRoadtrip.getRoadtripId(), createdPoi.getPoiId());
+
+                // Verify all updated fields
+                assertNotNull(retrievedPoi);
                 assertEquals("Updated POI", retrievedPoi.getName());
                 assertEquals("Updated Description", retrievedPoi.getDescription());
-                assertEquals(PoiCategory.FOOD, retrievedPoi.getCategory());
+                assertEquals(PoiCategory.SIGHTSEEING, retrievedPoi.getCategory());
                 assertEquals(PoiPriority.HIGH, retrievedPoi.getPriority());
+                
+                // Verify unchanged fields remain the same
+                assertEquals(createdPoi.getPoiId(), retrievedPoi.getPoiId());
+                assertEquals(createdPoi.getRoadtrip().getRoadtripId(), retrievedPoi.getRoadtrip().getRoadtripId());
+                assertEquals(createdPoi.getCreatorId(), retrievedPoi.getCreatorId());
+                assertEquals(point, retrievedPoi.getCoordinate());
         }
 
         @Test
