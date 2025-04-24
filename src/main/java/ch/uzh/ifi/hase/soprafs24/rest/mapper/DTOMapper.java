@@ -11,7 +11,6 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestCommentGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestCommentPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripMemberPostDTO;

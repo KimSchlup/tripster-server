@@ -396,4 +396,112 @@ public class RouteServiceIntegrationTest {
         roadtripMemberRepository.save(roadtripMember);
         roadtripMemberRepository.flush();
     }
+
+    @Test
+    public void deleteRoutes_roadtripNotFound_throwsException() {
+        Long nonExistentRoadtripId = 9999L;
+    
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.deleteRoutes(createdUser.getToken(), nonExistentRoadtripId);
+        });
+    }
+
+    @Test
+    public void deleteRoutes_userNotMember_throwsException() {
+        // Create a new roadtrip with a different owner
+        Roadtrip newRoadtrip = new Roadtrip();
+        newRoadtrip.setName("Lonely Roadtrip");
+        newRoadtrip.setDescription("Nobody is here");
+        newRoadtrip.setOwner(createdUser);
+        Roadtrip savedRoadtrip = roadtripRepository.saveAndFlush(newRoadtrip);
+    
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.deleteRoutes(createdUser.getToken(), savedRoadtrip.getRoadtripId());
+        });
+    }
+    
+
+    @Test
+    public void deleteRoutes_userNotAcceptedInvitation_throwsException() {
+        Roadtrip anotherRoadtrip = new Roadtrip();
+        anotherRoadtrip.setName("Pending Trip");
+        anotherRoadtrip.setDescription("Still waiting");
+        anotherRoadtrip.setOwner(createdUser); 
+        Roadtrip savedTrip = roadtripRepository.saveAndFlush(anotherRoadtrip);
+    
+        RoadtripMemberPK pk = new RoadtripMemberPK();
+        pk.setUserId(createdUser.getUserId());
+        pk.setRoadtripId(savedTrip.getRoadtripId());
+    
+        RoadtripMember member = new RoadtripMember();
+        member.setRoadtripMemberId(pk);
+        member.setUser(createdUser);
+        member.setRoadtrip(savedTrip);
+        member.setInvitationStatus(InvitationStatus.PENDING);
+        roadtripMemberRepository.saveAndFlush(member);
+    
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.deleteRoutes(createdUser.getToken(), savedTrip.getRoadtripId());
+        });
+    }
+    
+    @Test
+    public void deleteRoutes_noRoutesFound_throwsException() {
+        // Create new roadtrip and make user a member
+        Roadtrip trip = new Roadtrip();
+        trip.setName("Empty Trip");
+        trip.setDescription("No routes yet");
+        Roadtrip savedTrip = roadtripService.createRoadtrip(trip, createdUser.getToken());
+        makeUserRoadtripMember(createdUser, savedTrip);
+    
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.deleteRoutes(createdUser.getToken(), savedTrip.getRoadtripId());
+        });
+    }
+
+    @Test
+    public void convertToTravelMode_drivingCar_returnsDRIVING_CAR() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("driving-car");
+    
+        // Then
+        assertEquals(TravelMode.DRIVING_CAR, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_cyclingRegular_returnsCYCLING_REGULAR() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("cycling-regular");
+    
+        // Then
+        assertEquals(TravelMode.CYCLING_REGULAR, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_footWalking_returnsFOOT_WALKING() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("foot-walking");
+    
+        // Then
+        assertEquals(TravelMode.FOOT_WALKING, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_publicTransport_returnsPUBLIC_TRANSPORT() {
+        // When
+        TravelMode result = routeService.convertToTravelMode("public-transport");
+    
+        // Then
+        assertEquals(TravelMode.PUBLIC_TRANSPORT, result);
+    }
+    
+    @Test
+    public void convertToTravelMode_invalidTravelMode_throwsException() {
+        // When & Then
+        assertThrows(ResponseStatusException.class, () -> {
+            routeService.convertToTravelMode("invalid-mode");
+        });
+    }
+    
+        
 }
