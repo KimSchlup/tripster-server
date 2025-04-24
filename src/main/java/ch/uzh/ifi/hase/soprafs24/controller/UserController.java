@@ -106,7 +106,7 @@ public class UserController {
     User authenticatedUser = userService.getUserByToken(token);
 
     if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this user");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
     }
 
     userService.deleteUser(userId);
