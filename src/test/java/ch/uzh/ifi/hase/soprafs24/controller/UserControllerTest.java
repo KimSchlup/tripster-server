@@ -418,11 +418,7 @@ public void createUser_emptyUsername() throws Exception {
   //logout successful
   @Test
   public void logoutUser_successfull() throws Exception {
-
     // given
-    UserPostDTO userPostDTO = new UserPostDTO();
-
-    // and
     User user = new User();
     user.setFirstName("Firstname Lastname");
     user.setUserId(999L); // getUserbyToken gibt User 1 zurück, PUT Request geht aber auf ID 999
@@ -430,17 +426,17 @@ public void createUser_emptyUsername() throws Exception {
     given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
     given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token"))))
         .willReturn(user); // Simuliert authentifizierten User
-    doNothing().when(userService).deleteUser(Mockito.anyLong());
+    doNothing().when(userService).logoutUser(Mockito.any());
 
     // when
-    MockHttpServletRequestBuilder deleteRequest = delete("/users/999")
+    MockHttpServletRequestBuilder postRequest = post("/auth/logout")
         .contentType(MediaType.APPLICATION_JSON)
-        .header("Authorization", "some_token") // Simulierte Authentifizierung
-        .content(asJsonString(userPostDTO));
+        .header("Authorization", "some_token"); // Simulierte Authentifizierung
+        //.content(asJsonString(userPostDTO));
 
     // then
-    mockMvc.perform(deleteRequest)
-        .andExpect(status().isNoContent()); // Erwartet 204 NO CONTENT
+    mockMvc.perform(postRequest)
+        .andExpect(status().isOk()); // Erwartet 200
   }
 
   /**
