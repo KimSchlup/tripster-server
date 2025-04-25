@@ -2,21 +2,11 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.constant.ChecklistCategory;
 import ch.uzh.ifi.hase.soprafs24.constant.Priority;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
 import ch.uzh.ifi.hase.soprafs24.entity.ChecklistElement;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistGetDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.security.AuthenticationInterceptor;
-import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import ch.uzh.ifi.hase.soprafs24.service.ChecklistService;
-import ch.uzh.ifi.hase.soprafs24.service.RoadtripService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,23 +17,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.web.client.HttpClientErrorException.Forbidden;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.test.web.servlet.RequestBuilder;
-import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
-import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
-import ch.uzh.ifi.hase.soprafs24.repository.ChecklistRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.ChecklistElementRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -142,33 +122,9 @@ public class ChecklistControllerTest {
             .andExpect(status().isForbidden());
     }
 
-    // @Test
-    // public void get_checklist_roadtrip_notFound() throws Exception {
-    //     // given
-    //     Long roadtripId = 1L;
-    //     String token = "mock-token";
-
-    //     Checklist mockChecklist = new Checklist();
-    //     mockChecklist.setRoadtripId(roadtripId);
-
-    //     //mock
-    //     given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
-
-    //     doNothing().when(checklistService).checkAccessRights(roadtripId, token);
-    //     given(checklistService.getChecklistByRoadtripId(roadtripId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-    //     // when
-    //     RequestBuilder getRequest = get("/roadtrips/" + roadtripId + "/checklist")
-    //         .header("Authorization", token)
-    //         .contentType(MediaType.APPLICATION_JSON);
-
-    //     // then
-    //     mockMvc.perform(getRequest)
-    //         .andExpect(status().isNotFound());
-    // }
 
     @Test
-    public void updateChecklist() throws Exception {
+    public void updateChecklist_NotFound() throws Exception {
         // given
         Long roadtripId = 1L;
         String token = "mock-token";
