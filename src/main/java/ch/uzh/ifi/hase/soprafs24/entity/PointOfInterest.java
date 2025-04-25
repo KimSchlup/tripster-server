@@ -58,8 +58,10 @@ public class PointOfInterest implements Serializable {
     @Column
     private List<Long> downvotes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "poi", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "poi", 
+              cascade = CascadeType.ALL, 
+              fetch = FetchType.EAGER,  // Change from LAZY to EAGER
+              orphanRemoval = true)
     private List<PointOfInterestComment> comments = new ArrayList<>();
 
     // Getters and Setters

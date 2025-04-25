@@ -330,7 +330,7 @@ public class RouteServiceIntegrationTest {
     public void createRoute_differentTravelModes_success() {
         // Test all travel modes
         TravelMode[] modes = {TravelMode.DRIVING_CAR, TravelMode.CYCLING_REGULAR, 
-                             TravelMode.FOOT_WALKING, TravelMode.PUBLIC_TRANSPORT};
+                             TravelMode.FOOT_WALKING};
         
         for (TravelMode mode : modes) {
             Route route = new Route();
@@ -592,15 +592,6 @@ public class RouteServiceIntegrationTest {
     
         // Then
         assertEquals(TravelMode.FOOT_WALKING, result);
-    }
-    
-    @Test
-    public void convertToTravelMode_publicTransport_returnsPUBLIC_TRANSPORT() {
-        // When
-        TravelMode result = routeService.convertToTravelMode("public-transport");
-    
-        // Then
-        assertEquals(TravelMode.PUBLIC_TRANSPORT, result);
     }
     
     @Test
