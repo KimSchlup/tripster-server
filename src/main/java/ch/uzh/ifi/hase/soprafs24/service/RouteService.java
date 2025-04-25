@@ -258,9 +258,7 @@ public class RouteService {
             return TravelMode.CYCLING_REGULAR;
         } else if (travelMode.equals("foot-walking")) {
             return TravelMode.FOOT_WALKING;
-        } else if (travelMode.equals("public-transport")) {
-            return TravelMode.PUBLIC_TRANSPORT;
-        } else {
+        } else{
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid travel mode");
         }
     }
@@ -272,8 +270,6 @@ public class RouteService {
             return "cycling-regular";
         } else if (travelMode == TravelMode.FOOT_WALKING) {
             return "foot-walking";
-        } else if (travelMode == TravelMode.PUBLIC_TRANSPORT) {
-            return "public-transport";
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid travel mode");
         }
