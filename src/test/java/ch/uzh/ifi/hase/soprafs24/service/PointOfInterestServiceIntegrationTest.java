@@ -550,6 +550,7 @@ public class PointOfInterestServiceIntegrationTest {
 
         @Test
         public void calculateStatus_majorityVoting_success() {
+
                 // Create test users
                 User owner = new User();
                 owner.setUsername("owner");
