@@ -146,13 +146,6 @@ public class RouteService {
         logger.debug("Request payload: {}", payload);
         logger.debug("Request headers: {}", headers);
 
-        // Log the exact URL and payload being sent
-        logger.info("OpenRouteService URL: {}", "https://api.openrouteservice.org/v2/directions/" + travelMode);
-        logger.info("Request payload: {}", payload);
-
-        // Log request details
-        logger.info("OpenRouteService Request URL: {}", "https://api.openrouteservice.org/v2/directions/" + travelMode);
-        logger.info("Request payload: {}", payload);
 
         // Send API request
         HttpEntity<String> entity = new HttpEntity<>(payload, headers);
@@ -161,28 +154,17 @@ public class RouteService {
                 entity,
                 String.class);
 
-        // Log response
-        logger.info("Response Status: {}", response.getStatusCode());
-        logger.info("Response Body: {}", response.getBody());
-
-        // Log the response
-        logger.debug("Response status: {}", response.getStatusCode());
-        logger.debug("Response body: {}", response.getBody());
 
         if (response.getStatusCode() != HttpStatus.OK) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Failed to fetch route from OpenRouteService. Status: " + response.getStatusCode());
         }
 
-        // Enhanced logging of the OpenRouteService response
-        logger.info("Full OpenRouteService Response: {}", response.getBody());
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response.getBody());
 
-            // Debug log the response structure
-            logger.debug("Response structure: {}", rootNode.toString());
 
             // For OpenRouteService GeoJSON response, we need to look for 'routes' array
             if (!rootNode.has("routes") || rootNode.get("routes").size() == 0) {
@@ -487,8 +469,8 @@ public class RouteService {
                         "\"units\":\"m\"," +
                         "\"geometry\":true," +
                         "\"instructions\":false}",
-                startPoi.getCoordinate().getY(), startPoi.getCoordinate().getX(),
-                endPoi.getCoordinate().getY(), endPoi.getCoordinate().getX(),
+                startPoi.getCoordinate().getX(), startPoi.getCoordinate().getY(),
+                endPoi.getCoordinate().getX(), endPoi.getCoordinate().getY(),
                 travelMode);
 
         try {
@@ -520,8 +502,10 @@ public class RouteService {
 
             // Update route status based on POI statuses
             updateRouteStatus(existingRoute);
+            routeRepository.save(existingRoute);
+            routeRepository.flush();
 
-            return routeRepository.save(existingRoute);
+            return existingRoute;
 
         } catch (JsonProcessingException e) {
             logger.error("Failed to parse OpenRouteService response: {}", e.getMessage());
