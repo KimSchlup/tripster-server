@@ -22,6 +22,8 @@ spring:
       on-profile: dev,test
   cloud:
     gcp:
+      storage:
+        bucket: mapmates-object-store
       secretmanager:
         enabled: false
 
