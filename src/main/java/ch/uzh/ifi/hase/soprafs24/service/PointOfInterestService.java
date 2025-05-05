@@ -319,9 +319,9 @@ public class PointOfInterestService {
         }
 
         if(setting.getDecisionProcess() == DecisionProcess.MAJORITY){
-            if(upvotes.size() >= voteCount/2){
+            if(upvotes.size() >= (voteCount/2)){
                 poi.setStatus(AcceptanceStatus.ACCEPTED);
-            }else if(downvotes.size() >= voteCount/2){
+            }else if(downvotes.size() >= (voteCount/2)){
                 poi.setStatus(AcceptanceStatus.DECLINED);
             }
         }else if(isUserOwnerOfRoadtrip(token, roadtripId)){
