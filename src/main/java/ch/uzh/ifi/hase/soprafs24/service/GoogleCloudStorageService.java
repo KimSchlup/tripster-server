@@ -7,8 +7,7 @@ import com.google.cloud.storage.Storage;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Date;
 
 @Service
 public class GoogleCloudStorageService {
@@ -19,16 +18,12 @@ public class GoogleCloudStorageService {
         this.storage = storage; // Injected via Spring
     }
 
-    public String uploadFile(MultipartFile file, String bucketName) throws IOException {
+    public String uploadFile(MultipartFile file, String bucketName, String fileName) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is empty or missing");
         }
 
-        String originalFilename = Optional.ofNullable(file.getOriginalFilename())
-                .filter(name -> !name.trim().isEmpty())
-                .orElse("upload-" + UUID.randomUUID());
-
-        String objectName = "uploads/" + UUID.randomUUID() + "-" + originalFilename;
+        String objectName = "uploads/" + fileName;
 
         BlobId blobId = BlobId.of(bucketName, objectName);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
