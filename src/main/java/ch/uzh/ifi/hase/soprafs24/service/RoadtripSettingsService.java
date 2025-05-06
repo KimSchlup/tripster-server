@@ -1,12 +1,16 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import ch.uzh.ifi.hase.soprafs24.constant.BasemapType;
@@ -21,6 +25,9 @@ import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripSettingsRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
+
+import ch.uzh.ifi.hase.soprafs24.service.GoogleCloudStorageService;
 
 @Service
 @Transactional
@@ -30,14 +37,17 @@ public class RoadtripSettingsService {
     private final RoadtripSettingsRepository roadtripSettingsRepository;
     private final RoadtripRepository roadtripRepository;
     private final RoadtripMemberRepository roadtripMemberRepository;
+    private final GoogleCloudStorageService storageService;
 
     public RoadtripSettingsService(
             @Qualifier("roadtripSettingsRepository") RoadtripSettingsRepository roadtripSettingsRepository,
             @Qualifier("roadtripRepository") RoadtripRepository roadtripRepository,
-            @Qualifier("roadtripMemberRepository") RoadtripMemberRepository roadtripMemberRepository) {
+            @Qualifier("roadtripMemberRepository") RoadtripMemberRepository roadtripMemberRepository,
+            GoogleCloudStorageService storageService) {
         this.roadtripMemberRepository = roadtripMemberRepository;
         this.roadtripRepository = roadtripRepository;
         this.roadtripSettingsRepository = roadtripSettingsRepository;
+        this.storageService = storageService;
     }
 
     public RoadtripSettings getRoadtripSettingsById(Long roadtripId, User user) {
@@ -147,6 +157,53 @@ public class RoadtripSettingsService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "An error occurred while updating the settings: " + e.getMessage());
         }
+    }
+
+    public String uploadRoadtripImage(MultipartFile file, String bucketName, Long roadtripId, User user) {
+        // Check if roadtrip exists
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        // Check if user is owner
+        boolean isOwner = Objects.equals(roadtrip.getOwner().getUserId(), user.getUserId());
+
+        if (!isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only the roadtrip owner can access the settings");
+        }
+
+        RoadtripSettings roadtripSettings = roadtripSettingsRepository.findByRoadtrip_RoadtripId(roadtripId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip settings not found"));
+
+        try {
+            String imageName = new Date().getTime() + "-" + roadtripId.toString();
+            String fileUrl = storageService.uploadFile(file, bucketName, imageName);
+
+            roadtripSettings.setImageName(imageName);
+            roadtripSettings.setImageLocation(fileUrl);
+            return imageName;
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to upload file", e);
+        }
+    }
+
+    public byte[] downloadRoadtripImage(Long roadtripId, String bucketName, User user) {
+
+        // Check if roadtrip exists and get settings
+        RoadtripSettings roadtripSettings = roadtripSettingsRepository.findByRoadtrip_RoadtripId(roadtripId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip settings not found"));
+
+        // Check if user is roadtrip member
+
+        // Check if there is an image and fetch it
+        String fileName = roadtripSettings.getImageName();
+        if (fileName == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No image found for this roadtrip");
+        }
+
+        return storageService.downloadFile(bucketName, fileName);
     }
 
     /**
