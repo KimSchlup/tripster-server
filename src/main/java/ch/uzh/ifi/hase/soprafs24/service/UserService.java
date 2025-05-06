@@ -2,7 +2,9 @@ package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.UserEmergencyContactRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,8 +33,12 @@ public class UserService {
 
   private final UserRepository userRepository;
 
-  public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+  private final UserEmergencyContactRepository userEmergencyContactRepository;
+
+
+  public UserService(@Qualifier("userRepository") UserRepository userRepository, UserEmergencyContactRepository userEmergencyContactRepository) {
     this.userRepository = userRepository;
+    this.userEmergencyContactRepository = userEmergencyContactRepository;
   }
 
   public User loginUser(User user) {
@@ -119,6 +125,9 @@ public void updateUser(Long userId, User updatedUser) {
   if (updatedUser.getUserPreferences() != null) {
     user.setUserPreferences(updatedUser.getUserPreferences());
   }
+
+  //Emergency Info
+
 
   this.userRepository.save(user);
   userRepository.flush();

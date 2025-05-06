@@ -61,10 +61,10 @@ public class User implements Serializable {
   @Column
   private Boolean receiveNotifications;
 
-  // One-to-Many relationship with UserEmergencyContact
-  // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
-  // true)
-  // private List<UserEmergencyContact> userEmergencyContacts = new ArrayList<>();
+  //One-to-Many relationship with UserEmergencyContact
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
+  true)
+  private List<UserEmergencyContact> userEmergencyContacts = new ArrayList<>();
 
   // One-to-Many relationship with UserEmergencyInformation
   // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
