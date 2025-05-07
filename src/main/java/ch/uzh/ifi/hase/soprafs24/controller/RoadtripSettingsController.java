@@ -2,7 +2,6 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,9 +20,9 @@ import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
-import ch.uzh.ifi.hase.soprafs24.service.GoogleCloudStorageService;
 import ch.uzh.ifi.hase.soprafs24.service.RoadtripSettingsService;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
+import ch.uzh.ifi.hase.soprafs24.utils.GenerateV4GetObjectSignedUrl;
 
 @RestController
 @RequestMapping("/roadtrips")
@@ -31,14 +30,17 @@ public class RoadtripSettingsController {
 
     private final UserService userService;
     private final RoadtripSettingsService roadtripSettingsService;
+    private final GenerateV4GetObjectSignedUrl signedUrlGenerator;
 
     @Value("mapmates-object-store")
     private String bucketName;
 
     RoadtripSettingsController(UserService userService,
-            RoadtripSettingsService roadtripSettingsService) {
+            RoadtripSettingsService roadtripSettingsService,
+            GenerateV4GetObjectSignedUrl signedUrlGenerator) {
         this.roadtripSettingsService = roadtripSettingsService;
         this.userService = userService;
+        this.signedUrlGenerator = signedUrlGenerator;
 
     }
 
@@ -94,7 +96,7 @@ public class RoadtripSettingsController {
     @PostMapping("/{roadtripId}/settings/images")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String uploadFile(@PathVariable Long roadtripId, @RequestParam("file") MultipartFile file,
+    public String uploadRoadtripImage(@PathVariable Long roadtripId, @RequestParam("file") MultipartFile file,
             @RequestHeader("Authorization") String token) {
 
         // Get user from token
@@ -105,17 +107,21 @@ public class RoadtripSettingsController {
 
     }
 
-    @GetMapping("/{roadtripId}/settings/images/{fileName}")
+    @GetMapping("/{roadtripId}/settings/images")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public byte[] downloadFile(@PathVariable Long roadtripId, @PathVariable String fileName,
+    public String downloadRoadtripImage(@PathVariable Long roadtripId,
             @RequestHeader("Authorization") String token) {
 
         // Get user from token
         User user = userService.getUserByToken(token);
 
-        byte[] fileContent = roadtripSettingsService.downloadRoadtripImage(roadtripId, bucketName, user);
-        return fileContent;
+        // Get name of the roadtirp image and create signed url
+        String roadtripImageName = roadtripSettingsService.getRoadtripImageName(roadtripId, user);
+        String signedUrl = signedUrlGenerator.generateV4GetObjectSignedUrl(
+                "sopra-fs25-group-08-server", bucketName, "uploads/" + roadtripImageName);
+
+        return signedUrl;
     }
 
 }

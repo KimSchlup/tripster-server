@@ -7,7 +7,6 @@ import com.google.cloud.storage.Storage;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.Date;
 
 @Service
 public class GoogleCloudStorageService {
@@ -33,15 +32,6 @@ public class GoogleCloudStorageService {
         storage.create(blobInfo, file.getBytes());
 
         return String.format("https://storage.googleapis.com/%s/%s", bucketName, objectName);
-    }
-
-    public byte[] downloadFile(String bucketName, String fileName) {
-        String objectName = "uploads/" + fileName;
-        Blob blob = storage.get(BlobId.of(bucketName, objectName));
-        if (blob == null || !blob.exists()) {
-            throw new IllegalArgumentException("File not found in bucket: " + objectName);
-        }
-        return blob.getContent();
     }
 
     public void deleteFile(String bucketName, String fileName) {

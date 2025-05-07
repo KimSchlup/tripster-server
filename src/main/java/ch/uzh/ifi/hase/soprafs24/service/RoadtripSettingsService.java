@@ -188,7 +188,7 @@ public class RoadtripSettingsService {
         }
     }
 
-    public byte[] downloadRoadtripImage(Long roadtripId, String bucketName, User user) {
+    public String getRoadtripImageName(Long roadtripId, User user) {
 
         // Check if roadtrip exists and get settings
         RoadtripSettings roadtripSettings = roadtripSettingsRepository.findByRoadtrip_RoadtripId(roadtripId)
@@ -197,13 +197,13 @@ public class RoadtripSettingsService {
 
         // Check if user is roadtrip member
 
-        // Check if there is an image and fetch it
+        // Check if there is an image and fetch it's name
         String fileName = roadtripSettings.getImageName();
         if (fileName == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No image found for this roadtrip");
         }
 
-        return storageService.downloadFile(bucketName, fileName);
+        return fileName;
     }
 
     /**
