@@ -162,14 +162,7 @@ public class PointOfInterestService {
         }
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
-        RoadtripSettings setting = roadtrip.getRoadtripSettings();
-        List<RoadtripMember> roadtripMembers = roadtrip.getRoadtripMembers();
-        int acceptedMembers = 0;
-        for(RoadtripMember member : roadtripMembers){
-            if(member.getInvitationStatus() == InvitationStatus.ACCEPTED){
-                acceptedMembers++;
-            }
-        }
+
         List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
         PointOfInterest poi = new PointOfInterest();
         User user = userRepository.findByToken(token);
@@ -208,33 +201,10 @@ public class PointOfInterestService {
                 poi.setDownvotes(downvotes);
             }
         }
-        
+        pointOfInterestRepository.save(poi);
+        pointOfInterestRepository.flush();
         // check if acceptance status changes
-        if(setting.getDecisionProcess()== DecisionProcess.MAJORITY){
-            // if only one person is in roadtrip, set status to accepted or declined
-            if(acceptedMembers== 1){
-                if(vote.equals("upvote")){
-                    poi.setStatus(AcceptanceStatus.ACCEPTED);
-                }else if(vote.equals("downvote")){
-                    poi.setStatus(AcceptanceStatus.DECLINED);
-                }
-            }else{ 
-                if(upvotes.size() > (acceptedMembers)/2){
-                    poi.setStatus(AcceptanceStatus.ACCEPTED);
-                }else if(downvotes.size() > (acceptedMembers)/2){
-                    poi.setStatus(AcceptanceStatus.DECLINED);
-                }
-            }
-        }else{
-            if(isUserOwnerOfRoadtrip(token, roadtripId)){
-                if(vote.equals("upvote")){
-                    poi.setStatus(AcceptanceStatus.ACCEPTED);
-                }else if(vote.equals("downvote")){
-                    poi.setStatus(AcceptanceStatus.DECLINED);
-                }
-            }
-        }
-
+        calculateStatus(token, poi, roadtripId);
     }
 
     // Update deleteVote
@@ -278,6 +248,9 @@ public class PointOfInterestService {
                 poi.setStatus(AcceptanceStatus.PENDING);
             }
         }
+
+        pointOfInterestRepository.save(poi);
+        pointOfInterestRepository.flush();
 
     }
 
@@ -327,9 +300,12 @@ public class PointOfInterestService {
 
     public void calculateStatus(String token, PointOfInterest poi, Long roadtripId) {
         User user = userRepository.findByToken(token);
+        poi = pointOfInterestRepository.findById(poi.getPoiId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PointOfInterest not found"));
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
         RoadtripSettings setting = roadtrip.getRoadtripSettings();
+
 
         List<Long> upvotes = poi.getUpvotes();
         List<Long> downvotes = poi.getDownvotes();
@@ -341,19 +317,23 @@ public class PointOfInterestService {
                 voteCount++;
             }
         }
+
         if(setting.getDecisionProcess() == DecisionProcess.MAJORITY){
             if(upvotes.size() >= (voteCount/2)){
                 poi.setStatus(AcceptanceStatus.ACCEPTED);
             }else if(downvotes.size() >= (voteCount/2)){
                 poi.setStatus(AcceptanceStatus.DECLINED);
             }
-        }else if(isUserMemberOfRoadtrip(token, roadtripId)){
+        }else if(isUserOwnerOfRoadtrip(token, roadtripId)){
             if(upvotes.contains(user.getUserId())){
                 poi.setStatus(AcceptanceStatus.ACCEPTED);
-        }else if(downvotes.contains(user.getUserId())){
+            }else if(downvotes.contains(user.getUserId())){
                 poi.setStatus(AcceptanceStatus.DECLINED);
             }
         }
+
+        pointOfInterestRepository.save(poi);
+        pointOfInterestRepository.flush();
     }
 
     private void verifyUserAccess(String token, Long roadtripId) {
