@@ -75,6 +75,9 @@ dependencies {
     implementation 'org.webjars:sockjs-client:1.5.1' // optional: useful for frontend compatibility
     implementation 'org.webjars:stomp-websocket:2.3.4' // optional: STOMP client
 
+    // GCS
+    implementation 'com.google.cloud:google-cloud-storage:2.27.1'
+
 }
 
 bootJar {

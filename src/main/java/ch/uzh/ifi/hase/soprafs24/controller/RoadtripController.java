@@ -115,4 +115,6 @@ public class RoadtripController {
         Long authenticatedUserId = userService.getUserByToken(token).getUserId();
         roadtripService.deleteRoadtrip(roadtripId, authenticatedUserId);
     }
+
+    
 }

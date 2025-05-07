@@ -38,6 +38,12 @@ public class RoadtripSettings implements Serializable {
     @Column
     private LocalDate endDate;
 
+    @Column
+    private String imageName;
+
+    @Column
+    private String imageLocation;
+
     public Long getRoadtripSettingsId() {
         return roadtripSettingsId;
     }
@@ -92,6 +98,22 @@ public class RoadtripSettings implements Serializable {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public String getImageLocation() {
+        return imageLocation;
+    }
+
+    public void setImageLocation(String imageLocation) {
+        this.imageLocation = imageLocation;
     }
 
 }
