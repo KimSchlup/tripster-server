@@ -112,14 +112,18 @@ public class UserController {
     userService.deleteUser(userId);
     return;
   }
-  /*
+
   @GetMapping("/users/{userId}/emergency-contacts")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public List<UserEmergencyContactDTO> getAllUserEmergencyContacts(@PathVariable Long userId,
       @RequestHeader("Authorization") String token) {
-    // add Id authentication here
+    // add Id authentication here, check that only users in the same roadtrip can access this resource
+    User originalUser = userService.getUserById(userId);
     User authenticatedUser = userService.getUserByToken(token);
+
+    //check if users are in the same roadtrip
+    userService.checkForRoadtripMembership(originalUser, authenticatedUser);
 
     if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -136,6 +140,7 @@ public class UserController {
     return dtoContacts;
   }
 
+  /*
   @GetMapping("/users/{userId}/emergency-information")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody

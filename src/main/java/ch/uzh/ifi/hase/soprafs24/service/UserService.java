@@ -2,9 +2,12 @@ package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserEmergencyContactRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +19,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * User Service
@@ -35,10 +40,13 @@ public class UserService {
 
   private final UserEmergencyContactRepository userEmergencyContactRepository;
 
+  private final RoadtripMemberRepository roadtripMemberRepository;
 
-  public UserService(@Qualifier("userRepository") UserRepository userRepository, UserEmergencyContactRepository userEmergencyContactRepository) {
+
+  public UserService(@Qualifier("userRepository") UserRepository userRepository, @Qualifier("userEmergencyRepository") UserEmergencyContactRepository userEmergencyContactRepository, @Qualifier("roadtripMemberRepository") RoadtripMemberRepository roadtripMemberRepository) {
     this.userRepository = userRepository;
     this.userEmergencyContactRepository = userEmergencyContactRepository;
+    this.roadtripMemberRepository = roadtripMemberRepository;
   }
 
   public User loginUser(User user) {
@@ -131,7 +139,7 @@ public void updateUser(Long userId, User updatedUser) {
 
   this.userRepository.save(user);
   userRepository.flush();
-}
+  }
 
 public void deleteUser(Long userId) {
   User user = this.userRepository.findById(userId)
@@ -144,7 +152,7 @@ public void deleteUser(Long userId) {
     // Handle the foreign key constraint violation
     throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete user. Please delete your roadtrips first.");
   }
-}
+  }
 
 
   /**
@@ -170,4 +178,29 @@ public void deleteUser(Long userId) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
     } 
   }
+
+  //Helper method to check if requesting user is in the same roadtrip as the user who's emergency info he requests.
+public boolean checkForRoadtripMembership(User originalUser, User authenticatedUser) {
+    // Find all roadtrips the original user is part of
+    List<RoadtripMember> originalUserRoadtripMemberships = roadtripMemberRepository.findByUser(originalUser);
+
+    // If the original user is not in any roadtrips, return false
+    if (originalUserRoadtripMemberships.isEmpty()) {
+        return false;
+    }
+
+    // Extract the roadtrips from the memberships
+    List<Roadtrip> originalUserRoadtrips = originalUserRoadtripMemberships.stream()
+        .map(RoadtripMember::getRoadtrip)
+        .collect(Collectors.toList());
+
+    // Find the roadtrips the authenticated user is part of
+    List<RoadtripMember> authenticatedUserRoadtripMemberships = roadtripMemberRepository.findByUser(authenticatedUser);
+
+    // Check if any of the authenticated user's roadtrips match the original user's roadtrips
+    return authenticatedUserRoadtripMemberships.stream()
+        .map(RoadtripMember::getRoadtrip)
+        .anyMatch(originalUserRoadtrips::contains);
+  }
 }
+
