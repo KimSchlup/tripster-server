@@ -2,7 +2,9 @@ package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.UserEmergencyContactRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -135,6 +137,18 @@ public void deleteUser(Long userId) {
     // Handle the foreign key constraint violation
     throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete user. Please delete your roadtrips first.");
   }
+}
+
+public UserEmergencyContact createEmergencyContact(Long userId, UserEmergencyContact emergencyContact){
+  // Fetch the user
+  User user = getUserById(userId);
+  emergencyContact.setUser(user);
+
+
+  emergencyContact = userEmergencyContactRepository.save(emergencyContact);
+  userEmergencyContactRepository.flush();
+
+  return emergencyContact;
 }
 
 

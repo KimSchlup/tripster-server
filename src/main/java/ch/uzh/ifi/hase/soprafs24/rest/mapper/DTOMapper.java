@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
 import ch.uzh.ifi.hase.soprafs24.entity.Route;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestCommentGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestCommentPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PointOfInterestGetDTO;
@@ -29,6 +30,8 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistElementPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.EmergencyContactGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.EmergencyContactPostDTO;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
@@ -365,4 +368,17 @@ public interface DTOMapper {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid GeoJSON format");
     }
   }
+
+  @Mapping(source = "contactId", target = "contactId")
+  @Mapping(source = "firstName", target = "firstName")
+  @Mapping(source = "lastName", target = "lastName")
+  @Mapping(source = "phoneNumber", target = "phoneNumber")
+  EmergencyContactGetDTO convertUserEmergencyContactToDTO(UserEmergencyContact userEmergencyContact);
+
+  @Mapping(source = "firstName", target = "firstName")
+  @Mapping(source = "lastName", target = "lastName")
+  @Mapping(source = "phoneNumber", target = "phoneNumber")
+  @Mapping(target = "contactId", ignore = true)
+  @Mapping(target = "user", ignore = true)
+  UserEmergencyContact convertEmergencyContactPostDTOToEntity(EmergencyContactPostDTO emergencyContactPostDTO);
 }
