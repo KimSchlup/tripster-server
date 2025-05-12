@@ -16,6 +16,8 @@ import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +25,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.Point;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -657,4 +662,66 @@ public class PointOfInterestServiceIntegrationTest {
                 // Then
                 assertFalse(isMember);
         }
+
+
+@Test
+public void isInsideBoundingBox_pointInside_returnsTrue() {
+        // Create a bounding box polygon (simple square around Zurich)
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Coordinate[] boundingBoxCoords = new Coordinate[] {
+                new Coordinate(8.5, 47.3),
+                new Coordinate(8.6, 47.3),
+                new Coordinate(8.6, 47.4),
+                new Coordinate(8.5, 47.4),
+                new Coordinate(8.5, 47.3) // Close the polygon
+        };
+        Polygon boundingBox = geometryFactory.createPolygon(boundingBoxCoords);
+
+        // Create a PointOfInterest inside the bounding box
+        PointOfInterest poi = new PointOfInterest();
+        Point point = geometryFactory.createPoint(new Coordinate(8.5417, 47.3769)); // Zurich
+        poi.setCoordinate(point);
+
+        // Call the method under test
+        boolean result = pointOfInterestService.isInsideBoundingBox(poi, boundingBox);
+
+        assertTrue(result, "Expected point to be inside the bounding box");
+        }
+
+        @Test
+        public void isInsideBoundingBox_pointOutside_returnsFalse() {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Coordinate[] boundingBoxCoords = new Coordinate[] {
+                new Coordinate(8.5, 47.3),
+                new Coordinate(8.6, 47.3),
+                new Coordinate(8.6, 47.4),
+                new Coordinate(8.5, 47.4),
+                new Coordinate(8.5, 47.3)
+        };
+        Polygon boundingBox = geometryFactory.createPolygon(boundingBoxCoords);
+
+        PointOfInterest poi = new PointOfInterest();
+        Point point = geometryFactory.createPoint(new Coordinate(8.7, 47.5)); // Outside
+        poi.setCoordinate(point);
+
+        boolean result = pointOfInterestService.isInsideBoundingBox(poi, boundingBox);
+
+        assertFalse(result, "Expected point to be outside the bounding box");
+        }
+
+        @Test
+        public void isInsideBoundingBox_emptyBoundingBox() {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        
+        Polygon boundingBox = geometryFactory.createPolygon();
+
+        PointOfInterest poi = new PointOfInterest();
+        Point point = geometryFactory.createPoint(new Coordinate(8.7, 47.5)); // Inside, since empty
+        poi.setCoordinate(point);
+
+        boolean result = pointOfInterestService.isInsideBoundingBox(poi, boundingBox);
+
+        assertTrue(result, "Expected point to be inside the bounding box");
+        }
+        
 }
