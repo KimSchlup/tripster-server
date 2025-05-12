@@ -27,6 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.Point;
+
 @Service
 @Transactional
 public class PointOfInterestService {
@@ -76,6 +81,10 @@ public class PointOfInterestService {
         Optional<Roadtrip> roadtrip = roadtripRepository.findById(roadtripId);
         newPointOfInterest.setRoadtrip(roadtrip.get());
 
+        RoadtripSettings settings = roadtrip.get().getRoadtripSettings();
+        if(!isInsideBoundingBox(newPointOfInterest,settings.getBoundingBox())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "POI is outside of bounding box");
+        }
         // default value for eligibleVoteCount is set to 1 since there is at least one
         // person anyway
         if (newPointOfInterest.getEligibleVoteCount() == null) {
@@ -116,6 +125,12 @@ public class PointOfInterestService {
         // Validate input
         if (newPointOfInterest.getName() != null && newPointOfInterest.getName().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "POI name cannot be empty");
+        }
+        // check if POI is inside bounding box
+        Roadtrip roadtrip = oldPointOfInterest.getRoadtrip();
+        RoadtripSettings settings = roadtrip.getRoadtripSettings();
+        if(!isInsideBoundingBox(newPointOfInterest,settings.getBoundingBox())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New POI is outside of bounding box");
         }
 
         // Update fields
@@ -340,6 +355,15 @@ public class PointOfInterestService {
         if(!isUserMemberOfRoadtrip(token, roadtripId)){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a member of the roadtrip");
         }
+    }
+
+    public boolean isInsideBoundingBox(PointOfInterest poi, Polygon boundingBox){
+        if(boundingBox == null || boundingBox.isEmpty()){
+            return true;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new Coordinate(poi.getCoordinate().getX(), poi.getCoordinate().getY()));
+        return boundingBox.contains(point);
     }
 
 }
