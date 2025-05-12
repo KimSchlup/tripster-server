@@ -36,9 +36,9 @@ public class UserEmergencyContact implements Serializable {
   public Long getContactId(){
     return contactId;
   }
-  // public void setContactId(Long ContactId){
-  //   this.contactId = contactId;
-  // }
+  public void setContactId(Long ContactId){
+    this.contactId = contactId;
+  }
 
   public User getUser() {
     return user;
