@@ -44,7 +44,7 @@ public class UserService {
 
   private final UserEmergencyContactRepository userEmergencyContactRepository;
 
-  public UserService(@Qualifier("userRepository") UserRepository userRepository, @Qualifier("userEmergencyContactRepository") UserEmergencyContactRepository userEmergencyContactRepository, @Qualifier("roadtripMemberRepsoitory") RoadtripMemberRepository roadtripMemberRepository) {
+  public UserService(@Qualifier("userRepository") UserRepository userRepository, @Qualifier("userEmergencyContactRepository") UserEmergencyContactRepository userEmergencyContactRepository, @Qualifier("roadtripMemberRepository") RoadtripMemberRepository roadtripMemberRepository) {
     this.userRepository = userRepository;
     this.userEmergencyContactRepository = userEmergencyContactRepository;
     this.roadtripMemberRepository = roadtripMemberRepository;

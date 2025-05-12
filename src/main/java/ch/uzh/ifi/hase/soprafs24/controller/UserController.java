@@ -128,7 +128,9 @@ public class UserController {
       User originalUser = userService.getUserById(userId);
 
       // Check if the authenticated user has permission to view emergency contacts
-      userService.checkForRoadtripMembership(originalUser, authenticatedUser);
+      if(userService.checkForRoadtripMembership(originalUser, authenticatedUser) == false && !Objects.equals(authenticatedUser.getUserId(), userId)){
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
+      }
 
       // Create a list to store emergency contact DTOs
       List<EmergencyContactGetDTO> emergencyContactGetDTOs = new ArrayList<>();
@@ -141,7 +143,7 @@ public class UserController {
       return emergencyContactGetDTOs;
   }
 
-  //create post mapping for emergency contact
+  //post mapping for emergency contact
   @PostMapping("/users/{userId}/emergency-contacts")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody public EmergencyContactGetDTO createEmergencyContact( @PathVariable Long userId, @RequestBody EmergencyContactPostDTO emergencyContactPostDTO, @RequestHeader("Authorization") String token) { 
@@ -149,38 +151,20 @@ public class UserController {
     if (!Objects.equals(authenticatedUser.getUserId(), userId)) { 
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
       }
-      // Convert DTO to entity
-      UserEmergencyContact emergencyContact = DTOMapper.INSTANCE.convertEmergencyContactPostDTOToEntity(emergencyContactPostDTO);
-      // Create emergency contact
-      UserEmergencyContact savedContact = userService.createEmergencyContact(userId, emergencyContact);
-      // Convert back to DTO for response
-      return DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(savedContact);
+    // Convert DTO to entity
+    UserEmergencyContact emergencyContact = DTOMapper.INSTANCE.convertEmergencyContactPostDTOToEntity(emergencyContactPostDTO);
+    // Create emergency contact
+    UserEmergencyContact savedContact = userService.createEmergencyContact(userId, emergencyContact);
+    // Convert back to DTO for response
+    return DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(savedContact);
   }
+
+  //Put mapping for emergency contacts
+  
+
+  //Delete mapping for emergency contacts
 
   /*
-  @GetMapping("/users/{userId}/emergency-contacts")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public List<UserEmergencyContactDTO> getAllUserEmergencyContacts(@PathVariable Long userId,
-      @RequestHeader("Authorization") String token) {
-    // add Id authentication here
-    User authenticatedUser = userService.getUserByToken(token);
-
-    if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "You are not allowed to access this users emergency contact.");
-    }
-    // fetch user in the internal representation
-    User user = userService.getUserById(userId);
-    List<UserEmergencyContact> emergencyContacts = user.getUserEmergencyContacts();
-    List<UserEmergencyContactDTO> dtoContacts = new ArrayList<UserEmergencyContactDTO>();
-
-    for (UserEmergencyContact contact : emergencyContacts) {
-      dtoContacts.add(DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(contact));
-    }
-    return dtoContacts;
-  }
-
   @GetMapping("/users/{userId}/emergency-information")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
