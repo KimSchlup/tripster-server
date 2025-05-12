@@ -18,7 +18,7 @@ public class UserEmergencyContact implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private Long contactId;
 
   @ManyToOne
   @JoinColumn(name = "user_id")
@@ -32,6 +32,13 @@ public class UserEmergencyContact implements Serializable {
 
   @Column
   private String phoneNumber;
+
+  public Long getContactId(){
+    return contactId;
+  }
+  public void setContactId(Long ContactId){
+    this.contactId = contactId;
+  }
 
   public User getUser() {
     return user;

@@ -61,10 +61,10 @@ public class User implements Serializable {
   @Column
   private Boolean receiveNotifications;
 
-  // One-to-Many relationship with UserEmergencyContact
-  // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
-  // true)
-  // private List<UserEmergencyContact> userEmergencyContacts = new ArrayList<>();
+  //One-to-Many relationship with UserEmergencyContact
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
+  true)
+  private List<UserEmergencyContact> userEmergencyContacts = new ArrayList<>();
 
   // One-to-Many relationship with UserEmergencyInformation
   // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval =
@@ -179,5 +179,13 @@ public class User implements Serializable {
 
   public void setUserPreferences(UserPreferences userPreferences) {
     this.userPreferences = userPreferences;
+  }
+
+  public List<UserEmergencyContact> getUserEmergencyContacts() {
+    return userEmergencyContacts;
+  }
+
+  public void setUserEmergencyContacts(List<UserEmergencyContact> userEmergencyContacts) {
+    this.userEmergencyContacts = userEmergencyContacts;
   }
 }
