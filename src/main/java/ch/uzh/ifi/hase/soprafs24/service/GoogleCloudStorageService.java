@@ -14,7 +14,7 @@ public class GoogleCloudStorageService {
     private final Storage storage;
 
     public GoogleCloudStorageService(Storage storage) {
-        this.storage = storage; // Injected via Spring
+        this.storage = storage;
     }
 
     public String uploadFile(MultipartFile file, String bucketName, String fileName) throws IOException {
@@ -26,7 +26,7 @@ public class GoogleCloudStorageService {
 
         BlobId blobId = BlobId.of(bucketName, objectName);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
-                .setContentType(file.getContentType()) // Proper MIME type
+                .setContentType(file.getContentType())
                 .build();
 
         storage.create(blobInfo, file.getBytes());
