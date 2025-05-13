@@ -206,6 +206,32 @@ public class RoadtripSettingsService {
         return fileName;
     }
 
+    public void deleteRoadtripImage(Long roadtripId, String bucketName, User user) {
+        // Check if roadtrip exists
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+
+        // Check if user is owner
+        boolean isOwner = Objects.equals(roadtrip.getOwner().getUserId(), user.getUserId());
+
+        if (!isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only the roadtrip owner can access the settings");
+        }
+
+        RoadtripSettings roadtripSettings = roadtripSettingsRepository.findByRoadtrip_RoadtripId(roadtripId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip settings not found"));
+
+        String fileName = roadtripSettings.getImageName();
+        if (fileName != null) {
+            storageService.deleteFile(bucketName, fileName);
+            roadtripSettings.setImageName(null);
+            roadtripSettings.setImageLocation(null);
+            roadtripSettingsRepository.save(roadtripSettings);
+        }
+    }
+
     /**
      * Create a new RoadtripSettings object with default values.
      * There is no POST RoadtripSettings endpoint, so this method
