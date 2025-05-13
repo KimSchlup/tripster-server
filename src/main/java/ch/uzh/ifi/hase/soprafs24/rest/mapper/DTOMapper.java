@@ -22,6 +22,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.RoadtripSettingsPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RouteDeleteDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RouteGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoutePostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoutePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.entity.Checklist;
@@ -32,6 +33,8 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.ChecklistPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.EmergencyContactGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.EmergencyContactPostDTO;
+
+import java.util.List;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
@@ -381,4 +384,9 @@ public interface DTOMapper {
   @Mapping(target = "contactId", ignore = true)
   @Mapping(target = "user", ignore = true)
   UserEmergencyContact convertEmergencyContactPostDTOToEntity(EmergencyContactPostDTO emergencyContactPostDTO);
+
+  default List<Long> convertRoutePutDTOToEntity(RoutePutDTO routePutDTO){
+    return routePutDTO.getOrder();
+  };
+
 }

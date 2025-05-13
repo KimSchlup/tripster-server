@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Route;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RoutePostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.RoutePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RouteGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.RouteDeleteDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
@@ -70,5 +71,18 @@ public class RouteController {
         Route routeInput = DTOMapper.INSTANCE.convertRoutePostDTOToEntity(routePostDTO);
         Route updatedRoute = routeService.updateRoute(token, roadtripId, routeId, routeInput);
         return DTOMapper.INSTANCE.convertEntityToRouteGetDTO(updatedRoute);
+    }
+
+    // PUT: Update the route order
+    @PutMapping("/roadtrips/{roadtripId}/routes")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void updateRouteOrder(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long roadtripId,
+            @RequestBody RoutePutDTO routePutDTO) {
+        
+        List<Long> routeInput = DTOMapper.INSTANCE.convertRoutePutDTOToEntity(routePutDTO);
+        routeService.updateRouteOrder(token, roadtripId,routeInput);
     }
 }
