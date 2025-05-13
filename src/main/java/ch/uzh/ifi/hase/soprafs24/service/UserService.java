@@ -1,8 +1,13 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
+import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.UserEmergencyContactRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,8 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.dao.DataIntegrityViolationException;
 
+
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.List;
+
 
 /**
  * User Service
@@ -27,12 +36,18 @@ import java.util.UUID;
 @Transactional
 public class UserService {
 
+    private final RoadtripMemberRepository roadtripMemberRepository;
+
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
 
-  public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+  private final UserEmergencyContactRepository userEmergencyContactRepository;
+
+  public UserService(@Qualifier("userRepository") UserRepository userRepository, @Qualifier("userEmergencyContactRepository") UserEmergencyContactRepository userEmergencyContactRepository, @Qualifier("roadtripMemberRepository") RoadtripMemberRepository roadtripMemberRepository) {
     this.userRepository = userRepository;
+    this.userEmergencyContactRepository = userEmergencyContactRepository;
+    this.roadtripMemberRepository = roadtripMemberRepository;
   }
 
   public User loginUser(User user) {
@@ -137,6 +152,18 @@ public void deleteUser(Long userId) {
   }
 }
 
+public UserEmergencyContact createEmergencyContact(Long userId, UserEmergencyContact emergencyContact){
+  // Fetch the user
+  User user = getUserById(userId);
+  emergencyContact.setUser(user);
+
+
+  emergencyContact = userEmergencyContactRepository.save(emergencyContact);
+  userEmergencyContactRepository.flush();
+
+  return emergencyContact;
+}
+
 
   /**
    * This is a helper method that will check the uniqueness criteria of the
@@ -160,5 +187,29 @@ public void deleteUser(Long userId) {
     if (userByUsername != null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
     } 
+  }
+
+  //Helper method to check if requesting user is in the same roadtrip as the user who's emergency info he requests.
+public boolean checkForRoadtripMembership(User originalUser, User authenticatedUser) {
+    // Find all roadtrips the original user is part of
+    List<RoadtripMember> originalUserRoadtripMemberships = roadtripMemberRepository.findByUser(originalUser);
+
+    // If the original user is not in any roadtrips, return false
+    if (originalUserRoadtripMemberships.isEmpty()) {
+        return false;
+    }
+
+    // Extract the roadtrips from the memberships
+    List<Roadtrip> originalUserRoadtrips = originalUserRoadtripMemberships.stream()
+        .map(RoadtripMember::getRoadtrip)
+        .collect(Collectors.toList());
+
+    // Find the roadtrips the authenticated user is part of
+    List<RoadtripMember> authenticatedUserRoadtripMemberships = roadtripMemberRepository.findByUser(authenticatedUser);
+
+    // Check if any of the authenticated user's roadtrips match the original user's roadtrips
+    return authenticatedUserRoadtripMemberships.stream()
+        .map(RoadtripMember::getRoadtrip)
+        .anyMatch(originalUserRoadtrips::contains);
   }
 }

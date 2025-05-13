@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-
+import ch.uzh.ifi.hase.soprafs24.entity.UserEmergencyContact;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.EmergencyContactGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.EmergencyContactPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
@@ -10,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.List;
 
 /**
  * User Controller
@@ -112,30 +116,55 @@ public class UserController {
     userService.deleteUser(userId);
     return;
   }
-  /*
+
   @GetMapping("/users/{userId}/emergency-contacts")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<UserEmergencyContactDTO> getAllUserEmergencyContacts(@PathVariable Long userId,
+  public List<EmergencyContactGetDTO> getUserEmergencyContacts(
+      @PathVariable Long userId, 
       @RequestHeader("Authorization") String token) {
-    // add Id authentication here
-    User authenticatedUser = userService.getUserByToken(token);
+      
+      User authenticatedUser = userService.getUserByToken(token);
+      User originalUser = userService.getUserById(userId);
 
-    if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "You are not allowed to access this users emergency contact.");
-    }
-    // fetch user in the internal representation
-    User user = userService.getUserById(userId);
-    List<UserEmergencyContact> emergencyContacts = user.getUserEmergencyContacts();
-    List<UserEmergencyContactDTO> dtoContacts = new ArrayList<UserEmergencyContactDTO>();
+      // Check if the authenticated user has permission to view emergency contacts
+      if(userService.checkForRoadtripMembership(originalUser, authenticatedUser) == false && !Objects.equals(authenticatedUser.getUserId(), userId)){
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
+      }
 
-    for (UserEmergencyContact contact : emergencyContacts) {
-      dtoContacts.add(DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(contact));
-    }
-    return dtoContacts;
+      // Create a list to store emergency contact DTOs
+      List<EmergencyContactGetDTO> emergencyContactGetDTOs = new ArrayList<>();
+
+      // Convert each emergency contact to DTO
+      for (UserEmergencyContact contact : originalUser.getUserEmergencyContacts()) {
+          emergencyContactGetDTOs.add(DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(contact));
+      }
+
+      return emergencyContactGetDTOs;
   }
 
+  //post mapping for emergency contact
+  @PostMapping("/users/{userId}/emergency-contacts")
+  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseBody public EmergencyContactGetDTO createEmergencyContact( @PathVariable Long userId, @RequestBody EmergencyContactPostDTO emergencyContactPostDTO, @RequestHeader("Authorization") String token) { 
+    User authenticatedUser = userService.getUserByToken(token);
+    if (!Objects.equals(authenticatedUser.getUserId(), userId)) { 
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
+      }
+    // Convert DTO to entity
+    UserEmergencyContact emergencyContact = DTOMapper.INSTANCE.convertEmergencyContactPostDTOToEntity(emergencyContactPostDTO);
+    // Create emergency contact
+    UserEmergencyContact savedContact = userService.createEmergencyContact(userId, emergencyContact);
+    // Convert back to DTO for response
+    return DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(savedContact);
+  }
+
+  //Put mapping for emergency contacts
+  
+
+  //Delete mapping for emergency contacts
+
+  /*
   @GetMapping("/users/{userId}/emergency-information")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
