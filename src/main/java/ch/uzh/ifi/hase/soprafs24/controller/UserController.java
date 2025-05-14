@@ -15,6 +15,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.List;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 /**
  * User Controller
@@ -146,7 +150,8 @@ public class UserController {
   //post mapping for emergency contact
   @PostMapping("/users/{userId}/emergency-contacts")
   @ResponseStatus(HttpStatus.CREATED)
-  @ResponseBody public EmergencyContactGetDTO createEmergencyContact( @PathVariable Long userId, @RequestBody EmergencyContactPostDTO emergencyContactPostDTO, @RequestHeader("Authorization") String token) { 
+  @ResponseBody
+  public EmergencyContactGetDTO createEmergencyContact( @PathVariable Long userId, @RequestBody EmergencyContactPostDTO emergencyContactPostDTO, @RequestHeader("Authorization") String token) { 
     User authenticatedUser = userService.getUserByToken(token);
     if (!Objects.equals(authenticatedUser.getUserId(), userId)) { 
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
@@ -159,34 +164,41 @@ public class UserController {
     return DTOMapper.INSTANCE.convertUserEmergencyContactToDTO(savedContact);
   }
 
-  //Put mapping for emergency contacts
-  
-
-  //Delete mapping for emergency contacts
-
-  /*
-  @GetMapping("/users/{userId}/emergency-information")
-  @ResponseStatus(HttpStatus.OK)
+  //PUT mapping for emergency contacts
+  @PutMapping("/users/{userId}/emergency-contacts/{contactId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
-  public List<UserEmergencyInformationDTO> getAllUserEmergencyInformations(@PathVariable Long userId,
-      @RequestHeader("Authorization") String token) {
-    // add Id authentication here
+  public void updateEmergencyContact(@PathVariable Long userId, @PathVariable Long contactId, @RequestBody EmergencyContactPostDTO emergencyContactPostDTO, @RequestHeader("Authorization") String token) {
+    //authenticate user
     User authenticatedUser = userService.getUserByToken(token);
+    if (!Objects.equals(authenticatedUser.getUserId(), userId)) { 
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
+      }
 
-    if (!Objects.equals(authenticatedUser.getUserId(), userId)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "You are not allowed to access this users emergency information.");
-    }
-    // fetch user in the internal representation
-    User user = userService.getUserById(userId);
+    //convert API call to internal
+    UserEmergencyContact EmergencyContactInput = DTOMapper.INSTANCE.convertEmergencyContactPostDTOToEntity(emergencyContactPostDTO);
 
-    List<UserEmergencyInformation> emergencyInformation = user.getUserEmergencyInformations();
-    List<UserEmergencyInformationDTO> dtoInformations = new ArrayList<UserEmergencyInformationDTO>();
+    //update
+    userService.updateEmergencyContact(contactId, EmergencyContactInput);
 
-    for (UserEmergencyInformation contact : emergencyInformation) {
-      dtoInformations.add(DTOMapper.INSTANCE.convertUserEmergencyInformationToDTO(contact));
-    }
-    return dtoInformations;
+    return;
   }
-    */
+
+  //DELETE mapping for emergency contacts
+  @DeleteMapping("/users/{userId}/emergency-contacts/{contactId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseBody
+  public void deleteEmergencyContact(@PathVariable Long userId, @PathVariable Long contactId, @RequestHeader("Authorization") String token){
+    //authenticate user
+    User authenticatedUser = userService.getUserByToken(token);
+      if (!Objects.equals(authenticatedUser.getUserId(), userId)) { 
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this resource");
+      }
+    
+    //delete User
+    userService.deleteEmergencyContact(contactId);
+
+    return;
+  }
+  
 }
