@@ -36,7 +36,7 @@ import java.util.List;
 @Transactional
 public class UserService {
 
-    private final RoadtripMemberRepository roadtripMemberRepository;
+  private final RoadtripMemberRepository roadtripMemberRepository;
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
@@ -104,65 +104,93 @@ public class UserService {
     return user;
   }
 
-public void updateUser(Long userId, User updatedUser) {
-  User user = getUserById(userId);
-  
-  //check that username is valid input            
-  checkIfUserExists(updatedUser);
+  public void updateUser(Long userId, User updatedUser) {
+    User user = getUserById(userId);
+    
+    //check that username is valid input            
+    checkIfUserExists(updatedUser);
 
-  if (updatedUser.getUsername() != null) {
-      user.setUsername(updatedUser.getUsername());
-  }
-  if (updatedUser.getFirstName() != null) {
-    user.setFirstName(updatedUser.getFirstName());
-  }
-  if (updatedUser.getLastName() != null) {
-      user.setLastName(updatedUser.getLastName());
-  }
-  if (updatedUser.getPhoneNumber() != null) {
-      user.setPhoneNumber(updatedUser.getPhoneNumber());
-  }
-  if (updatedUser.getMail() != null) {
-      user.setMail(updatedUser.getMail());
-  }
-  if (updatedUser.getPassword() != null) {
-      user.setPassword(updatedUser.getPassword());
-  }
-  if (updatedUser.getReceiveNotifications() != null) {
-      user.setReceiveNotifications(updatedUser.getReceiveNotifications());
-  }
-  if (updatedUser.getUserPreferences() != null) {
-    user.setUserPreferences(updatedUser.getUserPreferences());
+    if (updatedUser.getUsername() != null) {
+        user.setUsername(updatedUser.getUsername());
+    }
+    if (updatedUser.getFirstName() != null) {
+      user.setFirstName(updatedUser.getFirstName());
+    }
+    if (updatedUser.getLastName() != null) {
+        user.setLastName(updatedUser.getLastName());
+    }
+    if (updatedUser.getPhoneNumber() != null) {
+        user.setPhoneNumber(updatedUser.getPhoneNumber());
+    }
+    if (updatedUser.getMail() != null) {
+        user.setMail(updatedUser.getMail());
+    }
+    if (updatedUser.getPassword() != null) {
+        user.setPassword(updatedUser.getPassword());
+    }
+    if (updatedUser.getReceiveNotifications() != null) {
+        user.setReceiveNotifications(updatedUser.getReceiveNotifications());
+    }
+    if (updatedUser.getUserPreferences() != null) {
+      user.setUserPreferences(updatedUser.getUserPreferences());
+    }
+
+    this.userRepository.save(user);
+    userRepository.flush();
   }
 
-  this.userRepository.save(user);
-  userRepository.flush();
-}
+  public void deleteUser(Long userId) {
+    User user = this.userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-public void deleteUser(Long userId) {
-  User user = this.userRepository.findById(userId)
-              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-  try {
-    this.userRepository.delete(user);
-    this.userRepository.flush();
-    } catch (DataIntegrityViolationException e) {
-    // Handle the foreign key constraint violation
-    throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete user. Please delete your roadtrips first.");
+    try {
+      this.userRepository.delete(user);
+      this.userRepository.flush();
+      } catch (DataIntegrityViolationException e) {
+      // Handle the foreign key constraint violation
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete user. Please delete your roadtrips first.");
+    }
   }
-}
 
-public UserEmergencyContact createEmergencyContact(Long userId, UserEmergencyContact emergencyContact){
-  // Fetch the user
-  User user = getUserById(userId);
-  emergencyContact.setUser(user);
+  public UserEmergencyContact createEmergencyContact(Long userId, UserEmergencyContact emergencyContact){
+    // Fetch the user
+    User user = getUserById(userId);
+    emergencyContact.setUser(user);
 
 
-  emergencyContact = userEmergencyContactRepository.save(emergencyContact);
-  userEmergencyContactRepository.flush();
+    emergencyContact = userEmergencyContactRepository.save(emergencyContact);
+    userEmergencyContactRepository.flush();
 
-  return emergencyContact;
-}
+    return emergencyContact;
+  }
+
+  public void updateEmergencyContact(Long contactId, UserEmergencyContact updatedInput){
+    //find contact
+    UserEmergencyContact contact = userEmergencyContactRepository.findById(contactId).
+      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact not found"));
+    
+    if(updatedInput.getFirstName() != null){
+      contact.setFirstName(updatedInput.getFirstName());
+    }
+    if(updatedInput.getLastName() != null){
+      contact.setLastName(updatedInput.getLastName());
+    }
+    if(updatedInput.getPhoneNumber() != null){
+      contact.setPhoneNumber(updatedInput.getPhoneNumber());
+    }
+
+    this.userEmergencyContactRepository.save(contact);
+    userEmergencyContactRepository.flush();
+  }
+
+  public void deleteEmergencyContact(Long contactId){
+    //find contact
+    UserEmergencyContact contact = userEmergencyContactRepository.findById(contactId).
+      orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact not found"));
+    
+    this.userEmergencyContactRepository.delete(contact);
+    userEmergencyContactRepository.flush();
+  }
 
 
   /**
@@ -189,27 +217,27 @@ public UserEmergencyContact createEmergencyContact(Long userId, UserEmergencyCon
     } 
   }
 
-  //Helper method to check if requesting user is in the same roadtrip as the user who's emergency info he requests.
-public boolean checkForRoadtripMembership(User originalUser, User authenticatedUser) {
-    // Find all roadtrips the original user is part of
-    List<RoadtripMember> originalUserRoadtripMemberships = roadtripMemberRepository.findByUser(originalUser);
+    //Helper method to check if requesting user is in the same roadtrip as the user who's emergency info he requests.
+  public boolean checkForRoadtripMembership(User originalUser, User authenticatedUser) {
+      // Find all roadtrips the original user is part of
+      List<RoadtripMember> originalUserRoadtripMemberships = roadtripMemberRepository.findByUser(originalUser);
 
-    // If the original user is not in any roadtrips, return false
-    if (originalUserRoadtripMemberships.isEmpty()) {
-        return false;
+      // If the original user is not in any roadtrips, return false
+      if (originalUserRoadtripMemberships.isEmpty()) {
+          return false;
+      }
+
+      // Extract the roadtrips from the memberships
+      List<Roadtrip> originalUserRoadtrips = originalUserRoadtripMemberships.stream()
+          .map(RoadtripMember::getRoadtrip)
+          .collect(Collectors.toList());
+
+      // Find the roadtrips the authenticated user is part of
+      List<RoadtripMember> authenticatedUserRoadtripMemberships = roadtripMemberRepository.findByUser(authenticatedUser);
+
+      // Check if any of the authenticated user's roadtrips match the original user's roadtrips
+      return authenticatedUserRoadtripMemberships.stream()
+          .map(RoadtripMember::getRoadtrip)
+          .anyMatch(originalUserRoadtrips::contains);
     }
-
-    // Extract the roadtrips from the memberships
-    List<Roadtrip> originalUserRoadtrips = originalUserRoadtripMemberships.stream()
-        .map(RoadtripMember::getRoadtrip)
-        .collect(Collectors.toList());
-
-    // Find the roadtrips the authenticated user is part of
-    List<RoadtripMember> authenticatedUserRoadtripMemberships = roadtripMemberRepository.findByUser(authenticatedUser);
-
-    // Check if any of the authenticated user's roadtrips match the original user's roadtrips
-    return authenticatedUserRoadtripMemberships.stream()
-        .map(RoadtripMember::getRoadtrip)
-        .anyMatch(originalUserRoadtrips::contains);
-  }
 }
