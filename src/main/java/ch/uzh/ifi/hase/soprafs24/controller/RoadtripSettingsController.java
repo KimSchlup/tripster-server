@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -124,4 +125,17 @@ public class RoadtripSettingsController {
         return signedUrl;
     }
 
+
+    @DeleteMapping("/{roadtripId}/settings/images")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void deleteRoadtripImage(@PathVariable Long roadtripId,
+            @RequestHeader("Authorization") String token) {
+
+        // Get user from token
+        User user = userService.getUserByToken(token);
+
+        // Delete image from bucket
+        roadtripSettingsService.deleteRoadtripImage(roadtripId, bucketName, user);
+    }
 }
