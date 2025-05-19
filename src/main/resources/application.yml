@@ -16,7 +16,7 @@ spring:
       max-request-size: 10MB
 
   datasource:
-    url: jdbc:postgresql://34.59.238.31:5432/mapmates
+    url: jdbc:postgresql://34.56.2.154:5432/mapmates
     username: postgres
     password: mapmates123
     driver-class-name: org.postgresql.Driver
