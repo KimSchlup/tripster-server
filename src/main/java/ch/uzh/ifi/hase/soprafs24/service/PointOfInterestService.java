@@ -13,9 +13,11 @@ import ch.uzh.ifi.hase.soprafs24.entity.PointOfInterest;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripSettings;
+import ch.uzh.ifi.hase.soprafs24.entity.Route;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.PointOfInterestRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.RouteRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,8 @@ import org.locationtech.jts.geom.Point;
 @Transactional
 public class PointOfInterestService {
 
+    private final RouteRepository routeRepository;
+
     private final UserRepository userRepository;
 
     private final RoadtripRepository roadtripRepository;
@@ -45,10 +49,11 @@ public class PointOfInterestService {
 
     public PointOfInterestService(@Qualifier("pointOfInterestRepository") PointOfInterestRepository pointOfInterestRepository, 
                                                                                 RoadtripRepository roadtripRepository,
-                                                                                UserRepository userRepository){
+                                                                                UserRepository userRepository, RouteRepository routeRepository){
         this.pointOfInterestRepository = pointOfInterestRepository;
         this.roadtripRepository = roadtripRepository;
         this.userRepository = userRepository;
+        this.routeRepository = routeRepository;
     }
 
     public List<PointOfInterest> getPointOfInterests() {
@@ -168,6 +173,15 @@ public class PointOfInterestService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "PointOfInterest not found");
         }
         pointOfInterestRepository.deleteById(poiId);
+        Roadtrip roadtrip = roadtripRepository.findById(roadtripId).get();
+        List<Route> routes = roadtrip.getRoutes();
+        List<Long> deletable_routes = new ArrayList<>();
+        for(Route route: routes){
+            if(route.getStartId().equals(poiId) || route.getEndId().equals(poiId)){
+                deletable_routes.add(route.getRouteId());
+            }
+        }
+        routeRepository.deleteAllById(deletable_routes);
     }
 
     // Update castVote
