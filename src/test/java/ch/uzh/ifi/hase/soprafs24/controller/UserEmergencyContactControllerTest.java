@@ -29,8 +29,11 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -170,6 +173,104 @@ public class UserEmergencyContactControllerTest {
 
         // then
         mockMvc.perform(postRequest)
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void updateEmergencyContact_validInput_success() throws Exception {
+        // given
+        User authenticatedUser = new User();
+        authenticatedUser.setUserId(1L);
+        authenticatedUser.setUsername("testUser");
+
+        EmergencyContactPostDTO emergencyContactPostDTO = new EmergencyContactPostDTO();
+        emergencyContactPostDTO.setFirstName("Jane");
+        emergencyContactPostDTO.setLastName("Smith");
+        emergencyContactPostDTO.setPhoneNumber("0987654321");
+
+        UserEmergencyContact updatedContact = DTOMapper.INSTANCE.convertEmergencyContactPostDTOToEntity(emergencyContactPostDTO);
+        updatedContact.setContactId(1L);
+        updatedContact.setUser(authenticatedUser);
+
+        given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+        given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token")))).willReturn(authenticatedUser);
+        doNothing().when(userService).updateEmergencyContact(anyLong(), any(UserEmergencyContact.class));
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/1/emergency-contacts/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "some_token")
+            .content(asJsonString(emergencyContactPostDTO));
+
+        // then
+        mockMvc.perform(putRequest)
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void updateEmergencyContact_unauthorized_throwsForbidden() throws Exception {
+        // given
+        User authenticatedUser = new User();
+        authenticatedUser.setUserId(2L);
+        authenticatedUser.setUsername("otherUser");
+
+        EmergencyContactPostDTO emergencyContactPostDTO = new EmergencyContactPostDTO();
+        emergencyContactPostDTO.setFirstName("Jane");
+        emergencyContactPostDTO.setLastName("Smith");
+        emergencyContactPostDTO.setPhoneNumber("0987654321");
+
+        given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+        given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token")))).willReturn(authenticatedUser);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/1/emergency-contacts/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "some_token")
+            .content(asJsonString(emergencyContactPostDTO));
+
+        // then
+        mockMvc.perform(putRequest)
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void deleteEmergencyContact_validInput_success() throws Exception {
+        // given
+        User authenticatedUser = new User();
+        authenticatedUser.setUserId(1L);
+        authenticatedUser.setUsername("testUser");
+
+        given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+        given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token")))).willReturn(authenticatedUser);
+        doNothing().when(userService).deleteEmergencyContact(1L);
+
+        // when
+        MockHttpServletRequestBuilder deleteRequest = delete("/users/1/emergency-contacts/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "some_token");
+
+        // then
+        mockMvc.perform(deleteRequest)
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void deleteEmergencyContact_unauthorized_throwsForbidden() throws Exception {
+        // given
+        User authenticatedUser = new User();
+        authenticatedUser.setUserId(2L);
+        authenticatedUser.setUsername("otherUser");
+
+        given(authenticationInterceptor.preHandle(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+        given(userService.getUserByToken(Mockito.argThat(token -> token.equals("some_token")))).willReturn(authenticatedUser);
+
+        // when
+        MockHttpServletRequestBuilder deleteRequest = delete("/users/1/emergency-contacts/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "some_token");
+
+        // then
+        mockMvc.perform(deleteRequest)
             .andExpect(status().isForbidden());
     }
 
