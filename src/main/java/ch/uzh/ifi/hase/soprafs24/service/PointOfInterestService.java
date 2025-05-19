@@ -161,18 +161,14 @@ public class PointOfInterestService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Casted vote does not match requirement: "+ vote);
         }
         Roadtrip roadtrip = roadtripRepository.findById(roadtripId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Roadtrip not found with id: " +roadtripId));
+                
+        PointOfInterest poi = pointOfInterestRepository.findById(poiId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Poi not found with id: " +poiId));
 
-        List<PointOfInterest> pois = pointOfInterestRepository.findByRoadtrip_RoadtripId(roadtripId);
-        PointOfInterest poi = new PointOfInterest();
+
         User user = userRepository.findByToken(token);
         Long userId = user.getUserId();
-        for(PointOfInterest temp : pois){
-            if(temp.getPoiId() == poiId){
-                poi = temp;
-                break;
-            }
-        }
 
         if(poi.getUpvotes()== null){
             poi.setUpvotes(new ArrayList<Long>());
@@ -248,10 +244,9 @@ public class PointOfInterestService {
                 poi.setStatus(AcceptanceStatus.PENDING);
             }
         }
-
         pointOfInterestRepository.save(poi);
         pointOfInterestRepository.flush();
-
+        calculateStatus(token, poi, roadtripId);
     }
 
     public boolean isUserMemberOfRoadtrip(String token, Long roadtripId) {
@@ -330,6 +325,10 @@ public class PointOfInterestService {
             }else if(downvotes.contains(user.getUserId())){
                 poi.setStatus(AcceptanceStatus.DECLINED);
             }
+        }
+        // if no more votes exist, set status to pending again
+        if(upvotes.size() == 0 && downvotes.size() == 0 ){
+            poi.setStatus(AcceptanceStatus.PENDING);
         }
 
         pointOfInterestRepository.save(poi);
