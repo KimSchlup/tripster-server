@@ -13,6 +13,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -127,6 +128,84 @@ public class UserEmergencyContactServiceIntegrationTest {
         // when and then
         assertThrows(ResponseStatusException.class, () -> {
             userService.createEmergencyContact(999L, emergencyContact);
+        });
+    }
+
+    @Test
+    public void updateEmergencyContact_validInput_success() {
+        // given
+        User testUser = new User();
+        testUser.setFirstName("testName");
+        testUser.setLastName("lastname");
+        testUser.setUsername("testUsername");
+        testUser.setPassword("password");
+        userService.createUser(testUser);
+
+        UserEmergencyContact originalContact = new UserEmergencyContact();
+        originalContact.setFirstName("Original");
+        originalContact.setLastName("Contact");
+        originalContact.setPhoneNumber("1234567890");
+        UserEmergencyContact savedContact = userService.createEmergencyContact(testUser.getUserId(), originalContact);
+
+        // when
+        UserEmergencyContact updatedContactInput = new UserEmergencyContact();
+        updatedContactInput.setFirstName("Updated");
+        updatedContactInput.setLastName("Name");
+        updatedContactInput.setPhoneNumber("0987654321");
+
+        userService.updateEmergencyContact(savedContact.getContactId(), updatedContactInput);
+
+        // then
+        Optional<UserEmergencyContact> retrievedContact = userEmergencyContactRepository.findById(savedContact.getContactId());
+        assertTrue(retrievedContact.isPresent());
+        assertEquals("Updated", retrievedContact.get().getFirstName());
+        assertEquals("Name", retrievedContact.get().getLastName());
+        assertEquals("0987654321", retrievedContact.get().getPhoneNumber());
+    }
+
+    @Test
+    public void updateEmergencyContact_nonExistentContact_throwsException() {
+        // given
+        UserEmergencyContact updatedContactInput = new UserEmergencyContact();
+        updatedContactInput.setFirstName("Updated");
+        updatedContactInput.setLastName("Name");
+        updatedContactInput.setPhoneNumber("0987654321");
+
+        // when and then
+        assertThrows(ResponseStatusException.class, () -> {
+            userService.updateEmergencyContact(999L, updatedContactInput);
+        });
+    }
+
+    @Test
+    public void deleteEmergencyContact_validInput_success() {
+        // given
+        User testUser = new User();
+        testUser.setFirstName("testName");
+        testUser.setLastName("lastname");
+        testUser.setUsername("testUsername");
+        testUser.setPassword("password");
+        userService.createUser(testUser);
+
+        UserEmergencyContact contactToDelete = new UserEmergencyContact();
+        contactToDelete.setFirstName("Delete");
+        contactToDelete.setLastName("Me");
+        contactToDelete.setPhoneNumber("1111111111");
+        UserEmergencyContact savedContact = userService.createEmergencyContact(testUser.getUserId(), contactToDelete);
+
+        // when
+        userService.deleteEmergencyContact(savedContact.getContactId());
+
+        // then
+        Optional<UserEmergencyContact> retrievedContact = userEmergencyContactRepository.findById(savedContact.getContactId());
+        assertTrue(retrievedContact.isEmpty());
+    }
+
+    @Test
+    public void deleteEmergencyContact_nonExistentContact_throwsException() {
+        // when and then
+        assertThrows(ResponseStatusException.class, () -> {
+            userService.deleteEmergencyContact(999L);
         });
     }
 }
