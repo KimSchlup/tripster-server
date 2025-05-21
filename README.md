@@ -43,6 +43,20 @@ MapMates' architecture is built around several core components that work togethe
    - Handles discovery, management, and interaction with Points of Interest (POIs)
    - Supports adding, editing, and sharing POIs along road trip routes
 
+## Roadmap
+
+For developers looking to contribute to MapMates, here are some exciting features to consider:
+
+1. **Real-time Collaborative Route Editing**
+   - Enhance the existing route editing functionality with real-time collaborative features
+   - Implement WebSocket-based live updates for route modifications
+   - Add conflict resolution mechanisms for simultaneous edits by multiple users
+
+2. **Comprehensive Trip Analytics and Insights**
+   - Develop a robust analytics module to provide users with insights about their trips
+   - Create visualizations of travel statistics, route efficiency, and group travel dynamics
+   - Implement features to track and compare different route options
+
 ## Launch & Deployment
 
 ### Prerequisites
