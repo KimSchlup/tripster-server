@@ -78,6 +78,13 @@ For developers looking to contribute to MapMates, here are some exciting feature
    docker-compose --profile dev up
    ```
 
+> **Note:**  
+> For image upload/download functionality to work correctly, a service account key is required.
+> Place a JSON key file named `sopra-service-account.json` in the top-level `keys/` directory of the project.
+> This file must contain the credentials for a **Google Cloud service account** with **Role:** `roles/storage.admin`  
+
+
+
 ### Running Tests
 
 Execute the comprehensive test suite using Docker:
