@@ -9,13 +9,14 @@ MapMates is an innovative web application designed to revolutionize road trip pl
 - **Backend**: 
   - Java 17
   - Spring Boot 3.1.5
-  - PostgreSQL Database
+  - PostgreSQL Database with PostGIS extension
   - Hibernate with Spatial Extensions
   - Docker
 
 - **Cloud & Infrastructure**:
-  - Google Cloud Storage
-  - Google Cloud Secret Manager
+  - Google Cloud App Engine for running the backend
+  - Google Cloud Compute Engine VM hosting the production Database in a Docker Container
+  - Google Cloud Storage for images
   - SonarCloud for Code Quality
 
 - **Testing**:
