@@ -260,4 +260,4 @@ public class RoadtripSettingsServiceIntegrationTest {
             roadtripSettingsService.updateRoadtripSettingsById(
                     createdRoadtrip.getRoadtripId(), updatedSettings, createdMember);
         });
-    }
+    }}
