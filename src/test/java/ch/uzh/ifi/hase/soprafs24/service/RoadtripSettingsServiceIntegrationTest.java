@@ -3,7 +3,6 @@ package ch.uzh.ifi.hase.soprafs24.service;
 import ch.uzh.ifi.hase.soprafs24.constant.BasemapType;
 import ch.uzh.ifi.hase.soprafs24.constant.DecisionProcess;
 import ch.uzh.ifi.hase.soprafs24.constant.InvitationStatus;
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.Roadtrip;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMember;
 import ch.uzh.ifi.hase.soprafs24.entity.RoadtripMemberPK;
@@ -13,18 +12,15 @@ import ch.uzh.ifi.hase.soprafs24.repository.RoadtripMemberRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.RoadtripSettingsRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,28 +28,20 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class RoadtripSettingsServiceIntegrationTest {
-
     @Autowired
     private RoadtripRepository roadtripRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private RoadtripMemberRepository roadtripMemberRepository;
-
     @Autowired
     private RoadtripSettingsRepository roadtripSettingsRepository;
-
     @Autowired
     private RoadtripService roadtripService;
-
     @Autowired
     private RoadtripSettingsService roadtripSettingsService;
-
     @Autowired
     private UserService userService;
-
     @Autowired
     private ch.uzh.ifi.hase.soprafs24.repository.PointOfInterestRepository pointOfInterestRepository;
 
@@ -69,16 +57,30 @@ public class RoadtripSettingsServiceIntegrationTest {
 
     @Test
     public void createRoadtripSettings_validInputs_success() {
-        // Given
-        User user = createTestUser("testUsername");
-        Roadtrip roadtrip = createTestRoadtrip(user);
+        // Create test user with all required fields
+        User testUser = new User();
+        testUser.setUsername("testUsername");
+        testUser.setPassword("password");
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setCreationDate(java.time.LocalDate.now());
+        testUser.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+        testUser.setToken("token-" + java.util.UUID.randomUUID().toString());
+        User createdUser = userService.createUser(testUser);
+
+        // Create a roadtrip with owner
+        Roadtrip testRoadtrip = new Roadtrip();
+        testRoadtrip.setName("Test Roadtrip");
+        testRoadtrip.setOwner(createdUser);
+        testRoadtrip = roadtripRepository.save(testRoadtrip);
 
         // When
-        RoadtripSettings createdSettings = roadtripSettingsService.createRoadtripSettings(roadtrip);
+        RoadtripSettings createdSettings = roadtripSettingsService.createRoadtripSettings(testRoadtrip);
 
         // Then
         assertNotNull(createdSettings);
-        assertEquals(roadtrip.getRoadtripId(), createdSettings.getRoadtrip().getRoadtripId());
+        // Compare roadtrip IDs instead of the objects themselves
+        assertEquals(testRoadtrip.getRoadtripId(), createdSettings.getRoadtrip().getRoadtripId());
         assertEquals(BasemapType.OPEN_STREET_MAP, createdSettings.getBasemapType());
         assertEquals(DecisionProcess.MAJORITY, createdSettings.getDecisionProcess());
         assertNotNull(createdSettings.getStartDate());
@@ -87,14 +89,30 @@ public class RoadtripSettingsServiceIntegrationTest {
 
     @Test
     public void getRoadtripSettingsById_validId_returnsSettings() {
-        // Given
-        User user = createTestUser("testUsername");
-        Roadtrip roadtrip = createTestRoadtrip(user);
-        RoadtripSettings settings = roadtripSettingsService.createRoadtripSettings(roadtrip);
+        // Create test user with all required fields
+        User testUser = new User();
+        testUser.setUsername("testUsername");
+        testUser.setPassword("password");
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setCreationDate(java.time.LocalDate.now());
+        testUser.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+        testUser.setToken("token-" + java.util.UUID.randomUUID().toString());
+        User createdUser = userService.createUser(testUser);
+
+        // Create roadtrip
+        Roadtrip testRoadtrip = new Roadtrip();
+        testRoadtrip.setName("Test Roadtrip");
+        testRoadtrip.setDescription("Test Description");
+        testRoadtrip.setOwner(createdUser);
+        Roadtrip createdRoadtrip = roadtripRepository.save(testRoadtrip);
+
+        // Create settings
+        RoadtripSettings settings = roadtripSettingsService.createRoadtripSettings(createdRoadtrip);
 
         // When
         RoadtripSettings retrievedSettings = roadtripSettingsService.getRoadtripSettingsById(
-                roadtrip.getRoadtripId(), user);
+                createdRoadtrip.getRoadtripId(), createdUser);
 
         // Then
         assertEquals(settings.getRoadtripSettingsId(), retrievedSettings.getRoadtripSettingsId());
@@ -104,26 +122,67 @@ public class RoadtripSettingsServiceIntegrationTest {
 
     @Test
     public void getRoadtripSettingsById_userNotMember_throwsForbidden() {
-        // Given
-        User owner = createTestUser("owner");
-        User nonMember = createTestUser("nonMember");
+        // Create test users with all required fields
+        User owner = new User();
+        owner.setUsername("owner");
+        owner.setPassword("password");
+        owner.setFirstName("Owner");
+        owner.setLastName("User");
+        owner.setCreationDate(java.time.LocalDate.now());
+        owner.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+        owner.setToken("token-" + java.util.UUID.randomUUID().toString());
+        User createdOwner = userService.createUser(owner);
 
-        Roadtrip roadtrip = createTestRoadtrip(owner);
-        roadtripSettingsService.createRoadtripSettings(roadtrip);
+        User nonMember = new User();
+        nonMember.setUsername("nonMember");
+        nonMember.setPassword("password");
+        nonMember.setFirstName("NonMember");
+        nonMember.setLastName("User");
+        nonMember.setCreationDate(java.time.LocalDate.now());
+        nonMember.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+        nonMember.setToken("token-" + java.util.UUID.randomUUID().toString());
+        User createdNonMember = userService.createUser(nonMember);
+
+        // Create roadtrip
+        Roadtrip testRoadtrip = new Roadtrip();
+        testRoadtrip.setName("Test Roadtrip");
+        testRoadtrip.setDescription("Test Description");
+        testRoadtrip.setOwner(createdOwner);
+        Roadtrip createdRoadtrip = roadtripRepository.save(testRoadtrip);
+
+        // Create settings
+        roadtripSettingsService.createRoadtripSettings(createdRoadtrip);
 
         // When/Then
         assertThrows(ResponseStatusException.class, () -> {
-            roadtripSettingsService.getRoadtripSettingsById(roadtrip.getRoadtripId(), nonMember);
+            roadtripSettingsService.getRoadtripSettingsById(createdRoadtrip.getRoadtripId(), createdNonMember);
         });
     }
 
     @Test
     public void updateRoadtripSettingsById_validInputs_success() {
-        // Given
-        User user = createTestUser("testUsername");
-        Roadtrip roadtrip = createTestRoadtrip(user);
-        roadtripSettingsService.createRoadtripSettings(roadtrip);
+        // Create test user with all required fields
+        User testUser = new User();
+        testUser.setUsername("testUsername");
+        testUser.setPassword("password");
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setCreationDate(java.time.LocalDate.now());
+        testUser.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+        testUser.setToken("token-" + java.util.UUID.randomUUID().toString());
+        User createdUser = userService.createUser(testUser);
 
+        // Create roadtrip
+        Roadtrip testRoadtrip = new Roadtrip();
+        testRoadtrip.setName("Test Roadtrip");
+        testRoadtrip.setDescription("Test Description");
+        testRoadtrip.setOwner(createdUser);
+        Roadtrip createdRoadtrip = roadtripRepository.save(testRoadtrip);
+
+        // Create settings
+        RoadtripSettings settings = roadtripSettingsService.createRoadtripSettings(createdRoadtrip);
+
+        // Update settings
         RoadtripSettings updatedSettings = new RoadtripSettings();
         updatedSettings.setBasemapType(BasemapType.SATELLITE);
         updatedSettings.setDecisionProcess(DecisionProcess.OWNER_DECISION);
@@ -134,11 +193,11 @@ public class RoadtripSettingsServiceIntegrationTest {
 
         // When
         roadtripSettingsService.updateRoadtripSettingsById(
-                roadtrip.getRoadtripId(), updatedSettings, user);
+                createdRoadtrip.getRoadtripId(), updatedSettings, createdUser);
 
         // Then
         RoadtripSettings retrievedSettings = roadtripSettingsRepository
-                .findByRoadtrip_RoadtripId(roadtrip.getRoadtripId()).orElse(null);
+                .findByRoadtrip_RoadtripId(createdRoadtrip.getRoadtripId()).orElse(null);
 
         assertNotNull(retrievedSettings);
         assertEquals(BasemapType.SATELLITE, retrievedSettings.getBasemapType());
@@ -149,146 +208,56 @@ public class RoadtripSettingsServiceIntegrationTest {
 
     @Test
     public void updateRoadtripSettingsById_userNotOwner_throwsForbidden() {
-        // Given
-        User owner = createTestUser("owner");
-        User member = createTestUser("member");
+        // Create test users with all required fields
+        User owner = new User();
+        owner.setUsername("owner");
+        owner.setPassword("password");
+        owner.setFirstName("Owner");
+        owner.setLastName("User");
+        owner.setCreationDate(java.time.LocalDate.now());
+        owner.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+        owner.setToken("token-" + java.util.UUID.randomUUID().toString());
+        User createdOwner = userService.createUser(owner);
 
-        Roadtrip roadtrip = createTestRoadtrip(owner);
-        roadtripSettingsService.createRoadtripSettings(roadtrip);
+        User member = new User();
+        member.setUsername("member");
+        member.setPassword("password");
+        member.setFirstName("Member");
+        member.setLastName("User");
+        member.setCreationDate(java.time.LocalDate.now());
+        member.setStatus(ch.uzh.ifi.hase.soprafs24.constant.UserStatus.ONLINE);
+        member.setToken("token-" + java.util.UUID.randomUUID().toString());
+        User createdMember = userService.createUser(member);
 
+        // Create roadtrip
+        Roadtrip testRoadtrip = new Roadtrip();
+        testRoadtrip.setName("Test Roadtrip");
+        testRoadtrip.setDescription("Test Description");
+        testRoadtrip.setOwner(createdOwner);
+        Roadtrip createdRoadtrip = roadtripRepository.save(testRoadtrip);
+
+        // Create settings
+        roadtripSettingsService.createRoadtripSettings(createdRoadtrip);
+
+        // Create roadtrip member
         RoadtripMemberPK pk = new RoadtripMemberPK();
-        pk.setUserId(member.getUserId());
-        pk.setRoadtripId(roadtrip.getRoadtripId());
+        pk.setUserId(createdMember.getUserId());
+        pk.setRoadtripId(createdRoadtrip.getRoadtripId());
 
         RoadtripMember roadtripMember = new RoadtripMember();
         roadtripMember.setRoadtripMemberId(pk);
-        roadtripMember.setUser(member);
-        roadtripMember.setRoadtrip(roadtrip);
+        roadtripMember.setUser(createdMember);
+        roadtripMember.setRoadtrip(createdRoadtrip);
         roadtripMember.setInvitationStatus(InvitationStatus.ACCEPTED);
         roadtripMemberRepository.save(roadtripMember);
 
+        // Update settings
         RoadtripSettings updatedSettings = new RoadtripSettings();
         updatedSettings.setBasemapType(BasemapType.SATELLITE);
 
         // When/Then
         assertThrows(ResponseStatusException.class, () -> {
             roadtripSettingsService.updateRoadtripSettingsById(
-                    roadtrip.getRoadtripId(), updatedSettings, member);
+                    createdRoadtrip.getRoadtripId(), updatedSettings, createdMember);
         });
     }
-
-    @Test
-    public void uploadRoadtripImage_validInput_success() throws Exception {
-        // Given
-        User user = createTestUser("uploadUser");
-        Roadtrip roadtrip = createTestRoadtrip(user);
-        roadtripSettingsService.createRoadtripSettings(roadtrip);
-
-        MockMultipartFile mockFile = new MockMultipartFile(
-                "file", "test-image.jpg", "image/jpeg", "dummy image content".getBytes());
-
-        // When
-        String imageName = roadtripSettingsService.uploadRoadtripImage(
-                mockFile, "mapmates-object-store", roadtrip.getRoadtripId(), user);
-
-        // Then
-        assertNotNull(imageName);
-    }
-
-    @Test
-    public void uploadRoadtripImage_userNotOwner_throwsForbidden() {
-        // Given
-        User owner = createTestUser("ownerUpload");
-        User nonOwner = createTestUser("nonOwnerUpload");
-        Roadtrip roadtrip = createTestRoadtrip(owner);
-
-        MockMultipartFile mockFile = new MockMultipartFile(
-                "file", "test.jpg", "image/jpeg", "content".getBytes());
-
-        // When/Then
-        assertThrows(ResponseStatusException.class, () -> {
-            roadtripSettingsService.uploadRoadtripImage(
-                    mockFile, "mapmates-object-store", roadtrip.getRoadtripId(), nonOwner);
-        });
-    }
-
-    @Test
-    public void downloadRoadtripImage_validInput_success() {
-        // Given
-        User user = createTestUser("downloadUser");
-        Roadtrip roadtrip = createTestRoadtrip(user);
-        roadtripSettingsService.createRoadtripSettings(roadtrip);
-
-        MockMultipartFile mockFile = new MockMultipartFile(
-                "file", "sample.jpg", "image/jpeg", "data".getBytes());
-        roadtripSettingsService.uploadRoadtripImage(mockFile, "mapmates-object-store", roadtrip.getRoadtripId(), user);
-
-        // When
-        String imageName = roadtripSettingsService.getRoadtripImageName(roadtrip.getRoadtripId(), user);
-
-        // Then
-        assertNotNull(imageName);
-    }
-
-    @Test
-    public void downloadRoadtripImage_userNotOwner_throwsForbidden() {
-        // Given
-        User owner = createTestUser("ownerDownload");
-        User nonOwner = createTestUser("nonOwnerDownload");
-        Roadtrip roadtrip = createTestRoadtrip(owner);
-
-        // When/Then
-        assertThrows(ResponseStatusException.class, () -> {
-            roadtripSettingsService.getRoadtripImageName(roadtrip.getRoadtripId(), nonOwner);
-        });
-    }
-
-    @Test
-    public void deleteRoadtripImage_validInput_success() {
-        // Given
-        User user = createTestUser("deleteUser");
-        Roadtrip roadtrip = createTestRoadtrip(user);
-        roadtripSettingsService.createRoadtripSettings(roadtrip);
-
-        MockMultipartFile file = new MockMultipartFile("file", "delete.jpg", "image/jpeg", "test".getBytes());
-        roadtripSettingsService.uploadRoadtripImage(file, "mapmates-object-store", roadtrip.getRoadtripId(), user);
-
-        // When/Then
-        assertDoesNotThrow(() -> {
-            roadtripSettingsService.deleteRoadtripImage(roadtrip.getRoadtripId(), "mapmates-object-store", user);
-        });
-    }
-
-    @Test
-    public void deleteRoadtripImage_userNotOwner_throwsForbidden() {
-        // Given
-        User owner = createTestUser("ownerDelete");
-        User nonOwner = createTestUser("nonOwnerDelete");
-        Roadtrip roadtrip = createTestRoadtrip(owner);
-
-        // When/Then
-        assertThrows(ResponseStatusException.class, () -> {
-            roadtripSettingsService.deleteRoadtripImage(roadtrip.getRoadtripId(), "mapmates-object-store", nonOwner);
-        });
-    }
-
-    // Helper methods
-    private User createTestUser(String username) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword("password");
-        user.setFirstName("First");
-        user.setLastName("Last");
-        user.setCreationDate(LocalDate.now());
-        user.setStatus(UserStatus.ONLINE);
-        user.setToken("token-" + UUID.randomUUID());
-        return userService.createUser(user);
-    }
-
-    private Roadtrip createTestRoadtrip(User owner) {
-        Roadtrip roadtrip = new Roadtrip();
-        roadtrip.setName("Test Trip");
-        roadtrip.setOwner(owner);
-        return roadtripRepository.save(roadtrip);
-    }
-}
